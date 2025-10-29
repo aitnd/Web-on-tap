@@ -226,10 +226,10 @@ const App: React.FC = () => {
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 md:p-12 max-w-2xl mx-auto">
             <SparklesIcon className="h-20 w-20 mx-auto text-indigo-500 mb-4 animate-pulse" />
             <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white mb-4">
-              Đang tải bộ đề thi...
+              Chào mừng anh/chị học viên!
             </h1>
             <p className="text-lg text-slate-600 dark:text-slate-300">
-              Vui lòng chờ trong giây lát, dữ liệu đang được tải từ server.
+              Hệ thống đang tải bộ đề thi mới nhất, vui lòng chờ trong giây lát.
             </p>
           </div>
         </div>
