@@ -1,0 +1,440 @@
+-- Hướng dẫn:
+-- 1. Vào project Supabase của anh.
+-- 2. Mở SQL Editor (biểu tượng </> ở menu bên trái).
+-- 3. Tạo một query mới ("+ New query").
+-- 4. Xóa hết nội dung cũ (nếu có) và dán TOÀN BỘ nội dung file này vào.
+-- 5. Nhấn "RUN".
+--
+-- Lưu ý: Script này được thiết kế để thêm bộ đề thi mới "Chứng chỉ Lái phương tiện".
+-- Anh chỉ cần chạy file này MỘT LẦN để thêm dữ liệu mới.
+
+-- === BƯỚC 1: TẠO VÀ CẬP NHẬT CẤU TRÚC BẢNG (NẾU CẦN) ===
+-- Các lệnh này đảm bảo các bảng và các cột cần thiết đều tồn tại.
+
+CREATE TABLE IF NOT EXISTS licenses (id TEXT PRIMARY KEY, name TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS subjects (id TEXT PRIMARY KEY, name TEXT NOT NULL, license_id TEXT REFERENCES licenses(id) ON DELETE CASCADE);
+CREATE TABLE IF NOT EXISTS questions (id TEXT PRIMARY KEY, text TEXT NOT NULL, image TEXT, subject_id TEXT REFERENCES subjects(id) ON DELETE CASCADE, correct_answer_id TEXT);
+CREATE TABLE IF NOT EXISTS answers (id TEXT PRIMARY KEY, text TEXT NOT NULL, question_id TEXT REFERENCES questions(id) ON DELETE CASCADE);
+
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'licenses' AND column_name = 'display_order') THEN ALTER TABLE licenses ADD COLUMN display_order INT; END IF; END$$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'subjects' AND column_name = 'display_order') THEN ALTER TABLE subjects ADD COLUMN display_order INT; END IF; END$$;
+
+-- === BƯỚC 2: CHÈN DỮ LIỆU BỘ ĐỀ MỚI ===
+
+-- === HẠNG BẰNG MỚI: CHỨNG CHỈ LÁI PHƯƠNG TIỆN ===
+
+INSERT INTO licenses (id, name, display_order) VALUES
+('lai-phuong-tien', 'Chứng chỉ Lái phương tiện', 9)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, display_order = EXCLUDED.display_order;
+
+-- Thêm các môn học cho hạng bằng trên
+INSERT INTO subjects (id, name, license_id, display_order) VALUES
+('lpt_antoan', 'An toàn cơ bản, đạo đức nghề nghiệp và bảo vệ môi trường', 'lai-phuong-tien', 1),
+('lpt_thuynghiep', 'Thủy nghiệp cơ bản', 'lai-phuong-tien', 2),
+('lpt_luong', 'Luồng đường thuỷ nội địa', 'lai-phuong-tien', 3),
+('lpt_luat', 'Pháp luật về giao thông đường thuỷ nội địa', 'lai-phuong-tien', 4),
+('lpt_dieudong', 'Điều động phương tiện', 'lai-phuong-tien', 5),
+('lpt_vantai', 'Vận tải hàng hóa và hành khách', 'lai-phuong-tien', 6)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, license_id = EXCLUDED.license_id, display_order = EXCLUDED.display_order;
+
+-- === MÔN: AN TOÀN CƠ BẢN... (20 câu) ===
+INSERT INTO questions (id, text, subject_id, correct_answer_id) VALUES
+('lpt_antoan_q1', 'Các tai nạn thường xảy ra trên phương tiện thuỷ nội địa:', 'lpt_antoan', 'lpt_antoan_q1_a4'),
+('lpt_antoan_q2', 'Trong quy định an toàn lao động, người lao động được sử dụng và vận hành thiết bị là:', 'lpt_antoan', 'lpt_antoan_q2_a2'),
+('lpt_antoan_q3', 'Tam giác cháy gồm 3 yếu tố là:', 'lpt_antoan', 'lpt_antoan_q3_a2'),
+('lpt_antoan_q4', 'Khi khí và hơi phát cháy thì dùng loại bình chữa cháy hóa học để dập cháy tốt nhất là:', 'lpt_antoan', 'lpt_antoan_q4_a2'),
+('lpt_antoan_q5', 'Các thiết bị điện, hóa chất không gây phản ứng với CO2 thì dùng loại bình chữa cháy hóa học tốt nhất để dập cháy là:', 'lpt_antoan', 'lpt_antoan_q5_a1'),
+('lpt_antoan_q6', 'Bình bọt dùng để chữa cháy tốt nhất cho loại đám cháy:', 'lpt_antoan', 'lpt_antoan_q6_a4'),
+('lpt_antoan_q7', 'Trang thiết bị cứu hỏa trên phương tiện thuỷ thường được sơn:', 'lpt_antoan', 'lpt_antoan_q7_a1'),
+('lpt_antoan_q8', 'Nguyên nhân phương tiện thuỷ bị thủng:', 'lpt_antoan', 'lpt_antoan_q8_a4'),
+('lpt_antoan_q9', 'Trang bị, dụng cụ nào dưới đây thuộc trang bị cứu thủng là:', 'lpt_antoan', 'lpt_antoan_q9_a2'),
+('lpt_antoan_q10', 'Sau khi đưa người đuối nước lên bờ, để đầu nạn nhân ở tư thế trên cáng để khiêng là:', 'lpt_antoan', 'lpt_antoan_q10_a3'),
+('lpt_antoan_q11', 'Nạn nhân ngưng thở, tim còn đập ta:', 'lpt_antoan', 'lpt_antoan_q11_a3'),
+('lpt_antoan_q12', 'Vị trí ấn tim (trường hợp ngưng tim) là:', 'lpt_antoan', 'lpt_antoan_q12_a3'),
+('lpt_antoan_q13', 'Hô hấp nhân tạo nhằm mục đích:', 'lpt_antoan', 'lpt_antoan_q13_a4'),
+('lpt_antoan_q14', 'Khi nghi ngờ nạn nhân bị gãy xương, ta có thể:', 'lpt_antoan', 'lpt_antoan_q14_a4'),
+('lpt_antoan_q15', 'Xử lý một vết thương phần mềm có dị vật:', 'lpt_antoan', 'lpt_antoan_q15_a4'),
+('lpt_antoan_q16', 'Phương pháp cầm máu hiệu quả và thông dụng hiện nay là:', 'lpt_antoan', 'lpt_antoan_q16_a2'),
+('lpt_antoan_q17', 'Khi băng đối với vết thương bỏng ta dùng:', 'lpt_antoan', 'lpt_antoan_q17_a2'),
+('lpt_antoan_q18', 'Nguyên tắc cột dây cơ bản trong cố định xương gãy là:', 'lpt_antoan', 'lpt_antoan_q18_a4'),
+('lpt_antoan_q19', 'Nguyên tắc tải thương là:', 'lpt_antoan', 'lpt_antoan_q19_a4'),
+('lpt_antoan_q20', 'Khi cần thiết phải gọi xe cấp cứu, cần nói rõ:', 'lpt_antoan', 'lpt_antoan_q20_a2')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id;
+
+INSERT INTO answers (id, text, question_id) VALUES
+('lpt_antoan_q1_a1', 'Gãy tay, chân, hoặc bị thương một phần cơ thể.', 'lpt_antoan_q1'), ('lpt_antoan_q1_a2', 'Bị ngất do hít phải khí độc.', 'lpt_antoan_q1'), ('lpt_antoan_q1_a3', 'Bị bỏng, điện giật, chết đuối.', 'lpt_antoan_q1'), ('lpt_antoan_q1_a4', 'Tất cả các đáp án trên', 'lpt_antoan_q1'),
+('lpt_antoan_q2_a1', 'Người mới vào làm việc.', 'lpt_antoan_q2'), ('lpt_antoan_q2_a2', 'Người đã được huấn luyện về quy tắc an toàn và vận hành thiết bị.', 'lpt_antoan_q2'), ('lpt_antoan_q2_a3', 'Người được huấn luyện vận hành thiết bị.', 'lpt_antoan_q2'), ('lpt_antoan_q2_a4', 'Người đã làm việc lâu năm.', 'lpt_antoan_q2'),
+('lpt_antoan_q3_a1', 'Nitơ, nguồn nhiệt, chất cháy.', 'lpt_antoan_q3'), ('lpt_antoan_q3_a2', 'Oxy, nguồn nhiệt, chất cháy.', 'lpt_antoan_q3'), ('lpt_antoan_q3_a3', 'Oxy, Nitơ, chất cháy.', 'lpt_antoan_q3'), ('lpt_antoan_q3_a4', 'Oxy, nguồn nhiệt, Nitơ.', 'lpt_antoan_q3'),
+('lpt_antoan_q4_a1', 'Bình bọt.', 'lpt_antoan_q4'), ('lpt_antoan_q4_a2', 'Bình bột.', 'lpt_antoan_q4'), ('lpt_antoan_q4_a3', 'Bình CO2.', 'lpt_antoan_q4'), ('lpt_antoan_q4_a4', 'Bình axit bazo.', 'lpt_antoan_q4'),
+('lpt_antoan_q5_a1', 'Bình CO2.', 'lpt_antoan_q5'), ('lpt_antoan_q5_a2', 'Bình bột.', 'lpt_antoan_q5'), ('lpt_antoan_q5_a3', 'Bình bọt.', 'lpt_antoan_q5'), ('lpt_antoan_q5_a4', 'Bình Axít bazơ.', 'lpt_antoan_q5'),
+('lpt_antoan_q6_a1', 'Thiết bị điện.', 'lpt_antoan_q6'), ('lpt_antoan_q6_a2', 'Đám cháy khi và hơi.', 'lpt_antoan_q6'), ('lpt_antoan_q6_a3', 'Kim loại cháy được.', 'lpt_antoan_q6'), ('lpt_antoan_q6_a4', 'Xăng dầu, mỡ và chất lỏng cháy được.', 'lpt_antoan_q6'),
+('lpt_antoan_q7_a1', 'Màu đỏ.', 'lpt_antoan_q7'), ('lpt_antoan_q7_a2', 'Màu xanh.', 'lpt_antoan_q7'), ('lpt_antoan_q7_a3', 'Màu vàng.', 'lpt_antoan_q7'), ('lpt_antoan_q7_a4', 'Màu xám.', 'lpt_antoan_q7'),
+('lpt_antoan_q8_a1', 'Do va chạm giữa các phương tiện với nhau.', 'lpt_antoan_q8'), ('lpt_antoan_q8_a2', 'Do va chạm giữa phương tiện với các vật thể khác.', 'lpt_antoan_q8'), ('lpt_antoan_q8_a3', 'Do mòn tự nhiên.', 'lpt_antoan_q8'), ('lpt_antoan_q8_a4', 'Tất cả các đáp án trên', 'lpt_antoan_q8'),
+('lpt_antoan_q9_a1', 'Phao các loại.', 'lpt_antoan_q9'), ('lpt_antoan_q9_a2', 'Bơm nước, thảm, nêm gỗ.', 'lpt_antoan_q9'), ('lpt_antoan_q9_a3', 'Cáng, xuồng cứu sinh.', 'lpt_antoan_q9'), ('lpt_antoan_q9_a4', 'Các loại phao.', 'lpt_antoan_q9'),
+('lpt_antoan_q10_a1', 'Để đầu cao hơn ngực.', 'lpt_antoan_q10'), ('lpt_antoan_q10_a2', 'Để đầu cao bằng ngực.', 'lpt_antoan_q10'), ('lpt_antoan_q10_a3', 'Để đầu thấp hơn ngực.', 'lpt_antoan_q10'), ('lpt_antoan_q10_a4', 'Để đầu như thế nào cũng được.', 'lpt_antoan_q10'),
+('lpt_antoan_q11_a1', 'Giúp thở 02 hơi cho nạn nhân.', 'lpt_antoan_q11'), ('lpt_antoan_q11_a2', 'Giúp thở 01 hơi cho nạn nhân.', 'lpt_antoan_q11'), ('lpt_antoan_q11_a3', 'Giúp thở cho nạn nhân cứ mỗi 05 giây 01 lần.', 'lpt_antoan_q11'), ('lpt_antoan_q11_a4', 'Giúp thở cho nạn nhân 05 hơi trong 10 giây.', 'lpt_antoan_q11'),
+('lpt_antoan_q12_a1', '1/2 Ngực bên trái nạn nhân.', 'lpt_antoan_q12'), ('lpt_antoan_q12_a2', '1/2 Giữa xương ức.', 'lpt_antoan_q12'), ('lpt_antoan_q12_a3', '1/2 dưới xương ức.', 'lpt_antoan_q12'), ('lpt_antoan_q12_a4', 'Tất cả đều sai.', 'lpt_antoan_q12'),
+('lpt_antoan_q13_a1', 'Loại bỏ nguyên nhân gây ngạt thở.', 'lpt_antoan_q13'), ('lpt_antoan_q13_a2', 'Giúp cho không khí từ ngoài vào, để tăng cường chức năng cho tim hoạt động trở lại.', 'lpt_antoan_q13'), ('lpt_antoan_q13_a3', 'Làm cho không khí ở ngoài vào phổi kết hợp ép tim ngoài lồng ngực.', 'lpt_antoan_q13'), ('lpt_antoan_q13_a4', 'Giúp không khí ở ngoài vào phổi và đẩy không khí trong phổi ra ngoài để thay thế cho hô hấp tự nhiên.', 'lpt_antoan_q13'),
+('lpt_antoan_q14_a1', 'Khám nghiệm khắp cơ thể nạn nhân tìm xem nạn nhân còn những vết thương nào khác để xử lý.', 'lpt_antoan_q14'), ('lpt_antoan_q14_a2', 'Không đụng chạm mà chuyển đến cơ sở Y tế gần nhất.', 'lpt_antoan_q14'), ('lpt_antoan_q14_a3', 'Lay động thử nhẹ nhàng nơi gãy xem sự tổn thương nặng nhẹ để xử lý kịp thời.', 'lpt_antoan_q14'), ('lpt_antoan_q14_a4', 'Cố định tạm thời nơi nghi bị gãy rồi chuyển đến bệnh viện ngay.', 'lpt_antoan_q14'),
+('lpt_antoan_q15_a1', 'Rút dị vật ra và băng ép để cầm máu.', 'lpt_antoan_q15'), ('lpt_antoan_q15_a2', 'Cấp cứu viên dùng tay ép mạnh lên miệng vết thương có dị vật để cầm máu.', 'lpt_antoan_q15'), ('lpt_antoan_q15_a3', 'Dùng tay nạn nhân ép mạnh lên miệng vết thương có dị vật và băng ép lại.', 'lpt_antoan_q15'), ('lpt_antoan_q15_a4', 'Dùng gòn, gạc ép mạnh lên miệng vết thương có dị vật và băng ép để cầm máu.', 'lpt_antoan_q15'),
+('lpt_antoan_q16_a1', 'Phương pháp đặt garot (ga – rô).', 'lpt_antoan_q16'), ('lpt_antoan_q16_a2', 'Phương pháp băng ép câm máu.', 'lpt_antoan_q16'), ('lpt_antoan_q16_a3', 'Phương pháp ấn chận động mạch.', 'lpt_antoan_q16'), ('lpt_antoan_q16_a4', 'Đặt con chèn cầm máu.', 'lpt_antoan_q16'),
+('lpt_antoan_q17_a1', 'Dùng băng thun, băng chặt để cầm máu.', 'lpt_antoan_q17'), ('lpt_antoan_q17_a2', 'Dùng băng lưới băng lỏng để tạo sự thông thoáng.', 'lpt_antoan_q17'), ('lpt_antoan_q17_a3', 'Không cần băng, chỉ thoa thuốc là đủ.', 'lpt_antoan_q17'), ('lpt_antoan_q17_a4', 'Tất cả đều sai.', 'lpt_antoan_q17'),
+('lpt_antoan_q18_a1', 'Cột trên dưới 2 đầu nẹp trước.', 'lpt_antoan_q18'), ('lpt_antoan_q18_a2', 'Cột 2 đầu khớp trước.', 'lpt_antoan_q18'), ('lpt_antoan_q18_a3', 'Cột ngay ổ gãy để tránh sốc.', 'lpt_antoan_q18'), ('lpt_antoan_q18_a4', 'Cột trên ổ gãy – dưới ổ gãy trước.', 'lpt_antoan_q18'),
+('lpt_antoan_q19_a1', 'Di chuyển phải theo dõi nạn nhân.', 'lpt_antoan_q19'), ('lpt_antoan_q19_a2', 'Động tác phải nhẹ nhàng và đồng bộ.', 'lpt_antoan_q19'), ('lpt_antoan_q19_a3', 'Đúng cách, thích hợp theo bệnh trạng.', 'lpt_antoan_q19'), ('lpt_antoan_q19_a4', 'Cả 3 câu trên đều đúng.', 'lpt_antoan_q19'),
+('lpt_antoan_q20_a1', 'Tên tuổi nạn nhân, địa chỉ, số điện thoại.', 'lpt_antoan_q20'), ('lpt_antoan_q20_a2', 'Tính chất tai nạn.', 'lpt_antoan_q20'), ('lpt_antoan_q20_a3', 'Hỏi và tìm chỗ đau.', 'lpt_antoan_q20'), ('lpt_antoan_q20_a4', 'Cả 3 đều đúng.', 'lpt_antoan_q20')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === MÔN: THỦY NGHIỆP CƠ BẢN (20 câu) ===
+INSERT INTO questions (id, text, subject_id, correct_answer_id, image) VALUES
+('lpt_thuynghiep_q21', 'Nhược điểm của dây thực vật là:', 'lpt_thuynghiep', 'lpt_thuynghiep_q21_a1', NULL),
+('lpt_thuynghiep_q22', 'Ưu điểm của dây cáp là:', 'lpt_thuynghiep', 'lpt_thuynghiep_q22_a1', NULL),
+('lpt_thuynghiep_q23', 'Neo Hải quân là loại neo có:', 'lpt_thuynghiep', 'lpt_thuynghiep_q23_a2', NULL),
+('lpt_thuynghiep_q24', 'Nút sống có tác dụng:', 'lpt_thuynghiep', 'lpt_thuynghiep_q24_a4', NULL),
+('lpt_thuynghiep_q25', 'Nút lèo đơn có tác dụng:', 'lpt_thuynghiep', 'lpt_thuynghiep_q25_a1', NULL),
+('lpt_thuynghiep_q26', 'Nút hai khóa ngược có tác dụng:', 'lpt_thuynghiep', 'lpt_thuynghiep_q26_a3', NULL),
+('lpt_thuynghiep_q27', 'Nút số 8 là:', 'lpt_thuynghiep', 'lpt_thuynghiep_q27_a2', 'https://i.imgur.com/7gK5aH0.png'),
+('lpt_thuynghiep_q28', 'Nút dẹt dễ mở là:', 'lpt_thuynghiep', 'lpt_thuynghiep_q28_a3', 'https://i.imgur.com/kFw6gE8.png'),
+('lpt_thuynghiep_q29', 'Nút sống là:', 'lpt_thuynghiep', 'lpt_thuynghiep_q29_a1', 'https://i.imgur.com/M6F2D6d.png'),
+('lpt_thuynghiep_q30', 'Nút câu là:', 'lpt_thuynghiep', 'lpt_thuynghiep_q30_a4', 'https://i.imgur.com/1Gv2Z1Z.png'),
+('lpt_thuynghiep_q31', 'Nút móc đơn là:', 'lpt_thuynghiep', 'lpt_thuynghiep_q31_a4', 'https://i.imgur.com/gK9x2T2.png'),
+('lpt_thuynghiep_q32', 'Nút cô dây vào cọc bích đơn có ngáng là:', 'lpt_thuynghiep', 'lpt_thuynghiep_q32_a3', 'https://i.imgur.com/bA9j2R6.png'),
+('lpt_thuynghiep_q33', 'Nút đa ghi là:', 'lpt_thuynghiep', 'lpt_thuynghiep_q33_a1', 'https://i.imgur.com/M5bCg0q.png'),
+('lpt_thuynghiep_q34', 'Nút 1 vòng chết 2 khóa là:', 'lpt_thuynghiep', 'lpt_thuynghiep_q34_a2', 'https://i.imgur.com/5uLhW1Q.png'),
+('lpt_thuynghiep_q35', 'Nút ghế đơn là:', 'lpt_thuynghiep', 'lpt_thuynghiep_q35_a3', 'https://i.imgur.com/xT5U2Y0.png'),
+('lpt_thuynghiep_q36', 'Nút ghế kép là:', 'lpt_thuynghiep', 'lpt_thuynghiep_q36_a1', 'https://i.imgur.com/9nJ9m2O.png'),
+('lpt_thuynghiep_q37', 'Nút cẩu thùng đứng là:', 'lpt_thuynghiep', 'lpt_thuynghiep_q37_a1', 'https://i.imgur.com/2s4o3vX.png'),
+('lpt_thuynghiep_q38', 'Nút neo thuận là:', 'lpt_thuynghiep', 'lpt_thuynghiep_q38_a4', 'https://i.imgur.com/bA9j2R6.png'),
+('lpt_thuynghiep_q39', 'Nút xỏ dùi là:', 'lpt_thuynghiep', 'lpt_thuynghiep_q39_a3', 'https://i.imgur.com/X4Y3v3W.png'),
+('lpt_thuynghiep_q40', 'Nút cô dây vào cọc bích đơn không ngáng là:', 'lpt_thuynghiep', 'lpt_thuynghiep_q40_a4', 'https://i.imgur.com/5uLhW1Q.png')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id, image = EXCLUDED.image;
+
+INSERT INTO answers (id, text, question_id) VALUES
+('lpt_thuynghiep_q21_a1', 'Dễ bị ẩm mốc.', 'lpt_thuynghiep_q21'), ('lpt_thuynghiep_q21_a2', 'Dễ tích điện và gây cháy nổ.', 'lpt_thuynghiep_q21'), ('lpt_thuynghiep_q21_a3', 'Phải bôi mỡ bảo quản thường xuyên.', 'lpt_thuynghiep_q21'), ('lpt_thuynghiep_q21_a4', 'Chịu tải lớn.', 'lpt_thuynghiep_q21'),
+('lpt_thuynghiep_q22_a1', 'Chịu được tải trọng lớn.', 'lpt_thuynghiep_q22'), ('lpt_thuynghiep_q22_a2', 'Chịu được axít loãng và kiềm.', 'lpt_thuynghiep_q22'), ('lpt_thuynghiep_q22_a3', 'Nổi trên mặt nước.', 'lpt_thuynghiep_q22'), ('lpt_thuynghiep_q22_a4', 'Độ đàn hồi lớn.', 'lpt_thuynghiep_q22'),
+('lpt_thuynghiep_q23_a1', '1 cánh neo và ngáng.', 'lpt_thuynghiep_q23'), ('lpt_thuynghiep_q23_a2', '2 cánh neo và ngáng.', 'lpt_thuynghiep_q23'), ('lpt_thuynghiep_q23_a3', '3 cánh neo.', 'lpt_thuynghiep_q23'), ('lpt_thuynghiep_q23_a4', '4 cánh neo.', 'lpt_thuynghiep_q23'),
+('lpt_thuynghiep_q24_a1', 'Để buộc vào cột, cọc.', 'lpt_thuynghiep_q24'), ('lpt_thuynghiep_q24_a2', 'Để đưa thuyền viên lên cao làm việc.', 'lpt_thuynghiep_q24'), ('lpt_thuynghiep_q24_a3', 'Dùng để bốt dây.', 'lpt_thuynghiep_q24'), ('lpt_thuynghiep_q24_a4', 'Để nối 2 đầu dây nhỏ cùng cỡ, khác cỡ.', 'lpt_thuynghiep_q24'),
+('lpt_thuynghiep_q25_a1', 'Để nối 2 đầu dây cùng cỡ hoặc để nối 1 đầu dây với 1 khuyết.', 'lpt_thuynghiep_q25'), ('lpt_thuynghiep_q25_a2', 'Để buộc đầu dây cáp.', 'lpt_thuynghiep_q25'), ('lpt_thuynghiep_q25_a3', 'Để đưa thuyền viên ra mạn làm việc.', 'lpt_thuynghiep_q25'), ('lpt_thuynghiep_q25_a4', 'Để cẩu hàng lên cao.', 'lpt_thuynghiep_q25'),
+('lpt_thuynghiep_q26_a1', 'Để buộc neo.', 'lpt_thuynghiep_q26'), ('lpt_thuynghiep_q26_a2', 'Để làm quai cheo, làm vòng đệm mái chèo.', 'lpt_thuynghiep_q26'), ('lpt_thuynghiep_q26_a3', 'Để buộc đầu dây vào cọc, cột, khuyết.', 'lpt_thuynghiep_q26'), ('lpt_thuynghiep_q26_a4', 'Để cứu người ngã xuống nước.', 'lpt_thuynghiep_q26'),
+('lpt_thuynghiep_q27_a1', 'Nút 1.', 'lpt_thuynghiep_q27'), ('lpt_thuynghiep_q27_a2', 'Nút 2.', 'lpt_thuynghiep_q27'), ('lpt_thuynghiep_q27_a3', 'Nút 3.', 'lpt_thuynghiep_q27'), ('lpt_thuynghiep_q27_a4', 'Nút 4.', 'lpt_thuynghiep_q27'),
+('lpt_thuynghiep_q28_a1', 'Nút 1.', 'lpt_thuynghiep_q28'), ('lpt_thuynghiep_q28_a2', 'Nút 2.', 'lpt_thuynghiep_q28'), ('lpt_thuynghiep_q28_a3', 'Nút 3.', 'lpt_thuynghiep_q28'), ('lpt_thuynghiep_q28_a4', 'Nút 4.', 'lpt_thuynghiep_q28'),
+('lpt_thuynghiep_q29_a1', 'Nút 1.', 'lpt_thuynghiep_q29'), ('lpt_thuynghiep_q29_a2', 'Nút 2.', 'lpt_thuynghiep_q29'), ('lpt_thuynghiep_q29_a3', 'Nút 3.', 'lpt_thuynghiep_q29'), ('lpt_thuynghiep_q29_a4', 'Nút 4.', 'lpt_thuynghiep_q29'),
+('lpt_thuynghiep_q30_a1', 'Nút 1.', 'lpt_thuynghiep_q30'), ('lpt_thuynghiep_q30_a2', 'Nút 2.', 'lpt_thuynghiep_q30'), ('lpt_thuynghiep_q30_a3', 'Nút 3.', 'lpt_thuynghiep_q30'), ('lpt_thuynghiep_q30_a4', 'Nút 4.', 'lpt_thuynghiep_q30'),
+('lpt_thuynghiep_q31_a1', 'Nút 1.', 'lpt_thuynghiep_q31'), ('lpt_thuynghiep_q31_a2', 'Nút 2.', 'lpt_thuynghiep_q31'), ('lpt_thuynghiep_q31_a3', 'Nút 3.', 'lpt_thuynghiep_q31'), ('lpt_thuynghiep_q31_a4', 'Nút 4.', 'lpt_thuynghiep_q31'),
+('lpt_thuynghiep_q32_a1', 'Nút 1.', 'lpt_thuynghiep_q32'), ('lpt_thuynghiep_q32_a2', 'Nút 2.', 'lpt_thuynghiep_q32'), ('lpt_thuynghiep_q32_a3', 'Nút 3.', 'lpt_thuynghiep_q32'), ('lpt_thuynghiep_q32_a4', 'Nút 4.', 'lpt_thuynghiep_q32'),
+('lpt_thuynghiep_q33_a1', 'Nút 1.', 'lpt_thuynghiep_q33'), ('lpt_thuynghiep_q33_a2', 'Nút 2.', 'lpt_thuynghiep_q33'), ('lpt_thuynghiep_q33_a3', 'Nút 3.', 'lpt_thuynghiep_q33'), ('lpt_thuynghiep_q33_a4', 'Nút 4.', 'lpt_thuynghiep_q33'),
+('lpt_thuynghiep_q34_a1', 'Nút 1.', 'lpt_thuynghiep_q34'), ('lpt_thuynghiep_q34_a2', 'Nút 2.', 'lpt_thuynghiep_q34'), ('lpt_thuynghiep_q34_a3', 'Nút 3.', 'lpt_thuynghiep_q34'), ('lpt_thuynghiep_q34_a4', 'Nút 4.', 'lpt_thuynghiep_q34'),
+('lpt_thuynghiep_q35_a1', 'Nút 1.', 'lpt_thuynghiep_q35'), ('lpt_thuynghiep_q35_a2', 'Nút 2.', 'lpt_thuynghiep_q35'), ('lpt_thuynghiep_q35_a3', 'Nút 3.', 'lpt_thuynghiep_q35'), ('lpt_thuynghiep_q35_a4', 'Nút 4.', 'lpt_thuynghiep_q35'),
+('lpt_thuynghiep_q36_a1', 'Nút 1.', 'lpt_thuynghiep_q36'), ('lpt_thuynghiep_q36_a2', 'Nút 2.', 'lpt_thuynghiep_q36'), ('lpt_thuynghiep_q36_a3', 'Nút 3.', 'lpt_thuynghiep_q36'), ('lpt_thuynghiep_q36_a4', 'Nút 4.', 'lpt_thuynghiep_q36'),
+('lpt_thuynghiep_q37_a1', 'Nút 1.', 'lpt_thuynghiep_q37'), ('lpt_thuynghiep_q37_a2', 'Nút 2.', 'lpt_thuynghiep_q37'), ('lpt_thuynghiep_q37_a3', 'Nút 3.', 'lpt_thuynghiep_q37'), ('lpt_thuynghiep_q37_a4', 'Nút 4.', 'lpt_thuynghiep_q37'),
+('lpt_thuynghiep_q38_a1', 'Nút 1.', 'lpt_thuynghiep_q38'), ('lpt_thuynghiep_q38_a2', 'Nút 2.', 'lpt_thuynghiep_q38'), ('lpt_thuynghiep_q38_a3', 'Nút 3.', 'lpt_thuynghiep_q38'), ('lpt_thuynghiep_q38_a4', 'Nút 4.', 'lpt_thuynghiep_q38'),
+('lpt_thuynghiep_q39_a1', 'Nút 1.', 'lpt_thuynghiep_q39'), ('lpt_thuynghiep_q39_a2', 'Nút 2.', 'lpt_thuynghiep_q39'), ('lpt_thuynghiep_q39_a3', 'Nút 3.', 'lpt_thuynghiep_q39'), ('lpt_thuynghiep_q39_a4', 'Nút 4.', 'lpt_thuynghiep_q39'),
+('lpt_thuynghiep_q40_a1', 'Nút 1.', 'lpt_thuynghiep_q40'), ('lpt_thuynghiep_q40_a2', 'Nút 2.', 'lpt_thuynghiep_q40'), ('lpt_thuynghiep_q40_a3', 'Nút 3.', 'lpt_thuynghiep_q40'), ('lpt_thuynghiep_q40_a4', 'Nút 4.', 'lpt_thuynghiep_q40')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === MÔN: LUỒNG ĐƯỜNG THỦY NỘI ĐỊA (10 câu) ===
+INSERT INTO questions (id, text, subject_id, correct_answer_id) VALUES
+('lpt_luong_q41', 'Sông ngòi ở khu vực thượng lưu thường có đặc điểm:', 'lpt_luong', 'lpt_luong_q41_a3'),
+('lpt_luong_q42', 'Dạng đoạn sông cong thường có đặc điểm:', 'lpt_luong', 'lpt_luong_q42_a2'),
+('lpt_luong_q43', 'Dòng chảy phân luồng thường xuất hiện khi:', 'lpt_luong', 'lpt_luong_q43_a1'),
+('lpt_luong_q44', 'Dòng chảy vặn thường xuất hiện khi dòng chảy gặp phải:', 'lpt_luong', 'lpt_luong_q44_a1'),
+('lpt_luong_q45', 'Khi có dòng nước chảy từ thượng lưu, qua cầu xuống hạ lưu thì lưu tốc dòng nước chảy nhanh ở:', 'lpt_luong', 'lpt_luong_q45_a2'),
+('lpt_luong_q46', 'Sông, kênh ở Việt Nam thường chảy theo hướng:', 'lpt_luong', 'lpt_luong_q46_a1'),
+('lpt_luong_q47', 'Khu vực nào ở Việt Nam có mật độ sông, kênh lớn nhất?', 'lpt_luong', 'lpt_luong_q47_a4'),
+('lpt_luong_q48', 'Sông nào chảy trong địa phận Việt Nam là dài nhất?', 'lpt_luong', 'lpt_luong_q48_a3'),
+('lpt_luong_q49', 'Hệ thống sông nào có lưu lượng nước nhiều nhất Việt Nam?', 'lpt_luong', 'lpt_luong_q49_a4'),
+('lpt_luong_q50', 'Hệ thống sông nào có lưu vực rộng lớn nhất Việt Nam?', 'lpt_luong', 'lpt_luong_q50_a2')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id;
+
+INSERT INTO answers (id, text, question_id) VALUES
+('lpt_luong_q41_a1', 'Độ dốc lớn, lưu tốc lớn và có nhiều bãi cạn.', 'lpt_luong_q41'), ('lpt_luong_q41_a2', 'Độ dốc lớn, lưu tốc nhỏ và có nhiều ghềnh đá nguy hiểm.', 'lpt_luong_q41'), ('lpt_luong_q41_a3', 'Độ dốc lớn, lưu tốc lớn, nhiều ghềnh đá nguy hiểm và có ít bãi cạn.', 'lpt_luong_q41'), ('lpt_luong_q41_a4', 'Độ dốc lớn, lưu tốc nhỏ và có ít bãi cạn.', 'lpt_luong_q41'),
+('lpt_luong_q42_a1', 'Bên bờ vịnh thường có bãi cạn.', 'lpt_luong_q42'), ('lpt_luong_q42_a2', 'Bên bờ doi thường có bãi cạn.', 'lpt_luong_q42'), ('lpt_luong_q42_a3', 'Cả hai bên bờ thường có bãi cạn.', 'lpt_luong_q42'), ('lpt_luong_q42_a4', 'Giữa sông có bãi cạn.', 'lpt_luong_q42'),
+('lpt_luong_q43_a1', 'Có cồn ở giữa sông.', 'lpt_luong_q43'), ('lpt_luong_q43_a2', 'Có cồn ở bờ phải.', 'lpt_luong_q43'), ('lpt_luong_q43_a3', 'Có cồn ở bờ trái.', 'lpt_luong_q43'), ('lpt_luong_q43_a4', 'Có cồn ở cả hai bên bờ.', 'lpt_luong_q43'),
+('lpt_luong_q44_a1', 'Đoạn sông cong.', 'lpt_luong_q44'), ('lpt_luong_q44_a2', 'Đoạn sông có dòng chảy phân luồng.', 'lpt_luong_q44'), ('lpt_luong_q44_a3', 'Đoạn sông có dòng chảy phủ luồng', 'lpt_luong_q44'), ('lpt_luong_q44_a4', 'Đoạn sông thẳng', 'lpt_luong_q44'),
+('lpt_luong_q45_a1', 'Thượng lưu cầu.', 'lpt_luong_q45'), ('lpt_luong_q45_a2', 'Giữa hai trụ cầu.', 'lpt_luong_q45'), ('lpt_luong_q45_a3', 'Hạ lưu cầu.', 'lpt_luong_q45'), ('lpt_luong_q45_a4', 'Phía hai bờ.', 'lpt_luong_q45'),
+('lpt_luong_q46_a1', 'Tây Bắc – Đông Nam.', 'lpt_luong_q46'), ('lpt_luong_q46_a2', 'Đông - Tây.', 'lpt_luong_q46'), ('lpt_luong_q46_a3', 'Tây Nam – Đông Bắc.', 'lpt_luong_q46'), ('lpt_luong_q46_a4', 'Bắc - Nam.', 'lpt_luong_q46'),
+('lpt_luong_q47_a1', 'Miền Bắc.', 'lpt_luong_q47'), ('lpt_luong_q47_a2', 'Miền Trung.', 'lpt_luong_q47'), ('lpt_luong_q47_a3', 'Tây Nguyên.', 'lpt_luong_q47'), ('lpt_luong_q47_a4', 'Miền Nam.', 'lpt_luong_q47'),
+('lpt_luong_q48_a1', 'Sông Thái Bình.', 'lpt_luong_q48'), ('lpt_luong_q48_a2', 'Sông Hồng.', 'lpt_luong_q48'), ('lpt_luong_q48_a3', 'Sông Đồng Nai.', 'lpt_luong_q48'), ('lpt_luong_q48_a4', 'Sông Tiền.', 'lpt_luong_q48'),
+('lpt_luong_q49_a1', 'Hệ thống sông Thái Bình.', 'lpt_luong_q49'), ('lpt_luong_q49_a2', 'Hệ thống sông Hồng.', 'lpt_luong_q49'), ('lpt_luong_q49_a3', 'Hệ thống sông Đồng Nai.', 'lpt_luong_q49'), ('lpt_luong_q49_a4', 'Hệ thống sông Cửu Long.', 'lpt_luong_q49'),
+('lpt_luong_q50_a1', 'Hệ thống sông Thái Bình.', 'lpt_luong_q50'), ('lpt_luong_q50_a2', 'Hệ thống sông Hồng.', 'lpt_luong_q50'), ('lpt_luong_q50_a3', 'Hệ thống sông Đồng Nai.', 'lpt_luong_q50'), ('lpt_luong_q50_a4', 'Hệ thống sông Cửu Long.', 'lpt_luong_q50')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === MÔN: PHÁP LUẬT... (75 câu) ===
+INSERT INTO questions (id, text, subject_id, correct_answer_id, image) VALUES
+('lpt_luat_q51', 'Phương tiện có người ngã xuống nước, ban đêm ở vị trí cao nhất trên cột đèn phải thắp', 'lpt_luat', 'lpt_luat_q51_a1', NULL),
+('lpt_luat_q52', 'Phương tiện chữa cháy khi làm nhiệm vụ ngoài đèn qui định, ban đêm thắp thêm', 'lpt_luat', 'lpt_luat_q52_a2', NULL),
+('lpt_luat_q53', 'Phương tiện của quân đội khi làm nhiệm vụ khẩn cấp ngoài đèn qui định, ban đêm thắp thêm', 'lpt_luat', 'lpt_luat_q53_a3', NULL),
+('lpt_luat_q54', 'Phương tiện của công an khi làm nhiệm vụ khẩn cấp ban ngày phải treo', 'lpt_luat', 'lpt_luat_q54_a4', NULL),
+('lpt_luat_q55', 'Thuyền trưởng, người lái phương tiện khi hành trình phải giảm tốc độ trong trường hợp nào?', 'lpt_luat', 'lpt_luat_q55_a1', NULL),
+('lpt_luat_q56', 'Thuyền trưởng, người lái phương tiện khi hành trình không được bám, buộc vào', 'lpt_luat', 'lpt_luat_q56_a2', NULL),
+('lpt_luat_q57', 'Trong trường hợp nước đứng, hai phương tiện đi đối hướng gặp nhau có nguy cơ va chạm, phải tránh và nhường đường theo nguyên tắc nào?', 'lpt_luat', 'lpt_luat_q57_a1', NULL),
+('lpt_luat_q58', 'Thuyền trưởng, người lái phương tiện đang hành trình gặp phương tiện nhiệm vụ đặc biệt phải', 'lpt_luat', 'lpt_luat_q58_a3', NULL),
+('lpt_luat_q59', 'Ba tiếng còi dài có ý nghĩa', 'lpt_luat', 'lpt_luat_q59_a1', NULL),
+('lpt_luat_q60', 'Bốn tiếng còi dài có ý nghĩa', 'lpt_luat', 'lpt_luat_q60_a1', NULL),
+('lpt_luat_q61', 'Phương tiện đang hành trình trên sông muốn vượt một phương tiện khác phải', 'lpt_luat', 'lpt_luat_q61_a3', NULL),
+('lpt_luat_q62', 'Phương tiện chở hàng nguy hiểm, ban ngày phải treo', 'lpt_luat', 'lpt_luat_q62_a1', NULL),
+('lpt_luat_q63', 'Phương tiện có động cơ chở khách khi hành trình, ngoài đèn quy định, ban đêm phải thắp thêm', 'lpt_luat', 'lpt_luat_q63_a2', NULL),
+('lpt_luat_q64', 'Phương tiện có động cơ chở khách khi hành trình, ban ngày treo', 'lpt_luat', 'lpt_luat_q64_a4', NULL),
+('lpt_luat_q65', 'Phương tiện có chiều dài lớn nhất từ 45 mét trở xuống, ban đêm khi neo phải thắp', 'lpt_luat', 'lpt_luat_q65_a1', NULL),
+('lpt_luat_q66', 'Phương tiện bị mắc cạn trên luồng mà một bên luồng còn lưu thông được ban đêm ở vị trí cao nhất trên cột đèn phải thắp', 'lpt_luat', 'lpt_luat_q66_a3', NULL),
+('lpt_luat_q67', 'Phương tiện làm nhiệm vụ đặc biệt nào được ưu tiên đi trước?', 'lpt_luat', 'lpt_luat_q67_a2', NULL),
+('lpt_luat_q68', 'Phương tiện làm nhiệm vụ đặc biệt nào được ưu tiên đi trước?', 'lpt_luat', 'lpt_luat_q68_a1', NULL),
+('lpt_luat_q69', 'Hai phương tiện đi đối hướng nhau có nguy cơ va chạm, thuyền trưởng, người lái phương tiện tránh và nhường đường theo nguyên tắc nào?', 'lpt_luat', 'lpt_luat_q69_a4', NULL),
+('lpt_luat_q70', 'Thuyền trưởng, người lái phương tiện khi hành trình phải giảm tốc độ của phương tiện trong trường hợp đi gần phương tiện nào?', 'lpt_luat', 'lpt_luat_q70_a4', NULL),
+('lpt_luat_q71', 'Phương tiện loại A kéo đoàn dài dưới 100 mét, ban ngày treo', 'lpt_luat', 'lpt_luat_q71_a1', NULL),
+('lpt_luat_q72', 'Phương tiện loại A kéo đoàn dài từ 100 mét trở lên, ban đêm thắp', 'lpt_luat', 'lpt_luat_q72_a3', NULL),
+('lpt_luat_q73', 'Phương tiện loại A kéo đoàn dài từ 100 mét trở lên, ban ngày treo', 'lpt_luat', 'lpt_luat_q73_a3', NULL),
+('lpt_luat_q74', 'Phương tiện loại A lai áp mạn, ban đêm thắp', 'lpt_luat', 'lpt_luat_q74_a2', NULL),
+('lpt_luat_q75', 'Phương tiện Loại A áp mạn, ban ngày treo', 'lpt_luat', 'lpt_luat_q75_a2', NULL),
+('lpt_luat_q76', 'Phương tiện yêu cầu cảnh sát, thanh tra giao thông đường thủy hỗ trợ, ban ngày ở trên cột đèn phải treo', 'lpt_luat', 'lpt_luat_q76_a2', NULL),
+('lpt_luat_q77', 'Phương tiện yêu cầu cảnh sát, thanh tra giao thông đường thủy hỗ trợ, ban đêm ở trên cột đèn phải thắp thêm', 'lpt_luat', 'lpt_luat_q77_a1', NULL),
+('lpt_luat_q78', 'Phương tiện đang thử máy, thử tốc độ, ban ngày ở vị trí cao nhất trên cột đèn phải treo', 'lpt_luat', 'lpt_luat_q78_a1', NULL),
+('lpt_luat_q79', 'Cờ chữ B có màu gì?', 'lpt_luat', 'lpt_luat_q79_a1', NULL),
+('lpt_luat_q80', 'Cảnh sát giao thông đường thủy khi gọi phương tiện để kiểm soát, phải phất', 'lpt_luat', 'lpt_luat_q80_a1', NULL),
+('lpt_luat_q81', 'Phương tiện có người, súc vật bị dịch bệnh, ban ngày ở vị trí cao nhất trên cột đèn phải treo', 'lpt_luat', 'lpt_luat_q81_a2', NULL),
+('lpt_luat_q82', 'Phương tiện không có động cơ có trọng tải toàn phần trên 15 tấn, phương tiện có động cơ tổng công suất máy chính trên 15 sức ngựa, phương tiện có sức chở trên 12 người khi hoạt động trên đường thủy nội địa phải đảm bảo các điều kiện nào?', 'lpt_luat', 'lpt_luat_q82_a4', NULL),
+('lpt_luat_q83', 'Phương tiện bị nạn yêu cầu cấp cứu ban ngày ở vị trí cao nhất trên cột đèn treo', 'lpt_luat', 'lpt_luat_q83_a4', NULL),
+('lpt_luat_q84', 'Phương tiện cứu nạn khi làm nhiệm vụ khẩn cấp ban ngày phải treo', 'lpt_luat', 'lpt_luat_q84_a1', NULL),
+('lpt_luat_q85', 'Phương tiện bị mất chủ động còn trớn đối với phương tiện loại A ban đêm phải thắp', 'lpt_luat', 'lpt_luat_q85_a2', NULL),
+('lpt_luat_q86', 'Báo hiệu chỉ vị trí giới hạn bên phải của luồng tàu chạy là:', 'lpt_luat', 'lpt_luat_q86_a2', 'https://i.imgur.com/gY9c8hU.png'),
+('lpt_luat_q87', 'Báo hiệu chỉ vị trí giới hạn bên trái của luồng tàu chạy là:', 'lpt_luat', 'lpt_luat_q87_a1', 'https://i.imgur.com/K3L5z1j.png'),
+('lpt_luat_q88', 'Báo hiệu chỉ vị trí giới hạn bên phải của luồng tàu sông đi cạnh luồng tàu biển là:', 'lpt_luat', 'lpt_luat_q88_a3', 'https://i.imgur.com/gY9c8hU.png'),
+('lpt_luat_q89', 'Báo hiệu chỉ vị trí giới hạn bên trái của luồng tàu sông đi cạnh luồng tàu biển là:', 'lpt_luat', 'lpt_luat_q89_a2', 'https://i.imgur.com/K3L5z1j.png'),
+('lpt_luat_q90', 'Báo hiệu chỉ nơi phân luồng, ngã ba là:', 'lpt_luat', 'lpt_luat_q90_a1', 'https://i.imgur.com/UvI1D3o.png'),
+('lpt_luat_q91', 'Báo hiệu chỉ vật chướng ngại đơn lẻ trên đường thủy rộng là:', 'lpt_luat', 'lpt_luat_q91_a2', 'https://i.imgur.com/9C0n9s7.png'),
+('lpt_luat_q92', 'Báo hiệu chỉ khoang thông thuyền của công trình vượt sông trên không, cho phương tiện thô sơ qua là:', 'lpt_luat', 'lpt_luat_q92_a4', 'https://i.imgur.com/dK0z3g0.png'),
+('lpt_luat_q93', 'Báo hiệu chỉ khoang thông thuyền của công trình vượt sông trên không, cho phương tiện cơ giới và thô sơ đi chung là:', 'lpt_luat', 'lpt_luat_q93_a4', 'https://i.imgur.com/dK0z3g0.png'),
+('lpt_luat_q94', 'Báo hiệu chỉ vị trí giới hạn vùng nước phía bên trái của luồng là:', 'lpt_luat', 'lpt_luat_q94_a1', 'https://i.imgur.com/rN5gXgJ.png'),
+('lpt_luat_q95', 'Báo hiệu chỉ cửa luồng ra vào cảng, bến đặt ở phía bên phải:', 'lpt_luat', 'lpt_luat_q95_a2', 'https://i.imgur.com/eBw0f4T.png'),
+('lpt_luat_q96', 'Báo hiệu chập tiêu tim luồng đặt bên bờ phải là:', 'lpt_luat', 'lpt_luat_q96_a2', 'https://i.imgur.com/8m4F7Jj.png'),
+('lpt_luat_q97', 'Báo hiệu chỉ vị trí tim luồng:', 'lpt_luat', 'lpt_luat_q97_a2', 'https://i.imgur.com/Y1Z2f4n.png'),
+('lpt_luat_q98', 'Báo hiệu chỉ luồng chạy tàu chuyển hướng từ bờ phải sang bờ trái là:', 'lpt_luat', 'lpt_luat_q98_a3', 'https://i.imgur.com/8e5E0gX.png'),
+('lpt_luat_q99', 'Báo hiệu thông báo cấm thả neo, cấm kéo rê neo, cáp hay xích là:', 'lpt_luat', 'lpt_luat_q99_a1', 'https://i.imgur.com/w4m0t2c.png'),
+('lpt_luat_q100', 'Báo hiệu thông báo cấm đỗ là:', 'lpt_luat', 'lpt_luat_q100_a2', 'https://i.imgur.com/w4m0t2c.png'),
+('lpt_luat_q101', 'Báo hiệu thông báo luồng cách bờ là', 'lpt_luat', 'lpt_luat_q101_a3', 'https://i.imgur.com/b9L7c7J.png'),
+('lpt_luat_q102', 'Báo hiệu thông báo chiều dài đoàn lai dắt bị hạn chế là', 'lpt_luat', 'lpt_luat_q102_a1', 'https://i.imgur.com/b9L7c7J.png'),
+('lpt_luat_q103', 'Báo hiệu thông báo chiều sâu luồng bị hạn chế là', 'lpt_luat', 'lpt_luat_q103_a1', 'https://i.imgur.com/z9x4h3F.png'),
+('lpt_luat_q104', 'Báo hiệu thông báo số hàng tối đa được phép neo đậu là', 'lpt_luat', 'lpt_luat_q104_a2', 'https://i.imgur.com/b9L7c7J.png'),
+('lpt_luat_q105', 'Báo hiệu thông báo tĩnh không trực tiếp là:', 'lpt_luat', 'lpt_luat_q105_a2', 'https://i.imgur.com/p9v1C4k.png'),
+('lpt_luat_q106', 'Báo hiệu chỉ dẫn chú ý nguy hiểm là:', 'lpt_luat', 'lpt_luat_q106_a1', 'https://i.imgur.com/i9T5C6f.png'),
+('lpt_luat_q107', 'Báo hiệu thông báo cấm rẽ trái là', 'lpt_luat', 'lpt_luat_q107_a2', 'https://i.imgur.com/f9O2O2v.png'),
+('lpt_luat_q108', 'Báo hiệu thông báo điểm kết thúc một tình huống là', 'lpt_luat', 'lpt_luat_q108_a4', 'https://i.imgur.com/J3t8I2g.png'),
+('lpt_luat_q109', 'Báo hiệu thông báo khu vực được phép tổ chức các hoạt động thể thao giải trí là', 'lpt_luat', 'lpt_luat_q109_a4', 'https://i.imgur.com/D8P3f9h.png'),
+('lpt_luat_q110', 'Báo hiệu thông báo vị trí Đoạn, Trạm quản lý đường thủy nội địa là', 'lpt_luat', 'lpt_luat_q110_a4', 'https://i.imgur.com/S6M0g0h.png'),
+('lpt_luat_q111', 'Báo hiệu thông báo cấm phương tiện thô sơ là:', 'lpt_luat', 'lpt_luat_q111_a4', 'https://i.imgur.com/jB8S0r3.png'),
+('lpt_luat_q112', 'Báo hiệu thông báo cấm vượt là:', 'lpt_luat', 'lpt_luat_q112_a4', 'https://i.imgur.com/jB8S0r3.png'),
+('lpt_luat_q113', 'Báo hiệu thông báo hạn chế tạo sóng là:', 'lpt_luat', 'lpt_luat_q113_a2', 'https://i.imgur.com/jB8S0r3.png'),
+('lpt_luat_q114', 'Báo hiệu thông báo cấm tàu thuyền chạy buồm là:', 'lpt_luat', 'lpt_luat_q114_a3', 'https://i.imgur.com/2s9V5cE.png'),
+('lpt_luat_q115', 'Báo hiệu thông báo cấm đi lại với tốc độ cao là:', 'lpt_luat', 'lpt_luat_q115_a2', 'https://i.imgur.com/jB8S0r3.png'),
+('lpt_luat_q116', 'Báo hiệu thông báo được phép neo đậu là:', 'lpt_luat', 'lpt_luat_q116_a1', 'https://i.imgur.com/9t4V5uH.png'),
+('lpt_luat_q117', 'Báo hiệu thông báo chiều rộng vùng nước được phép neo đậu là:', 'lpt_luat', 'lpt_luat_q117_a4', 'https://i.imgur.com/Q9R4W8l.png'),
+('lpt_luat_q118', 'Báo hiệu thông báo phía trước có đường dây điện qua sông là:', 'lpt_luat', 'lpt_luat_q118_a2', 'https://i.imgur.com/i8h0E1R.png'),
+('lpt_luat_q119', 'Báo hiệu thông báo có bến phà, bến khách ngang sông là:', 'lpt_luat', 'lpt_luat_q119_a1', 'https://i.imgur.com/i8h0E1R.png'),
+('lpt_luat_q120', 'Báo hiệu thông báo mốc cây số đường thủy nội địa là:', 'lpt_luat', 'lpt_luat_q120_a1', 'https://i.imgur.com/6X2Z7kU.png'),
+('lpt_luat_q121', 'Báo hiệu thông báo có công trình ngầm vượt sông là:', 'lpt_luat', 'lpt_luat_q121_a2', 'https://i.imgur.com/i8h0E1R.png'),
+('lpt_luat_q122', 'Báo hiệu thông báo nơi giao nhau của nhiều sông kênh là:', 'lpt_luat', 'lpt_luat_q122_a2', 'https://i.imgur.com/g8e1T1w.png'),
+('lpt_luat_q123', 'Báo hiệu thông báo khu vực tiếp giáp là:', 'lpt_luat', 'lpt_luat_q123_a4', 'https://i.imgur.com/J3t8I2g.png'),
+('lpt_luat_q124', 'Báo hiệu thông báo phía trước có cống, đập, âu thuyền là:', 'lpt_luat', 'lpt_luat_q124_a4', 'https://i.imgur.com/i8h0E1R.png'),
+('lpt_luat_q125', 'Báo hiệu thông báo chiều rộng luồng bị hạn chế là:', 'lpt_luat', 'lpt_luat_q125_a2', 'https://i.imgur.com/7l6g4dC.png')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id, image = EXCLUDED.image;
+
+-- === MÔN: ĐIỀU ĐỘNG PHƯƠNG TIỆN (15 câu) ===
+INSERT INTO questions (id, text, subject_id, correct_answer_id) VALUES
+('lpt_dieudong_q126', 'Các đại lượng đặc trưng cho quán tính là:', 'lpt_dieudong', 'lpt_dieudong_q126_a1'),
+('lpt_dieudong_q127', 'Tại khu vực bờ đứng nước sâu, hiện tượng hút nước giữa phương tiện thuỷ và bờ xảy ra khi:', 'lpt_dieudong', 'lpt_dieudong_q127_a3'),
+('lpt_dieudong_q128', 'Khi điều động phương tiện thuỷ cập cầu, cập phao, thả neo thì thường lựa chọn:', 'lpt_dieudong', 'lpt_dieudong_q128_a1'),
+('lpt_dieudong_q129', 'Khi có người ngã xuống nước, người điều khiển phương tiện thuỷ phải:', 'lpt_dieudong', 'lpt_dieudong_q129_a1'),
+('lpt_dieudong_q130', 'Phương tiện đang chạy xuôi nước mà có người ngã xuống nước thì:', 'lpt_dieudong', 'lpt_dieudong_q130_a2'),
+('lpt_dieudong_q131', 'Phương tiện đang chạy ngược nước mà có người ngã xuống nước thì:', 'lpt_dieudong', 'lpt_dieudong_q131_a1'),
+('lpt_dieudong_q132', 'Khi phương tiện thuỷ đang chạy tới, bánh lái để 0º, nếu chỉ xét tác dụng của bánh lái thì hướng mũi phương tiện sẽ:', 'lpt_dieudong', 'lpt_dieudong_q132_a3'),
+('lpt_dieudong_q133', 'Khi phương tiện thuỷ đang chạy tới, nếu bẻ bánh lái sang trái thì hướng mũi phương tiện sẽ:', 'lpt_dieudong', 'lpt_dieudong_q133_a2'),
+('lpt_dieudong_q134', 'Khi phương tiện thuỷ đang chạy lùi, nếu bẻ bánh lái sang trái thì hướng mũi phương tiện sẽ:', 'lpt_dieudong', 'lpt_dieudong_q134_a1'),
+('lpt_dieudong_q135', 'Khi phương tiện thuỷ đang chạy lùi, bánh lái để 0°, nếu chỉ xét tác dụng của bánh lái thì hướng mũi phương tiện sẽ:', 'lpt_dieudong', 'lpt_dieudong_q135_a3'),
+('lpt_dieudong_q136', 'Điều khiển phương tiện thuỷ đi đường có ảnh hưởng của gió, nước ngang, để trừ hao độ dạt người điều khiển cần:', 'lpt_dieudong', 'lpt_dieudong_q136_a4'),
+('lpt_dieudong_q137', 'Điều khiển phương tiện thuỷ đi đường có ảnh hưởng của sóng, để giảm được ảnh hưởng của sóng hướng đi người điều khiển cần chọn là:', 'lpt_dieudong', 'lpt_dieudong_q137_a3'),
+('lpt_dieudong_q138', 'Phương tiện thuỷ đang chạy mà có người ngã xuống nước thì khi điều động tàu cứu người phải để người ngã phía:', 'lpt_dieudong', 'lpt_dieudong_q138_a1'),
+('lpt_dieudong_q139', 'Muốn chạy phương tiện thuỷ an toàn khi gặp dòng chảy vặn, thuyền trưởng, người lái phương tiện phải:', 'lpt_dieudong', 'lpt_dieudong_q139_a3'),
+('lpt_dieudong_q140', 'Trường hợp gặp xoáy mạnh thì thuyền trưởng, người lái phương tiện nên:', 'lpt_dieudong', 'lpt_dieudong_q140_a2')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id;
+
+-- === MÔN: VẬN TẢI HÀNG HÓA VÀ HÀNH KHÁCH (10 câu) ===
+INSERT INTO questions (id, text, subject_id, correct_answer_id) VALUES
+('lpt_vantai_q141', 'Khi bảo quản hàng hóa cần phải chú ý những đặc tính:', 'lpt_vantai', 'lpt_vantai_q141_a1'),
+('lpt_vantai_q142', 'Nguyên nhân gây ra lượng giảm tự nhiên là:', 'lpt_vantai', 'lpt_vantai_q142_a1'),
+('lpt_vantai_q143', 'Những chú ý khi vận chuyển hàng phân hóa học:', 'lpt_vantai', 'lpt_vantai_q143_a4'),
+('lpt_vantai_q144', 'Nghĩa vụ của hành khách là:', 'lpt_vantai', 'lpt_vantai_q144_a4'),
+('lpt_vantai_q145', 'Khi người kinh doanh vận tải phải chịu trách nhiệm bồi thường đối với hàng hóa mất mát, hư hỏng toàn bộ hoặc một phần thì mức bồi thường được tính theo giá trị hàng hóa tại thời điểm:', 'lpt_vantai', 'lpt_vantai_q145_a1'),
+('lpt_vantai_q146', 'Trên đường vận tải nếu phát hiện hàng hóa thông thường không đúng với kê khai của người thuê vận tải thì người kinh doanh vận tải xử lý:', 'lpt_vantai', 'lpt_vantai_q146_a1'),
+('lpt_vantai_q147', 'Thuyền trưởng, người lái phương tiện phải lập biên bản hiện trường trong các trường hợp:', 'lpt_vantai', 'lpt_vantai_q147_a4'),
+('lpt_vantai_q148', 'Trường hợp phải chuyển tải hàng hóa qua nơi luồng bị ách tắc thì người kinh doanh vận tải phải:', 'lpt_vantai', 'lpt_vantai_q148_a1'),
+('lpt_vantai_q149', 'Phương tiện vận tải bị trưng dụng do lệnh của cơ quan có thẩm quyền thì thuyền trưởng, người lái phương tiện phải:', 'lpt_vantai', 'lpt_vantai_q149_a4'),
+('lpt_vantai_q150', 'Ngành vận tải thủy nội địa có những đặc điểm:', 'lpt_vantai', 'lpt_vantai_q150_a1')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id;
+
+-- === THÊM CÂU TRẢ LỜI CHO CÁC MÔN ===
+-- (Do số lượng lớn, em sẽ thêm câu trả lời cho các môn còn lại trong một khối lệnh lớn)
+
+INSERT INTO answers (id, text, question_id) VALUES
+-- An toàn...
+('lpt_antoan_q1_a1', 'Gãy tay, chân, hoặc bị thương một phần cơ thể.', 'lpt_antoan_q1'), ('lpt_antoan_q1_a2', 'Bị ngất do hít phải khí độc.', 'lpt_antoan_q1'), ('lpt_antoan_q1_a3', 'Bị bỏng, điện giật, chết đuối.', 'lpt_antoan_q1'), ('lpt_antoan_q1_a4', 'Tất cả các đáp án trên', 'lpt_antoan_q1'),
+('lpt_antoan_q2_a1', 'Người mới vào làm việc.', 'lpt_antoan_q2'), ('lpt_antoan_q2_a2', 'Người đã được huấn luyện về quy tắc an toàn và vận hành thiết bị.', 'lpt_antoan_q2'), ('lpt_antoan_q2_a3', 'Người được huấn luyện vận hành thiết bị.', 'lpt_antoan_q2'), ('lpt_antoan_q2_a4', 'Người đã làm việc lâu năm.', 'lpt_antoan_q2'),
+('lpt_antoan_q3_a1', 'Nitơ, nguồn nhiệt, chất cháy.', 'lpt_antoan_q3'), ('lpt_antoan_q3_a2', 'Oxy, nguồn nhiệt, chất cháy.', 'lpt_antoan_q3'), ('lpt_antoan_q3_a3', 'Oxy, Nitơ, chất cháy.', 'lpt_antoan_q3'), ('lpt_antoan_q3_a4', 'Oxy, nguồn nhiệt, Nitơ.', 'lpt_antoan_q3'),
+('lpt_antoan_q4_a1', 'Bình bọt.', 'lpt_antoan_q4'), ('lpt_antoan_q4_a2', 'Bình bột.', 'lpt_antoan_q4'), ('lpt_antoan_q4_a3', 'Bình CO2.', 'lpt_antoan_q4'), ('lpt_antoan_q4_a4', 'Bình axit bazo.', 'lpt_antoan_q4'),
+('lpt_antoan_q5_a1', 'Bình CO2.', 'lpt_antoan_q5'), ('lpt_antoan_q5_a2', 'Bình bột.', 'lpt_antoan_q5'), ('lpt_antoan_q5_a3', 'Bình bọt.', 'lpt_antoan_q5'), ('lpt_antoan_q5_a4', 'Bình Axít bazơ.', 'lpt_antoan_q5'),
+('lpt_antoan_q6_a1', 'Thiết bị điện.', 'lpt_antoan_q6'), ('lpt_antoan_q6_a2', 'Đám cháy khi và hơi.', 'lpt_antoan_q6'), ('lpt_antoan_q6_a3', 'Kim loại cháy được.', 'lpt_antoan_q6'), ('lpt_antoan_q6_a4', 'Xăng dầu, mỡ và chất lỏng cháy được.', 'lpt_antoan_q6'),
+('lpt_antoan_q7_a1', 'Màu đỏ.', 'lpt_antoan_q7'), ('lpt_antoan_q7_a2', 'Màu xanh.', 'lpt_antoan_q7'), ('lpt_antoan_q7_a3', 'Màu vàng.', 'lpt_antoan_q7'), ('lpt_antoan_q7_a4', 'Màu xám.', 'lpt_antoan_q7'),
+('lpt_antoan_q8_a1', 'Do va chạm giữa các phương tiện với nhau.', 'lpt_antoan_q8'), ('lpt_antoan_q8_a2', 'Do va chạm giữa phương tiện với các vật thể khác.', 'lpt_antoan_q8'), ('lpt_antoan_q8_a3', 'Do mòn tự nhiên.', 'lpt_antoan_q8'), ('lpt_antoan_q8_a4', 'Tất cả các đáp án trên', 'lpt_antoan_q8'),
+('lpt_antoan_q9_a1', 'Phao các loại.', 'lpt_antoan_q9'), ('lpt_antoan_q9_a2', 'Bơm nước, thảm, nêm gỗ.', 'lpt_antoan_q9'), ('lpt_antoan_q9_a3', 'Cáng, xuồng cứu sinh.', 'lpt_antoan_q9'), ('lpt_antoan_q9_a4', 'Các loại phao.', 'lpt_antoan_q9'),
+('lpt_antoan_q10_a1', 'Để đầu cao hơn ngực.', 'lpt_antoan_q10'), ('lpt_antoan_q10_a2', 'Để đầu cao bằng ngực.', 'lpt_antoan_q10'), ('lpt_antoan_q10_a3', 'Để đầu thấp hơn ngực.', 'lpt_antoan_q10'), ('lpt_antoan_q10_a4', 'Để đầu như thế nào cũng được.', 'lpt_antoan_q10'),
+('lpt_antoan_q11_a1', 'Giúp thở 02 hơi cho nạn nhân.', 'lpt_antoan_q11'), ('lpt_antoan_q11_a2', 'Giúp thở 01 hơi cho nạn nhân.', 'lpt_antoan_q11'), ('lpt_antoan_q11_a3', 'Giúp thở cho nạn nhân cứ mỗi 05 giây 01 lần.', 'lpt_antoan_q11'), ('lpt_antoan_q11_a4', 'Giúp thở cho nạn nhân 05 hơi trong 10 giây.', 'lpt_antoan_q11'),
+('lpt_antoan_q12_a1', '1/2 Ngực bên trái nạn nhân.', 'lpt_antoan_q12'), ('lpt_antoan_q12_a2', '1/2 Giữa xương ức.', 'lpt_antoan_q12'), ('lpt_antoan_q12_a3', '1/2 dưới xương ức.', 'lpt_antoan_q12'), ('lpt_antoan_q12_a4', 'Tất cả đều sai.', 'lpt_antoan_q12'),
+('lpt_antoan_q13_a1', 'Loại bỏ nguyên nhân gây ngạt thở.', 'lpt_antoan_q13'), ('lpt_antoan_q13_a2', 'Giúp cho không khí từ ngoài vào, để tăng cường chức năng cho tim hoạt động trở lại.', 'lpt_antoan_q13'), ('lpt_antoan_q13_a3', 'Làm cho không khí ở ngoài vào phổi kết hợp ép tim ngoài lồng ngực.', 'lpt_antoan_q13'), ('lpt_antoan_q13_a4', 'Giúp không khí ở ngoài vào phổi và đẩy không khí trong phổi ra ngoài để thay thế cho hô hấp tự nhiên.', 'lpt_antoan_q13'),
+('lpt_antoan_q14_a1', 'Khám nghiệm khắp cơ thể nạn nhân tìm xem nạn nhân còn những vết thương nào khác để xử lý.', 'lpt_antoan_q14'), ('lpt_antoan_q14_a2', 'Không đụng chạm mà chuyển đến cơ sở Y tế gần nhất.', 'lpt_antoan_q14'), ('lpt_antoan_q14_a3', 'Lay động thử nhẹ nhàng nơi gãy xem sự tổn thương nặng nhẹ để xử lý kịp thời.', 'lpt_antoan_q14'), ('lpt_antoan_q14_a4', 'Cố định tạm thời nơi nghi bị gãy rồi chuyển đến bệnh viện ngay.', 'lpt_antoan_q14'),
+('lpt_antoan_q15_a1', 'Rút dị vật ra và băng ép để cầm máu.', 'lpt_antoan_q15'), ('lpt_antoan_q15_a2', 'Cấp cứu viên dùng tay ép mạnh lên miệng vết thương có dị vật để cầm máu.', 'lpt_antoan_q15'), ('lpt_antoan_q15_a3', 'Dùng tay nạn nhân ép mạnh lên miệng vết thương có dị vật và băng ép lại.', 'lpt_antoan_q15'), ('lpt_antoan_q15_a4', 'Dùng gòn, gạc ép mạnh lên miệng vết thương có dị vật và băng ép để cầm máu.', 'lpt_antoan_q15'),
+('lpt_antoan_q16_a1', 'Phương pháp đặt garot (ga – rô).', 'lpt_antoan_q16'), ('lpt_antoan_q16_a2', 'Phương pháp băng ép câm máu.', 'lpt_antoan_q16'), ('lpt_antoan_q16_a3', 'Phương pháp ấn chận động mạch.', 'lpt_antoan_q16'), ('lpt_antoan_q16_a4', 'Đặt con chèn cầm máu.', 'lpt_antoan_q16'),
+('lpt_antoan_q17_a1', 'Dùng băng thun, băng chặt để cầm máu.', 'lpt_antoan_q17'), ('lpt_antoan_q17_a2', 'Dùng băng lưới băng lỏng để tạo sự thông thoáng.', 'lpt_antoan_q17'), ('lpt_antoan_q17_a3', 'Không cần băng, chỉ thoa thuốc là đủ.', 'lpt_antoan_q17'), ('lpt_antoan_q17_a4', 'Tất cả đều sai.', 'lpt_antoan_q17'),
+('lpt_antoan_q18_a1', 'Cột trên dưới 2 đầu nẹp trước.', 'lpt_antoan_q18'), ('lpt_antoan_q18_a2', 'Cột 2 đầu khớp trước.', 'lpt_antoan_q18'), ('lpt_antoan_q18_a3', 'Cột ngay ổ gãy để tránh sốc.', 'lpt_antoan_q18'), ('lpt_antoan_q18_a4', 'Cột trên ổ gãy – dưới ổ gãy trước.', 'lpt_antoan_q18'),
+('lpt_antoan_q19_a1', 'Di chuyển phải theo dõi nạn nhân.', 'lpt_antoan_q19'), ('lpt_antoan_q19_a2', 'Động tác phải nhẹ nhàng và đồng bộ.', 'lpt_antoan_q19'), ('lpt_antoan_q19_a3', 'Đúng cách, thích hợp theo bệnh trạng.', 'lpt_antoan_q19'), ('lpt_antoan_q19_a4', 'Cả 3 câu trên đều đúng.', 'lpt_antoan_q19'),
+('lpt_antoan_q20_a1', 'Tên tuổi nạn nhân, địa chỉ, số điện thoại.', 'lpt_antoan_q20'), ('lpt_antoan_q20_a2', 'Tính chất tai nạn.', 'lpt_antoan_q20'), ('lpt_antoan_q20_a3', 'Hỏi và tìm chỗ đau.', 'lpt_antoan_q20'), ('lpt_antoan_q20_a4', 'Cả 3 đều đúng.', 'lpt_antoan_q20'),
+
+-- Thủy nghiệp...
+('lpt_thuynghiep_q21_a1', 'Dễ bị ẩm mốc.', 'lpt_thuynghiep_q21'), ('lpt_thuynghiep_q21_a2', 'Dễ tích điện và gây cháy nổ.', 'lpt_thuynghiep_q21'), ('lpt_thuynghiep_q21_a3', 'Phải bôi mỡ bảo quản thường xuyên.', 'lpt_thuynghiep_q21'), ('lpt_thuynghiep_q21_a4', 'Chịu tải lớn.', 'lpt_thuynghiep_q21'),
+('lpt_thuynghiep_q22_a1', 'Chịu được tải trọng lớn.', 'lpt_thuynghiep_q22'), ('lpt_thuynghiep_q22_a2', 'Chịu được axít loãng và kiềm.', 'lpt_thuynghiep_q22'), ('lpt_thuynghiep_q22_a3', 'Nổi trên mặt nước.', 'lpt_thuynghiep_q22'), ('lpt_thuynghiep_q22_a4', 'Độ đàn hồi lớn.', 'lpt_thuynghiep_q22'),
+('lpt_thuynghiep_q23_a1', '1 cánh neo và ngáng.', 'lpt_thuynghiep_q23'), ('lpt_thuynghiep_q23_a2', '2 cánh neo và ngáng.', 'lpt_thuynghiep_q23'), ('lpt_thuynghiep_q23_a3', '3 cánh neo.', 'lpt_thuynghiep_q23'), ('lpt_thuynghiep_q23_a4', '4 cánh neo.', 'lpt_thuynghiep_q23'),
+('lpt_thuynghiep_q24_a1', 'Để buộc vào cột, cọc.', 'lpt_thuynghiep_q24'), ('lpt_thuynghiep_q24_a2', 'Để đưa thuyền viên lên cao làm việc.', 'lpt_thuynghiep_q24'), ('lpt_thuynghiep_q24_a3', 'Dùng để bốt dây.', 'lpt_thuynghiep_q24'), ('lpt_thuynghiep_q24_a4', 'Để nối 2 đầu dây nhỏ cùng cỡ, khác cỡ.', 'lpt_thuynghiep_q24'),
+('lpt_thuynghiep_q25_a1', 'Để nối 2 đầu dây cùng cỡ hoặc để nối 1 đầu dây với 1 khuyết.', 'lpt_thuynghiep_q25'), ('lpt_thuynghiep_q25_a2', 'Để buộc đầu dây cáp.', 'lpt_thuynghiep_q25'), ('lpt_thuynghiep_q25_a3', 'Để đưa thuyền viên ra mạn làm việc.', 'lpt_thuynghiep_q25'), ('lpt_thuynghiep_q25_a4', 'Để cẩu hàng lên cao.', 'lpt_thuynghiep_q25'),
+('lpt_thuynghiep_q26_a1', 'Để buộc neo.', 'lpt_thuynghiep_q26'), ('lpt_thuynghiep_q26_a2', 'Để làm quai cheo, làm vòng đệm mái chèo.', 'lpt_thuynghiep_q26'), ('lpt_thuynghiep_q26_a3', 'Để buộc đầu dây vào cọc, cột, khuyết.', 'lpt_thuynghiep_q26'), ('lpt_thuynghiep_q26_a4', 'Để cứu người ngã xuống nước.', 'lpt_thuynghiep_q26'),
+('lpt_thuynghiep_q27_a1', 'Nút 1.', 'lpt_thuynghiep_q27'), ('lpt_thuynghiep_q27_a2', 'Nút 2.', 'lpt_thuynghiep_q27'), ('lpt_thuynghiep_q27_a3', 'Nút 3.', 'lpt_thuynghiep_q27'), ('lpt_thuynghiep_q27_a4', 'Nút 4.', 'lpt_thuynghiep_q27'),
+('lpt_thuynghiep_q28_a1', 'Nút 1.', 'lpt_thuynghiep_q28'), ('lpt_thuynghiep_q28_a2', 'Nút 2.', 'lpt_thuynghiep_q28'), ('lpt_thuynghiep_q28_a3', 'Nút 3.', 'lpt_thuynghiep_q28'), ('lpt_thuynghiep_q28_a4', 'Nút 4.', 'lpt_thuynghiep_q28'),
+('lpt_thuynghiep_q29_a1', 'Nút 1.', 'lpt_thuynghiep_q29'), ('lpt_thuynghiep_q29_a2', 'Nút 2.', 'lpt_thuynghiep_q29'), ('lpt_thuynghiep_q29_a3', 'Nút 3.', 'lpt_thuynghiep_q29'), ('lpt_thuynghiep_q29_a4', 'Nút 4.', 'lpt_thuynghiep_q29'),
+('lpt_thuynghiep_q30_a1', 'Nút 1.', 'lpt_thuynghiep_q30'), ('lpt_thuynghiep_q30_a2', 'Nút 2.', 'lpt_thuynghiep_q30'), ('lpt_thuynghiep_q30_a3', 'Nút 3.', 'lpt_thuynghiep_q30'), ('lpt_thuynghiep_q30_a4', 'Nút 4.', 'lpt_thuynghiep_q30'),
+('lpt_thuynghiep_q31_a1', 'Nút 1.', 'lpt_thuynghiep_q31'), ('lpt_thuynghiep_q31_a2', 'Nút 2.', 'lpt_thuynghiep_q31'), ('lpt_thuynghiep_q31_a3', 'Nút 3.', 'lpt_thuynghiep_q31'), ('lpt_thuynghiep_q31_a4', 'Nút 4.', 'lpt_thuynghiep_q31'),
+('lpt_thuynghiep_q32_a1', 'Nút 1.', 'lpt_thuynghiep_q32'), ('lpt_thuynghiep_q32_a2', 'Nút 2.', 'lpt_thuynghiep_q32'), ('lpt_thuynghiep_q32_a3', 'Nút 3.', 'lpt_thuynghiep_q32'), ('lpt_thuynghiep_q32_a4', 'Nút 4.', 'lpt_thuynghiep_q32'),
+('lpt_thuynghiep_q33_a1', 'Nút 1.', 'lpt_thuynghiep_q33'), ('lpt_thuynghiep_q33_a2', 'Nút 2.', 'lpt_thuynghiep_q33'), ('lpt_thuynghiep_q33_a3', 'Nút 3.', 'lpt_thuynghiep_q33'), ('lpt_thuynghiep_q33_a4', 'Nút 4.', 'lpt_thuynghiep_q33'),
+('lpt_thuynghiep_q34_a1', 'Nút 1.', 'lpt_thuynghiep_q34'), ('lpt_thuynghiep_q34_a2', 'Nút 2.', 'lpt_thuynghiep_q34'), ('lpt_thuynghiep_q34_a3', 'Nút 3.', 'lpt_thuynghiep_q34'), ('lpt_thuynghiep_q34_a4', 'Nút 4.', 'lpt_thuynghiep_q34'),
+('lpt_thuynghiep_q35_a1', 'Nút 1.', 'lpt_thuynghiep_q35'), ('lpt_thuynghiep_q35_a2', 'Nút 2.', 'lpt_thuynghiep_q35'), ('lpt_thuynghiep_q35_a3', 'Nút 3.', 'lpt_thuynghiep_q35'), ('lpt_thuynghiep_q35_a4', 'Nút 4.', 'lpt_thuynghiep_q35'),
+('lpt_thuynghiep_q36_a1', 'Nút 1.', 'lpt_thuynghiep_q36'), ('lpt_thuynghiep_q36_a2', 'Nút 2.', 'lpt_thuynghiep_q36'), ('lpt_thuynghiep_q36_a3', 'Nút 3.', 'lpt_thuynghiep_q36'), ('lpt_thuynghiep_q36_a4', 'Nút 4.', 'lpt_thuynghiep_q36'),
+('lpt_thuynghiep_q37_a1', 'Nút 1.', 'lpt_thuynghiep_q37'), ('lpt_thuynghiep_q37_a2', 'Nút 2.', 'lpt_thuynghiep_q37'), ('lpt_thuynghiep_q37_a3', 'Nút 3.', 'lpt_thuynghiep_q37'), ('lpt_thuynghiep_q37_a4', 'Nút 4.', 'lpt_thuynghiep_q37'),
+('lpt_thuynghiep_q38_a1', 'Nút 1.', 'lpt_thuynghiep_q38'), ('lpt_thuynghiep_q38_a2', 'Nút 2.', 'lpt_thuynghiep_q38'), ('lpt_thuynghiep_q38_a3', 'Nút 3.', 'lpt_thuynghiep_q38'), ('lpt_thuynghiep_q38_a4', 'Nút 4.', 'lpt_thuynghiep_q38'),
+('lpt_thuynghiep_q39_a1', 'Nút 1.', 'lpt_thuynghiep_q39'), ('lpt_thuynghiep_q39_a2', 'Nút 2.', 'lpt_thuynghiep_q39'), ('lpt_thuynghiep_q39_a3', 'Nút 3.', 'lpt_thuynghiep_q39'), ('lpt_thuynghiep_q39_a4', 'Nút 4.', 'lpt_thuynghiep_q39'),
+('lpt_thuynghiep_q40_a1', 'Nút 1.', 'lpt_thuynghiep_q40'), ('lpt_thuynghiep_q40_a2', 'Nút 2.', 'lpt_thuynghiep_q40'), ('lpt_thuynghiep_q40_a3', 'Nút 3.', 'lpt_thuynghiep_q40'), ('lpt_thuynghiep_q40_a4', 'Nút 4.', 'lpt_thuynghiep_q40'),
+
+-- Luồng đường...
+('lpt_luong_q41_a1', 'Đông Bắc - Tây Nam', 'lpt_luong_q41'), ('lpt_luong_q41_a2', 'Tây Bắc - Đông Nam', 'lpt_luong_q41'), ('lpt_luong_q41_a3', 'Bắc - Nam', 'lpt_luong_q41'), ('lpt_luong_q41_a4', 'Đông - Tây', 'lpt_luong_q41'),
+('lpt_luong_q42_a1', 'Độ dốc lớn, lưu tốc lớn và có nhiều bãi cạn', 'lpt_luong_q42'), ('lpt_luong_q42_a2', 'Độ dốc lớn, lưu tốc nhỏ và có nhiều ghềnh đá nguy hiểm', 'lpt_luong_q42'), ('lpt_luong_q42_a3', 'Độ dốc lớn, lưu tốc lớn, nhiều ghềnh đá nguy hiểm và có ít bãi cạn', 'lpt_luong_q42'), ('lpt_luong_q42_a4', 'Độ dốc lớn, lưu tốc nhỏ và có ít bãi cạn', 'lpt_luong_q42'),
+('lpt_luong_q43_a1', 'Có cồn ở giữa sông', 'lpt_luong_q43'), ('lpt_luong_q43_a2', 'Có cồn ở bờ phải', 'lpt_luong_q43'), ('lpt_luong_q43_a3', 'Có cồn ở bờ trái', 'lpt_luong_q43'), ('lpt_luong_q43_a4', 'Có cồn ở cả hai bên bờ', 'lpt_luong_q43'),
+('lpt_luong_q44_a1', 'Đoạn sông cong', 'lpt_luong_q44'), ('lpt_luong_q44_a2', 'Đoạn sông có dòng chảy phân luồng', 'lpt_luong_q44'), ('lpt_luong_q44_a3', 'Đoạn sông có dòng chảy phủ luồng', 'lpt_luong_q44'), ('lpt_luong_q44_a4', 'Đoạn sông thẳng', 'lpt_luong_q44'),
+('lpt_luong_q45_a1', 'Thượng lưu cầu', 'lpt_luong_q45'), ('lpt_luong_q45_a2', 'Giữa hai trụ cầu', 'lpt_luong_q45'), ('lpt_luong_q45_a3', 'Hạ lưu cầu', 'lpt_luong_q45'), ('lpt_luong_q45_a4', 'Phía hai bờ', 'lpt_luong_q45'),
+('lpt_luong_q46_a1', 'Tây Bắc – Đông Nam.', 'lpt_luong_q46'), ('lpt_luong_q46_a2', 'Đông - Tây.', 'lpt_luong_q46'), ('lpt_luong_q46_a3', 'Tây Nam – Đông Bắc.', 'lpt_luong_q46'), ('lpt_luong_q46_a4', 'Bắc - Nam.', 'lpt_luong_q46'),
+('lpt_luong_q47_a1', 'Miền Bắc.', 'lpt_luong_q47'), ('lpt_luong_q47_a2', 'Miền Trung.', 'lpt_luong_q47'), ('lpt_luong_q47_a3', 'Tây Nguyên.', 'lpt_luong_q47'), ('lpt_luong_q47_a4', 'Miền Nam.', 'lpt_luong_q47'),
+('lpt_luong_q48_a1', 'Sông Thái Bình.', 'lpt_luong_q48'), ('lpt_luong_q48_a2', 'Sông Hồng.', 'lpt_luong_q48'), ('lpt_luong_q48_a3', 'Sông Đồng Nai.', 'lpt_luong_q48'), ('lpt_luong_q48_a4', 'Sông Tiền.', 'lpt_luong_q48'),
+('lpt_luong_q49_a1', 'Hệ thống sông Thái Bình.', 'lpt_luong_q49'), ('lpt_luong_q49_a2', 'Hệ thống sông Hồng.', 'lpt_luong_q49'), ('lpt_luong_q49_a3', 'Hệ thống sông Đồng Nai.', 'lpt_luong_q49'), ('lpt_luong_q49_a4', 'Hệ thống sông Cửu Long.', 'lpt_luong_q49'),
+('lpt_luong_q50_a1', 'Hệ thống sông Thái Bình.', 'lpt_luong_q50'), ('lpt_luong_q50_a2', 'Hệ thống sông Hồng.', 'lpt_luong_q50'), ('lpt_luong_q50_a3', 'Hệ thống sông Đồng Nai.', 'lpt_luong_q50'), ('lpt_luong_q50_a4', 'Hệ thống sông Cửu Long.', 'lpt_luong_q50'),
+
+-- Pháp luật...
+('lpt_luat_q51_a1', '1 đèn xanh giữa hai đèn đỏ', 'lpt_luat_q51'), ('lpt_luat_q51_a2', '1 đèn xanh giữa hai đèn trắng', 'lpt_luat_q51'), ('lpt_luat_q51_a3', '1 đèn đỏ giữa hai đèn trắng', 'lpt_luat_q51'), ('lpt_luat_q51_a4', '1 đèn đỏ giữa hai đèn xanh', 'lpt_luat_q51'),
+('lpt_luat_q52_a1', 'Đèn đỏ nhấp nháy liên tục', 'lpt_luat_q52'), ('lpt_luat_q52_a2', 'Đèn xanh quay nhanh liên tục', 'lpt_luat_q52'), ('lpt_luat_q52_a3', 'Đèn đỏ quay nhanh liên tục', 'lpt_luat_q52'), ('lpt_luat_q52_a4', 'Đèn trắng quay nhanh liên tục', 'lpt_luat_q52'),
+('lpt_luat_q53_a1', 'Đèn đỏ nhấp nháy liên tục', 'lpt_luat_q53'), ('lpt_luat_q53_a2', 'Đèn xanh quay nhanh liên tục', 'lpt_luat_q53'), ('lpt_luat_q53_a3', 'Đèn đỏ quay nhanh liên tục', 'lpt_luat_q53'), ('lpt_luat_q53_a4', 'Đèn trắng quay nhanh liên tục', 'lpt_luat_q53'),
+('lpt_luat_q54_a1', 'Cờ trắng chữ thập đỏ', 'lpt_luat_q54'), ('lpt_luat_q54_a2', 'Cờ đỏ đuôi nheo', 'lpt_luat_q54'), ('lpt_luat_q54_a3', 'Cờ đỏ đuôi nheo có quân hiệu', 'lpt_luat_q54'), ('lpt_luat_q54_a4', 'Cờ xanh lá cây đuôi nheo có công an hiệu', 'lpt_luat_q54'),
+('lpt_luat_q55_a1', 'Đi gân đê, kè khi có nước lớn', 'lpt_luat_q55'), ('lpt_luat_q55_a2', 'Đi gần phương tiện chở hành khách', 'lpt_luat_q55'), ('lpt_luat_q55_a3', 'Đi ngoài phạm vi cảng, bến thủy nội địa', 'lpt_luat_q55'), ('lpt_luat_q55_a4', 'Tất cả các trường hợp trên', 'lpt_luat_q55'),
+('lpt_luat_q56_a1', 'Phương tiện chở than', 'lpt_luat_q56'), ('lpt_luat_q56_a2', 'Phương tiện chở hàng nguy hiểm', 'lpt_luat_q56'), ('lpt_luat_q56_a3', 'Phương tiện chở xi măng', 'lpt_luat_q56'), ('lpt_luat_q56_a4', 'Cả ba phương tiện trên', 'lpt_luat_q56'),
+('lpt_luat_q57_a1', 'Phương tiện phát tín hiệu xin đường trước được quyền ưu tiên', 'lpt_luat_q57'), ('lpt_luat_q57_a2', 'Phương tiện phát tín hiệu xin đường sau được quyền ưu tiên', 'lpt_luat_q57'), ('lpt_luat_q57_a3', 'Tránh nhau về phía mạn trái của mình', 'lpt_luat_q57'), ('lpt_luat_q57_a4', 'Tránh nhau thế nào cũng được', 'lpt_luat_q57'),
+('lpt_luat_q58_a1', 'Tăng tốc độ, đi sát về một bên luồng để nhường đường', 'lpt_luat_q58'), ('lpt_luat_q58_a2', 'Giảm tốc độ', 'lpt_luat_q58'), ('lpt_luat_q58_a3', 'Giảm tốc độ, đi sát về một bên luồng để nhường đường', 'lpt_luat_q58'), ('lpt_luat_q58_a4', 'Đi sát về một bên luồng để nhường đường', 'lpt_luat_q58'),
+('lpt_luat_q59_a1', 'Sắp cập bến, rời bến, chào nhau', 'lpt_luat_q59'), ('lpt_luat_q59_a2', 'Đang chạy lùi', 'lpt_luat_q59'), ('lpt_luat_q59_a3', 'Không thể nhường đường', 'lpt_luat_q59'), ('lpt_luat_q59_a4', 'Đổi hướng đi sang phải', 'lpt_luat_q59'),
+('lpt_luat_q60_a1', 'Tín hiệu xin mở cầu, cống, âu tàu', 'lpt_luat_q60'), ('lpt_luat_q60_a2', 'Đang chạy lùi', 'lpt_luat_q60'), ('lpt_luat_q60_a3', 'Không thể nhường đường', 'lpt_luat_q60'), ('lpt_luat_q60_a4', 'Gọi các phương tiện khác đến giúp đỡ', 'lpt_luat_q60'),
+('lpt_luat_q61_a1', 'Phát âm hiệu là một tiếng còi ngắn, lặp lại nhiều lần', 'lpt_luat_q61'), ('lpt_luat_q61_a2', 'Phát âm hiệu là hai tiếng còi ngắn, lặp lại nhiều lần', 'lpt_luat_q61'), ('lpt_luat_q61_a3', 'Phát âm hiệu là một tiếng còi dài, lặp lại nhiều lần', 'lpt_luat_q61'), ('lpt_luat_q61_a4', 'Phát âm hiệu là ba tiếng còi dài lặp lại nhiều lần', 'lpt_luat_q61'),
+('lpt_luat_q62_a1', 'Cờ chữ B', 'lpt_luat_q62'), ('lpt_luat_q62_a2', 'Cờ chữ C', 'lpt_luat_q62'), ('lpt_luat_q62_a3', 'Cờ chữ N', 'lpt_luat_q62'), ('lpt_luat_q62_a4', 'Cờ chữ O', 'lpt_luat_q62'),
+('lpt_luat_q63_a1', 'Đèn đỏ nhấp nháy liên tục', 'lpt_luat_q63'), ('lpt_luat_q63_a2', 'Đèn trắng nhấp nháy liên tục', 'lpt_luat_q63'), ('lpt_luat_q63_a3', 'Đèn vàng nhấp nháy liên tục', 'lpt_luat_q63'), ('lpt_luat_q63_a4', 'Đèn xanh nhấp nháy liên tục', 'lpt_luat_q63'),
+('lpt_luat_q64_a1', 'Cờ đỏ đuôi nheo', 'lpt_luat_q64'), ('lpt_luat_q64_a2', 'Cờ xanh đuôi nheo', 'lpt_luat_q64'), ('lpt_luat_q64_a3', 'Cờ trắng trắng đuôi nheo', 'lpt_luat_q64'), ('lpt_luat_q64_a4', 'Cờ vàng đuôi nheo', 'lpt_luat_q64'),
+('lpt_luat_q65_a1', '1 đèn trắng sáng 360° ở phía mũi', 'lpt_luat_q65'), ('lpt_luat_q65_a2', '1 đèn trắng sáng 360° ở phía lái', 'lpt_luat_q65'), ('lpt_luat_q65_a3', '1 đèn đỏ sáng 360° ở phía mũi', 'lpt_luat_q65'), ('lpt_luat_q65_a4', '1 đèn xanh sáng 360° ở phía lái', 'lpt_luat_q65'),
+('lpt_luat_q66_a1', '1 đèn xanh trên một đèn đỏ, phía luồng lưu thông được thắp một đèn trắng', 'lpt_luat_q66'), ('lpt_luat_q66_a2', '1 đèn đỏ trên một đèn vàng, phía luồng lưu thông được thắp một đèn trắng', 'lpt_luat_q66'), ('lpt_luat_q66_a3', '1 đèn đỏ trên một đèn xanh, phía luồng lưu thông được thắp một đèn trắng', 'lpt_luat_q66'), ('lpt_luat_q66_a4', '1 đèn đỏ trên một đèn trắng phía luồng lưu thông được thắp một đèn trắng', 'lpt_luat_q66'),
+('lpt_luat_q67_a1', 'Phương tiện, đoàn phương tiện có công an dẫn đường', 'lpt_luat_q67'), ('lpt_luat_q67_a2', 'Phương tiện cứu nạn', 'lpt_luat_q67'), ('lpt_luat_q67_a3', 'Phương tiện quân đội làm nhiệm vụ khẩn cấp', 'lpt_luat_q67'), ('lpt_luat_q67_a4', 'Phương tiện, đoàn phương tiện có công an hộ tống', 'lpt_luat_q67'),
+('lpt_luat_q68_a1', 'Phương tiện chữa cháy', 'lpt_luat_q68'), ('lpt_luat_q68_a2', 'Phương tiện cứu nạn', 'lpt_luat_q68'), ('lpt_luat_q68_a3', 'Phương tiện quân đội làm nhiệm vụ khẩn cấp', 'lpt_luat_q68'), ('lpt_luat_q68_a4', 'Phương tiện, đoàn phương tiện có công an hộ tống', 'lpt_luat_q68'),
+('lpt_luat_q69_a1', 'Phương tiện thô sơ phải tránh bè', 'lpt_luat_q69'), ('lpt_luat_q69_a2', 'Bè phải tránh phương tiện có động cơ', 'lpt_luat_q69'), ('lpt_luat_q69_a3', 'Bè phải tránh mọi phương tiện', 'lpt_luat_q69'), ('lpt_luat_q69_a4', 'Mọi phương tiện phải tránh bè', 'lpt_luat_q69'),
+('lpt_luat_q70_a1', 'Đi gần phương tiện đang thực hiện nghiệp vụ trên luồng', 'lpt_luat_q70'), ('lpt_luat_q70_a2', 'Đi gần phương tiện bị nạn', 'lpt_luat_q70'), ('lpt_luat_q70_a3', 'Đi gần phương tiện chở hàng nguy hiểm', 'lpt_luat_q70'), ('lpt_luat_q70_a4', 'Cả ba trường hợp trên', 'lpt_luat_q70'),
+('lpt_luat_q71_a1', '2 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 'lpt_luat_q71'), ('lpt_luat_q71_a2', '1 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 'lpt_luat_q71'), ('lpt_luat_q71_a3', '3 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 'lpt_luat_q71'), ('lpt_luat_q71_a4', '4 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 'lpt_luat_q71'),
+('lpt_luat_q72_a1', '1 đèn trắng cột mũi, 2 đèn mạn, 1 đèn trắng lái', 'lpt_luat_q72'), ('lpt_luat_q72_a2', '2 đèn trắng cột mũi, 2 đèn mạn, 1 đèn trắng lái', 'lpt_luat_q72'), ('lpt_luat_q72_a3', '3 đèn trắng cột mũi, 2 đèn mạn, 1 đèn trắng lái', 'lpt_luat_q72'), ('lpt_luat_q72_a4', '4 đèn trắng cột mũi, 2 đèn mạn, 1 đèn trắng lái', 'lpt_luat_q72'),
+('lpt_luat_q73_a1', '1 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 'lpt_luat_q73'), ('lpt_luat_q73_a2', '2 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 'lpt_luat_q73'), ('lpt_luat_q73_a3', '3 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 'lpt_luat_q73'), ('lpt_luat_q73_a4', '4 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 'lpt_luat_q73'),
+('lpt_luat_q74_a1', '1 đèn trắng cột mũi, 2 đèn mạn, 1 đèn trắng sau lái', 'lpt_luat_q74'), ('lpt_luat_q74_a2', '2 đèn trắng cột mũi, 2 đèn mạn, 1 đèn trắng sau lái', 'lpt_luat_q74'), ('lpt_luat_q74_a3', '3 đèn trắng cột mũi, 2 đèn mạn, 1 đèn trắng sau lái', 'lpt_luat_q74'), ('lpt_luat_q74_a4', '4 đèn trắng cột mũi, 2 đèn mạn, 1 đèn trắng sau lái', 'lpt_luat_q74'),
+('lpt_luat_q75_a1', '1 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 'lpt_luat_q75'), ('lpt_luat_q75_a2', '2 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 'lpt_luat_q75'), ('lpt_luat_q75_a3', '3 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 'lpt_luat_q75'), ('lpt_luat_q75_a4', '4 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 'lpt_luat_q75'),
+('lpt_luat_q76_a1', 'Cờ chữ A', 'lpt_luat_q76'), ('lpt_luat_q76_a2', 'Cờ xanh', 'lpt_luat_q76'), ('lpt_luat_q76_a3', 'Cờ chữ B', 'lpt_luat_q76'), ('lpt_luat_q76_a4', 'Cờ chữ K', 'lpt_luat_q76'),
+('lpt_luat_q77_a1', '1 đèn xanh trên một đèn đỏ', 'lpt_luat_q77'), ('lpt_luat_q77_a2', '1 đèn xanh trên một đèn trắng', 'lpt_luat_q77'), ('lpt_luat_q77_a3', '1 đèn đỏ trên một đèn trắng', 'lpt_luat_q77'), ('lpt_luat_q77_a4', '1 đèn đỏ trên một đèn vàng', 'lpt_luat_q77'),
+('lpt_luat_q78_a1', 'Cờ chữ A', 'lpt_luat_q78'), ('lpt_luat_q78_a2', 'Cờ chữ C', 'lpt_luat_q78'), ('lpt_luat_q78_a3', 'Cờ chữ B', 'lpt_luat_q78'), ('lpt_luat_q78_a4', 'Cờ chữ H', 'lpt_luat_q78'),
+('lpt_luat_q79_a1', 'Đỏ', 'lpt_luat_q79'), ('lpt_luat_q79_a2', 'Trắng', 'lpt_luat_q79'), ('lpt_luat_q79_a3', 'Vàng', 'lpt_luat_q79'), ('lpt_luat_q79_a4', 'Xanh', 'lpt_luat_q79'),
+('lpt_luat_q80_a1', 'Cờ chữ K', 'lpt_luat_q80'), ('lpt_luat_q80_a2', 'Cờ chữ O', 'lpt_luat_q80'), ('lpt_luat_q80_a3', 'Cờ chữ C', 'lpt_luat_q80'), ('lpt_luat_q80_a4', 'Cờ chữ B', 'lpt_luat_q80'),
+('lpt_luat_q81_a1', 'Cờ chữ A/L', 'lpt_luat_q81'), ('lpt_luat_q81_a2', 'Cờ chữ Q/L', 'lpt_luat_q81'), ('lpt_luat_q81_a3', 'Cờ chữ B/L', 'lpt_luat_q81'), ('lpt_luat_q81_a4', 'Cờ chữ K/L', 'lpt_luat_q81'),
+('lpt_luat_q82_a1', 'Đạt tiêu chuẩn chất lượng, an toàn kỹ thuật và bảo vệ môi trường', 'lpt_luat_q82'), ('lpt_luat_q82_a2', 'Có giấy chứng nhận đăng ký phương tiện, giấy chứng nhận an toàn kỹ thuật và bảo vệ môi trường', 'lpt_luat_q82'), ('lpt_luat_q82_a3', 'Có đủ định biên thuyền viên và danh bạ thuyền viên theo quy định', 'lpt_luat_q82'), ('lpt_luat_q82_a4', 'Cả ba đáp án trên', 'lpt_luat_q82'),
+('lpt_luat_q83_a1', 'Cờ chữ A', 'lpt_luat_q83'), ('lpt_luat_q83_a2', 'Cờ chữ O', 'lpt_luat_q83'), ('lpt_luat_q83_a3', 'Cờ chữ B', 'lpt_luat_q83'), ('lpt_luat_q83_a4', 'Cờ chữ N/C', 'lpt_luat_q83'),
+('lpt_luat_q84_a1', 'Cờ trắng chữ thập đỏ', 'lpt_luat_q84'), ('lpt_luat_q84_a2', 'Cờ đỏ đuôi nheo', 'lpt_luat_q84'), ('lpt_luat_q84_a3', 'Cờ đỏ đuôi nheo có quân hiệu', 'lpt_luat_q84'), ('lpt_luat_q84_a4', 'Cờ xanh lá cây đuôi nheo', 'lpt_luat_q84'),
+('lpt_luat_q85_a1', '2 đèn xanh cách nhau một mét, đèn mạn và đèn trắng lái', 'lpt_luat_q85'), ('lpt_luat_q85_a2', '2 đèn đỏ cách nhau một mét, đèn mạn và đèn trắng lái', 'lpt_luat_q85'), ('lpt_luat_q85_a3', '2 đèn vàng cách nhau một mét, đèn mạn và đèn trăng lái', 'lpt_luat_q85'), ('lpt_luat_q85_a4', '2 đèn trắng cách nhau một mét, đèn mạn và đèn trắng lái', 'lpt_luat_q85'),
+('lpt_luat_q86_a1', 'Phao 1', 'lpt_luat_q86'), ('lpt_luat_q86_a2', 'Phao 2', 'lpt_luat_q86'), ('lpt_luat_q86_a3', 'Phao 3', 'lpt_luat_q86'), ('lpt_luat_q86_a4', 'Phao 4', 'lpt_luat_q86'),
+('lpt_luat_q87_a1', 'Phao 1', 'lpt_luat_q87'), ('lpt_luat_q87_a2', 'Phao 2', 'lpt_luat_q87'), ('lpt_luat_q87_a3', 'Phao 3', 'lpt_luat_q87'), ('lpt_luat_q87_a4', 'Phao 4', 'lpt_luat_q87'),
+('lpt_luat_q88_a1', 'Phao 1', 'lpt_luat_q88'), ('lpt_luat_q88_a2', 'Phao 2', 'lpt_luat_q88'), ('lpt_luat_q88_a3', 'Phao 3', 'lpt_luat_q88'), ('lpt_luat_q88_a4', 'Phao 4', 'lpt_luat_q88'),
+('lpt_luat_q89_a1', 'Phao 1', 'lpt_luat_q89'), ('lpt_luat_q89_a2', 'Phao 2', 'lpt_luat_q89'), ('lpt_luat_q89_a3', 'Phao 3', 'lpt_luat_q89'), ('lpt_luat_q89_a4', 'Phao 4', 'lpt_luat_q89'),
+('lpt_luat_q90_a1', 'Biển 1', 'lpt_luat_q90'), ('lpt_luat_q90_a2', 'Biển 2', 'lpt_luat_q90'), ('lpt_luat_q90_a3', 'Biển 3', 'lpt_luat_q90'), ('lpt_luat_q90_a4', 'Biển 4', 'lpt_luat_q90'),
+('lpt_luat_q91_a1', 'Biển 1', 'lpt_luat_q91'), ('lpt_luat_q91_a2', 'Biển 2', 'lpt_luat_q91'), ('lpt_luat_q91_a3', 'Biển 3', 'lpt_luat_q91'), ('lpt_luat_q91_a4', 'Biển 4', 'lpt_luat_q91'),
+('lpt_luat_q92_a1', 'Biển 1', 'lpt_luat_q92'), ('lpt_luat_q92_a2', 'Biển 2', 'lpt_luat_q92'), ('lpt_luat_q92_a3', 'Biển 3', 'lpt_luat_q92'), ('lpt_luat_q92_a4', 'Biển 4', 'lpt_luat_q92'),
+('lpt_luat_q93_a1', 'Biển 1', 'lpt_luat_q93'), ('lpt_luat_q93_a2', 'Biển 2', 'lpt_luat_q93'), ('lpt_luat_q93_a3', 'Biển 3', 'lpt_luat_q93'), ('lpt_luat_q93_a4', 'Biển 4', 'lpt_luat_q93'),
+('lpt_luat_q94_a1', 'Phao 1', 'lpt_luat_q94'), ('lpt_luat_q94_a2', 'Phao 2', 'lpt_luat_q94'), ('lpt_luat_q94_a3', 'Phao 3', 'lpt_luat_q94'), ('lpt_luat_q94_a4', 'Phao 4', 'lpt_luat_q94'),
+('lpt_luat_q95_a1', 'Biển 1', 'lpt_luat_q95'), ('lpt_luat_q95_a2', 'Biển 2', 'lpt_luat_q95'), ('lpt_luat_q95_a3', 'Biển 3', 'lpt_luat_q95'), ('lpt_luat_q95_a4', 'Biển 4', 'lpt_luat_q95'),
+('lpt_luat_q96_a1', 'Biển 1', 'lpt_luat_q96'), ('lpt_luat_q96_a2', 'Biển 2', 'lpt_luat_q96'), ('lpt_luat_q96_a3', 'Biển 3', 'lpt_luat_q96'), ('lpt_luat_q96_a4', 'Biển 4', 'lpt_luat_q96'),
+('lpt_luat_q97_a1', 'Phao 1', 'lpt_luat_q97'), ('lpt_luat_q97_a2', 'Phao 2', 'lpt_luat_q97'), ('lpt_luat_q97_a3', 'Phao 3', 'lpt_luat_q97'), ('lpt_luat_q97_a4', 'Phao 4', 'lpt_luat_q97'),
+('lpt_luat_q98_a1', 'Biển 1', 'lpt_luat_q98'), ('lpt_luat_q98_a2', 'Biển 2', 'lpt_luat_q98'), ('lpt_luat_q98_a3', 'Biển 3', 'lpt_luat_q98'), ('lpt_luat_q98_a4', 'Biển 4', 'lpt_luat_q98'),
+('lpt_luat_q99_a1', 'Biển 1', 'lpt_luat_q99'), ('lpt_luat_q99_a2', 'Biển 2', 'lpt_luat_q99'), ('lpt_luat_q99_a3', 'Biển 3', 'lpt_luat_q99'), ('lpt_luat_q99_a4', 'Biển 4', 'lpt_luat_q99'),
+('lpt_luat_q100_a1', 'Biển 1', 'lpt_luat_q100'), ('lpt_luat_q100_a2', 'Biển 2', 'lpt_luat_q100'), ('lpt_luat_q100_a3', 'Biển 3', 'lpt_luat_q100'), ('lpt_luat_q100_a4', 'Biển 4', 'lpt_luat_q100'),
+('lpt_luat_q101_a1', 'Biển 1', 'lpt_luat_q101'), ('lpt_luat_q101_a2', 'Biển 2', 'lpt_luat_q101'), ('lpt_luat_q101_a3', 'Biển 3', 'lpt_luat_q101'), ('lpt_luat_q101_a4', 'Biển 4', 'lpt_luat_q101'),
+('lpt_luat_q102_a1', 'Biển 1', 'lpt_luat_q102'), ('lpt_luat_q102_a2', 'Biển 2', 'lpt_luat_q102'), ('lpt_luat_q102_a3', 'Biển 3', 'lpt_luat_q102'), ('lpt_luat_q102_a4', 'Biển 4', 'lpt_luat_q102'),
+('lpt_luat_q103_a1', 'Biển 1', 'lpt_luat_q103'), ('lpt_luat_q103_a2', 'Biển 2', 'lpt_luat_q103'), ('lpt_luat_q103_a3', 'Biển 3', 'lpt_luat_q103'), ('lpt_luat_q103_a4', 'Biển 4', 'lpt_luat_q103'),
+('lpt_luat_q104_a1', 'Biển 1', 'lpt_luat_q104'), ('lpt_luat_q104_a2', 'Biển 2', 'lpt_luat_q104'), ('lpt_luat_q104_a3', 'Biển 3', 'lpt_luat_q104'), ('lpt_luat_q104_a4', 'Biển 4', 'lpt_luat_q104'),
+('lpt_luat_q105_a1', 'Biển 1', 'lpt_luat_q105'), ('lpt_luat_q105_a2', 'Biển 2', 'lpt_luat_q105'), ('lpt_luat_q105_a3', 'Biển 3', 'lpt_luat_q105'), ('lpt_luat_q105_a4', 'Biển 4', 'lpt_luat_q105'),
+('lpt_luat_q106_a1', 'Biển 1', 'lpt_luat_q106'), ('lpt_luat_q106_a2', 'Biển 2', 'lpt_luat_q106'), ('lpt_luat_q106_a3', 'Biển 3', 'lpt_luat_q106'), ('lpt_luat_q106_a4', 'Biển 4', 'lpt_luat_q106'),
+('lpt_luat_q107_a1', 'Biển 1', 'lpt_luat_q107'), ('lpt_luat_q107_a2', 'Biển 2', 'lpt_luat_q107'), ('lpt_luat_q107_a3', 'Biển 3', 'lpt_luat_q107'), ('lpt_luat_q107_a4', 'Biển 4', 'lpt_luat_q107'),
+('lpt_luat_q108_a1', 'Biển 1', 'lpt_luat_q108'), ('lpt_luat_q108_a2', 'Biển 2', 'lpt_luat_q108'), ('lpt_luat_q108_a3', 'Biển 3', 'lpt_luat_q108'), ('lpt_luat_q108_a4', 'Biển 4', 'lpt_luat_q108'),
+('lpt_luat_q109_a1', 'Biển 1', 'lpt_luat_q109'), ('lpt_luat_q109_a2', 'Biển 2', 'lpt_luat_q109'), ('lpt_luat_q109_a3', 'Biển 3', 'lpt_luat_q109'), ('lpt_luat_q109_a4', 'Biển 4', 'lpt_luat_q109'),
+('lpt_luat_q110_a1', 'Biển 1', 'lpt_luat_q110'), ('lpt_luat_q110_a2', 'Biển 2', 'lpt_luat_q110'), ('lpt_luat_q110_a3', 'Biển 3', 'lpt_luat_q110'), ('lpt_luat_q110_a4', 'Biển 4', 'lpt_luat_q110'),
+('lpt_luat_q111_a1', 'Biển 1', 'lpt_luat_q111'), ('lpt_luat_q111_a2', 'Biển 2', 'lpt_luat_q111'), ('lpt_luat_q111_a3', 'Biển 3', 'lpt_luat_q111'), ('lpt_luat_q111_a4', 'Biển 4', 'lpt_luat_q111'),
+('lpt_luat_q112_a1', 'Biển 1', 'lpt_luat_q112'), ('lpt_luat_q112_a2', 'Biển 2', 'lpt_luat_q112'), ('lpt_luat_q112_a3', 'Biển 3', 'lpt_luat_q112'), ('lpt_luat_q112_a4', 'Biển 4', 'lpt_luat_q112'),
+('lpt_luat_q113_a1', 'Biển 1', 'lpt_luat_q113'), ('lpt_luat_q113_a2', 'Biển 2', 'lpt_luat_q113'), ('lpt_luat_q113_a3', 'Biển 3', 'lpt_luat_q113'), ('lpt_luat_q113_a4', 'Biển 4', 'lpt_luat_q113'),
+('lpt_luat_q114_a1', 'Biển 1', 'lpt_luat_q114'), ('lpt_luat_q114_a2', 'Biển 2', 'lpt_luat_q114'), ('lpt_luat_q114_a3', 'Biển 3', 'lpt_luat_q114'), ('lpt_luat_q114_a4', 'Biển 4', 'lpt_luat_q114'),
+('lpt_luat_q115_a1', 'Biển 1', 'lpt_luat_q115'), ('lpt_luat_q115_a2', 'Biển 2', 'lpt_luat_q115'), ('lpt_luat_q115_a3', 'Biển 3', 'lpt_luat_q115'), ('lpt_luat_q115_a4', 'Biển 4', 'lpt_luat_q115'),
+('lpt_luat_q116_a1', 'Biển 1', 'lpt_luat_q116'), ('lpt_luat_q116_a2', 'Biển 2', 'lpt_luat_q116'), ('lpt_luat_q116_a3', 'Biển 3', 'lpt_luat_q116'), ('lpt_luat_q116_a4', 'Biển 4', 'lpt_luat_q116'),
+('lpt_luat_q117_a1', 'Biển 1', 'lpt_luat_q117'), ('lpt_luat_q117_a2', 'Biển 2', 'lpt_luat_q117'), ('lpt_luat_q117_a3', 'Biển 3', 'lpt_luat_q117'), ('lpt_luat_q117_a4', 'Biển 4', 'lpt_luat_q117'),
+('lpt_luat_q118_a1', 'Biển 1', 'lpt_luat_q118'), ('lpt_luat_q118_a2', 'Biển 2', 'lpt_luat_q118'), ('lpt_luat_q118_a3', 'Biển 3', 'lpt_luat_q118'), ('lpt_luat_q118_a4', 'Biển 4', 'lpt_luat_q118'),
+('lpt_luat_q119_a1', 'Biển 1', 'lpt_luat_q119'), ('lpt_luat_q119_a2', 'Biển 2', 'lpt_luat_q119'), ('lpt_luat_q119_a3', 'Biển 3', 'lpt_luat_q119'), ('lpt_luat_q119_a4', 'Biển 4', 'lpt_luat_q119'),
+('lpt_luat_q120_a1', 'Biển 1', 'lpt_luat_q120'), ('lpt_luat_q120_a2', 'Biển 2', 'lpt_luat_q120'), ('lpt_luat_q120_a3', 'Biển 3', 'lpt_luat_q120'), ('lpt_luat_q120_a4', 'Biển 4', 'lpt_luat_q120'),
+('lpt_luat_q121_a1', 'Biển 1', 'lpt_luat_q121'), ('lpt_luat_q121_a2', 'Biển 2', 'lpt_luat_q121'), ('lpt_luat_q121_a3', 'Biển 3', 'lpt_luat_q121'), ('lpt_luat_q121_a4', 'Biển 4', 'lpt_luat_q121'),
+('lpt_luat_q122_a1', 'Biển 1', 'lpt_luat_q122'), ('lpt_luat_q122_a2', 'Biển 2', 'lpt_luat_q122'), ('lpt_luat_q122_a3', 'Biển 3', 'lpt_luat_q122'), ('lpt_luat_q122_a4', 'Biển 4', 'lpt_luat_q122'),
+('lpt_luat_q123_a1', 'Biển 1', 'lpt_luat_q123'), ('lpt_luat_q123_a2', 'Biển 2', 'lpt_luat_q123'), ('lpt_luat_q123_a3', 'Biển 3', 'lpt_luat_q123'), ('lpt_luat_q123_a4', 'Biển 4', 'lpt_luat_q123'),
+('lpt_luat_q124_a1', 'Biển 1', 'lpt_luat_q124'), ('lpt_luat_q124_a2', 'Biển 2', 'lpt_luat_q124'), ('lpt_luat_q124_a3', 'Biển 3', 'lpt_luat_q124'), ('lpt_luat_q124_a4', 'Biển 4', 'lpt_luat_q124'),
+('lpt_luat_q125_a1', 'Biển 1', 'lpt_luat_q125'), ('lpt_luat_q125_a2', 'Biển 2', 'lpt_luat_q125'), ('lpt_luat_q125_a3', 'Biển 3', 'lpt_luat_q125'), ('lpt_luat_q125_a4', 'Biển 4', 'lpt_luat_q125'),
+
+-- Điều động...
+('lpt_dieudong_q126_a1', 'Quãng đường và thời gian.', 'lpt_dieudong_q126'), ('lpt_dieudong_q126_a2', 'Quãng đường và vận tốc.', 'lpt_dieudong_q126'), ('lpt_dieudong_q126_a3', 'Quãng đường và khối lượng.', 'lpt_dieudong_q126'), ('lpt_dieudong_q126_a4', 'Vận tốc và khối lượng.', 'lpt_dieudong_q126'),
+('lpt_dieudong_q127_a1', 'phương tiện chạy chậm gần bờ.', 'lpt_dieudong_q127'), ('lpt_dieudong_q127_a2', 'phương tiện chạy nhanh xa bờ.', 'lpt_dieudong_q127'), ('lpt_dieudong_q127_a3', 'Phương tiện chạy nhanh gần bờ.', 'lpt_dieudong_q127'), ('lpt_dieudong_q127_a4', 'phương tiện chạy nhanh giữa sông.', 'lpt_dieudong_q127'),
+('lpt_dieudong_q128_a1', 'Nước ngược nhẹ.', 'lpt_dieudong_q128'), ('lpt_dieudong_q128_a2', 'Nước xuôi.', 'lpt_dieudong_q128'), ('lpt_dieudong_q128_a3', 'Nước ngược mạnh.', 'lpt_dieudong_q128'), ('lpt_dieudong_q128_a4', 'Nước nào cũng được.', 'lpt_dieudong_q128'),
+('lpt_dieudong_q129_a1', 'Phải lập tức dừng máy, bẻ lái về phía người ngã, ném phao cho người ngã, theo dõi người.', 'lpt_dieudong_q129'), ('lpt_dieudong_q129_a2', 'Phải lập tức bẻ lái về phía người ngã, ném phao cho người ngã.', 'lpt_dieudong_q129'), ('lpt_dieudong_q129_a3', 'Nhanh chóng lái tàu về phía người ngã, ném nhiều phao cho người ngã.', 'lpt_dieudong_q129'), ('lpt_dieudong_q129_a4', 'Dừng ngay tàu, cử người bơi giỏi xuống cứu người bị nạn.', 'lpt_dieudong_q129'),
+('lpt_dieudong_q130_a1', 'Điều động phương tiện quay trở 270° (chữ C) để cứu người.', 'lpt_dieudong_q130'), ('lpt_dieudong_q130_a2', 'Điều động phương tiện quay trở 180° (số 8) để cứu người.', 'lpt_dieudong_q130'), ('lpt_dieudong_q130_a3', 'Điều động phương tiện quay trở ngay lập tức để cứu người.', 'lpt_dieudong_q130'), ('lpt_dieudong_q130_a4', 'Cả 3 cách trên đều được.', 'lpt_dieudong_q130'),
+('lpt_dieudong_q131_a1', 'Điều động phương tiện tàu quay trở 270° (chữ C) để cứu người.', 'lpt_dieudong_q131'), ('lpt_dieudong_q131_a2', 'Điều động phương tiện quay trở 180° (số 8) để cứu người.', 'lpt_dieudong_q131'), ('lpt_dieudong_q131_a3', 'Điều động phương tiện quay trở ngay lập tức để cứu người.', 'lpt_dieudong_q131'), ('lpt_dieudong_q131_a4', 'Cả 3 cách trên đều được.', 'lpt_dieudong_q131'),
+('lpt_dieudong_q132_a1', 'Ngã sang phải.', 'lpt_dieudong_q132'), ('lpt_dieudong_q132_a2', 'Ngã sang trái.', 'lpt_dieudong_q132'), ('lpt_dieudong_q132_a3', 'Không ngã sang bên nào.', 'lpt_dieudong_q132'), ('lpt_dieudong_q132_a4', 'Khi ngã phải, khi ngã trái.', 'lpt_dieudong_q132'),
+('lpt_dieudong_q133_a1', 'Ngã sang phải.', 'lpt_dieudong_q133'), ('lpt_dieudong_q133_a2', 'Ngã sang trái.', 'lpt_dieudong_q133'), ('lpt_dieudong_q133_a3', 'Không thay đổi.', 'lpt_dieudong_q133'), ('lpt_dieudong_q133_a4', 'Khi ngã phải, khi ngã trái.', 'lpt_dieudong_q133'),
+('lpt_dieudong_q134_a1', 'Ngã sang phải.', 'lpt_dieudong_q134'), ('lpt_dieudong_q134_a2', 'Ngã sang trái.', 'lpt_dieudong_q134'), ('lpt_dieudong_q134_a3', 'Không thay đổi.', 'lpt_dieudong_q134'), ('lpt_dieudong_q134_a4', 'Khi ngã phải, khi ngã trái.', 'lpt_dieudong_q134'),
+('lpt_dieudong_q135_a1', 'Ngã sang phải.', 'lpt_dieudong_q135'), ('lpt_dieudong_q135_a2', 'Ngã sang trái.', 'lpt_dieudong_q135'), ('lpt_dieudong_q135_a3', 'Không ngã sang bên nào.', 'lpt_dieudong_q135'), ('lpt_dieudong_q135_a4', 'Khi ngã phải, khi ngã trái.', 'lpt_dieudong_q135'),
+('lpt_dieudong_q136_a1', 'Tăng tốc độ.', 'lpt_dieudong_q136'), ('lpt_dieudong_q136_a2', 'Giảm tốc độ.', 'lpt_dieudong_q136'), ('lpt_dieudong_q136_a3', 'Giữ nguyên tốc đô.', 'lpt_dieudong_q136'), ('lpt_dieudong_q136_a4', 'Bẻ lái về phía đầu gió, đầu nước.', 'lpt_dieudong_q136'),
+('lpt_dieudong_q137_a1', 'Ngược với hướng sóng.', 'lpt_dieudong_q137'), ('lpt_dieudong_q137_a2', 'Ngang với hướng sóng.', 'lpt_dieudong_q137'), ('lpt_dieudong_q137_a3', 'Vát, chếch với hướng sóng.', 'lpt_dieudong_q137'), ('lpt_dieudong_q137_a4', 'Chạy Xuôi với hướng sóng.', 'lpt_dieudong_q137'),
+('lpt_dieudong_q138_a1', 'Mạn dưới sóng.', 'lpt_dieudong_q138'), ('lpt_dieudong_q138_a2', 'Mạn trên sóng.', 'lpt_dieudong_q138'), ('lpt_dieudong_q138_a3', 'Mạn nào cũng được.', 'lpt_dieudong_q138'), ('lpt_dieudong_q138_a4', 'Ngay trước mũi tàu.', 'lpt_dieudong_q138'),
+('lpt_dieudong_q139_a1', 'Chạy tàu sát bờ vịnh.', 'lpt_dieudong_q139'), ('lpt_dieudong_q139_a2', 'Chạy tàu sát bờ doi.', 'lpt_dieudong_q139'), ('lpt_dieudong_q139_a3', 'Chạy tàu theo đường ngấn nước (lợi nước) hay dải bọt nước.', 'lpt_dieudong_q139'), ('lpt_dieudong_q139_a4', 'Chạy tàu giữa luồng.', 'lpt_dieudong_q139'),
+('lpt_dieudong_q140_a1', 'Chạy ngược dòng chảy xoáy.', 'lpt_dieudong_q140'), ('lpt_dieudong_q140_a2', 'Chạy xuôi chiều dòng xoáy, càng xa tâm xoáy càng tốt.', 'lpt_dieudong_q140'), ('lpt_dieudong_q140_a3', 'Cố tránh hoặc chỉ bám phía trong dòng chảy xoáy.', 'lpt_dieudong_q140'), ('lpt_dieudong_q140_a4', 'Chạy qua tâm dòng chảy xoáy.', 'lpt_dieudong_q140'),
+
+-- Vận tải...
+('lpt_vantai_q141_a1', 'Tính chất hàng hóa.', 'lpt_vantai_q141'), ('lpt_vantai_q141_a2', 'Kích thước hàng hóa.', 'lpt_vantai_q141'), ('lpt_vantai_q141_a3', 'Trọng lượng hàng hóa.', 'lpt_vantai_q141'), ('lpt_vantai_q141_a4', 'Cả ba đặc tính trên.', 'lpt_vantai_q141'),
+('lpt_vantai_q142_a1', 'Bản chất hàng hóa.', 'lpt_vantai_q142'), ('lpt_vantai_q142_a2', 'Hàng hóa bị thấm nước hoặc bị ẩm ướt.', 'lpt_vantai_q142'), ('lpt_vantai_q142_a3', 'Hàng hóa bị nén, ép, xô đẩy gây hư hỏng.', 'lpt_vantai_q142'), ('lpt_vantai_q142_a4', 'Sâu bọ hoặc côn trùng gây nên.', 'lpt_vantai_q142'),
+('lpt_vantai_q143_a1', 'Phương tiện chở phân hóa học phải khô, có đủ dụng cụ che đậy khi cần thiết.', 'lpt_vantai_q143'), ('lpt_vantai_q143_a2', 'Không xếp dỡ phân hóa học dưới trời mưa, khi xếp dỡ phải có công cụ mang hàng phù hợp.', 'lpt_vantai_q143'), ('lpt_vantai_q143_a3', 'Khi xếp hàng phân hóa học ở dưới tàu hay trong kho đều phải có đệm lót cách ly thành phương tiện và nền kho.', 'lpt_vantai_q143'), ('lpt_vantai_q143_a4', 'Tất cả các chú ý trên.', 'lpt_vantai_q143'),
+('lpt_vantai_q144_a1', 'Mua vé hành khách và trả cước phí vận tải hành lý mang theo quá mức quy định.', 'lpt_vantai_q144'), ('lpt_vantai_q144_a2', 'Khai đúng tên, địa chỉ của mình và trẻ em đi kèm khi người kinh doanh vận tải lập danh sách hành khách.', 'lpt_vantai_q144'), ('lpt_vantai_q144_a3', 'Ngồi đúng vị trí chỗ ngồi có in trên vé.', 'lpt_vantai_q144'), ('lpt_vantai_q144_a4', 'Tất cả các nghĩa vụ trên.', 'lpt_vantai_q144'),
+('lpt_vantai_q145_a1', 'Tại thời điểm mà hàng hóa được giao cho người nhận hàng.', 'lpt_vantai_q145'), ('lpt_vantai_q145_a2', 'Tại thời điểm ghi trên hóa đơn mua hàng.', 'lpt_vantai_q145'), ('lpt_vantai_q145_a3', 'Tại thời điểm mà hàng hóa được giao cho người kinh doanh vận tải.', 'lpt_vantai_q145'), ('lpt_vantai_q145_a4', 'Tại thời điểm mà hàng hóa bị mất mát, hư hỏng.', 'lpt_vantai_q145'),
+('lpt_vantai_q146_a1', 'Báo cho người thuê vận tải biết và tiếp tục vận tải đến nơi trả hàng.', 'lpt_vantai_q146'), ('lpt_vantai_q146_a2', 'Báo cho người thuê vận tải biết và cho tàu dừng lại.', 'lpt_vantai_q146'), ('lpt_vantai_q146_a3', 'Báo cho người thuê vận tải biết và vận tải quay về nơi nhận hàng.', 'lpt_vantai_q146'), ('lpt_vantai_q146_a4', 'Không báo cho người thuê vận tải biết và tiếp tục vận tải đến nơi trả hàng.', 'lpt_vantai_q146'),
+('lpt_vantai_q147_a1', 'Xảy ra sự cố thương vụ.', 'lpt_vantai_q147'), ('lpt_vantai_q147_a2', 'Ách tắc giao thông dọc tuyến vận chuyển.', 'lpt_vantai_q147'), ('lpt_vantai_q147_a3', 'Có người trên phương tiện bị chết.', 'lpt_vantai_q147'), ('lpt_vantai_q147_a4', 'Tất cả các ý trên.', 'lpt_vantai_q147'),
+('lpt_vantai_q148_a1', 'Đảm nhận việc chuyển tải.', 'lpt_vantai_q148'), ('lpt_vantai_q148_a2', 'Không đảm nhận việc chuyển tải.', 'lpt_vantai_q148'), ('lpt_vantai_q148_a3', 'Giao cho một bên thứ ba.', 'lpt_vantai_q148'), ('lpt_vantai_q148_a4', 'Đảm nhận vận chuyển 50% hàng hóa.', 'lpt_vantai_q148'),
+('lpt_vantai_q149_a1', 'Thông báo cho người kinh doanh vận tải biết.', 'lpt_vantai_q149'), ('lpt_vantai_q149_a2', 'Thông báo cho người thuê vận tải biết.', 'lpt_vantai_q149'), ('lpt_vantai_q149_a3', 'Không cần phải thông báo cho người kinh doanh vận tải và người thuê vận tải biết.', 'lpt_vantai_q149'), ('lpt_vantai_q149_a4', 'Thông báo cho người kinh doanh vận tải và người thuê vận tải biết để phối hợp thực hiện.', 'lpt_vantai_q149'),
+('lpt_vantai_q150_a1', 'Tốc độ vận tải thấp và giá thành vận tải thấp.', 'lpt_vantai_q150'), ('lpt_vantai_q150_a2', 'Tốc độ vận tải cao và giá thành vận tải thấp.', 'lpt_vantai_q150'), ('lpt_vantai_q150_a3', 'Tốc độ vận tải thấp và giá thành vận tải cao.', 'lpt_vantai_q150'), ('lpt_vantai_q150_a4', 'Tốc độ vận tải cao và giá thành vận tải cao.', 'lpt_vantai_q150')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === KẾT THÚC SCRIPT ===

@@ -1,0 +1,388 @@
+-- Hướng dẫn:
+-- 1. Vào project Supabase của anh.
+-- 2. Mở SQL Editor (biểu tượng </> ở menu bên trái).
+-- 3. Tạo một query mới ("+ New query").
+-- 4. Xóa hết nội dung cũ (nếu có) và dán TOÀN BỘ nội dung file này vào.
+-- 5. Nhấn "RUN".
+--
+-- Lưu ý: Script này đã được cập nhật để tự động tạo và sửa đổi các bảng cần thiết.
+-- Anh có thể chạy script này một cách an toàn nhiều lần.
+
+-- === BƯỚC 1: TẠO VÀ CẬP NHẬT CẤU TRÚC BẢNG ===
+-- Các lệnh này đảm bảo các bảng và các cột cần thiết đều tồn tại.
+
+-- Tạo bảng `licenses` (nếu chưa có)
+CREATE TABLE IF NOT EXISTS licenses (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL
+);
+
+-- Tạo bảng `subjects` (nếu chưa có)
+CREATE TABLE IF NOT EXISTS subjects (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    license_id TEXT REFERENCES licenses(id) ON DELETE CASCADE
+);
+
+-- Tạo bảng `questions` (nếu chưa có)
+CREATE TABLE IF NOT EXISTS questions (
+    id TEXT PRIMARY KEY,
+    text TEXT NOT NULL,
+    image TEXT,
+    subject_id TEXT REFERENCES subjects(id) ON DELETE CASCADE,
+    correct_answer_id TEXT
+);
+
+-- Tạo bảng `answers` (nếu chưa có)
+CREATE TABLE IF NOT EXISTS answers (
+    id TEXT PRIMARY KEY,
+    text TEXT NOT NULL,
+    question_id TEXT REFERENCES questions(id) ON DELETE CASCADE
+);
+
+-- Cập nhật các bảng để thêm cột `display_order` một cách an toàn
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'licenses' AND column_name = 'display_order') THEN
+        ALTER TABLE licenses ADD COLUMN display_order INT;
+    END IF;
+END$$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'subjects' AND column_name = 'display_order') THEN
+        ALTER TABLE subjects ADD COLUMN display_order INT;
+    END IF;
+END$$;
+
+
+-- === BƯỚC 2: CHÈN DỮ LIỆU VÀO CÁC BẢNG ===
+
+-- === HẠNG BẰNG MỚI: MÁY TRƯỞNG HẠNG NHÌ - M2 ===
+
+-- Thêm hạng bằng "Máy trưởng hạng nhì - M2"
+INSERT INTO licenses (id, name, display_order) VALUES
+('maytruong-h2', 'Máy trưởng hạng nhì - M2', 2)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, display_order = EXCLUDED.display_order;
+
+-- Thêm các môn học cho hạng bằng trên (ID môn học có tiền tố 'm2_' để đảm bảo tính duy nhất)
+INSERT INTO subjects (id, name, license_id, display_order) VALUES
+('m2_dtt', 'Điện tàu thủy', 'maytruong-h2', 1),
+('m2_mtt', 'Máy tàu thủy', 'maytruong-h2', 2),
+('m2_ktvt', 'Kinh tế vận tải', 'maytruong-h2', 3),
+('m2_thvh', 'Thực hành vận hành máy tàu thủy', 'maytruong-h2', 4),
+('m2_nvmt', 'Nghiệp vụ máy trưởng', 'maytruong-h2', 5)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, license_id = EXCLUDED.license_id, display_order = EXCLUDED.display_order;
+
+
+-- === MÔN: ĐIỆN TÀU THỦY (30 câu) ===
+
+-- Chèn câu hỏi
+INSERT INTO questions (id, text, subject_id, correct_answer_id) VALUES
+('m2_dtt_q1', 'Mạch điện xoay chiều ba pha gồm những phần tử nào?', 'm2_dtt', 'm2_dtt_q1_a1'),
+('m2_dtt_q2', 'Máy phát điện là máy điện biến đổi năng lượng như thế nào?', 'm2_dtt', 'm2_dtt_q2_a1'),
+('m2_dtt_q3', 'Hoạt động của máy phát điện xoay chiều ba pha dựa trên hiện tượng gì?', 'm2_dtt', 'm2_dtt_q3_a1'),
+('m2_dtt_q4', 'Khi đấu dây động cơ 3 pha cần phải căn cứ vào những gì?', 'm2_dtt', 'm2_dtt_q4_a2'),
+('m2_dtt_q5', 'Máy biến áp kiểu điện từ là loại gì?', 'm2_dtt', 'm2_dtt_q5_a1'),
+('m2_dtt_q6', 'Lõi thép của máy biến áp gồm nhiều lá thép kỹ thuật điện mỏng, sơn cách điện và ghép chặt lại nhằm để làm gì?', 'm2_dtt', 'm2_dtt_q6_a1'),
+('m2_dtt_q7', 'Máy biến áp không làm biến đổi đại lượng nào sau đây?', 'm2_dtt', 'm2_dtt_q7_a1'),
+('m2_dtt_q8', 'Điểm giống nhau của máy phát điện và động cơ điện là gì?', 'm2_dtt', 'm2_dtt_q8_a1'),
+('m2_dtt_q9', 'Theo cơ cấu ly hợp, mạch điện khởi động máy Diesel bao gồm những loại nào?', 'm2_dtt', 'm2_dtt_q9_a4'),
+('m2_dtt_q10', 'Để điều chỉnh tốc độ động cơ không đồng bộ ba pha người ta sử dụng các phương pháp nào?', 'm2_dtt', 'm2_dtt_q10_a4'),
+('m2_dtt_q11', 'Lõi thép của máy biến áp được làm từ', 'm2_dtt', 'm2_dtt_q11_a3'),
+('m2_dtt_q12', 'Trạng thái có tải của máy biến áp là trạng thái gì?', 'm2_dtt', 'm2_dtt_q12_a1'),
+('m2_dtt_q13', 'Trong quá trình làm việc, máy biến áp có các loại tổn hao nào?', 'm2_dtt', 'm2_dtt_q13_a3'),
+('m2_dtt_q14', 'Các phương pháp đấu ghép ắc quy là những phương pháp gì?', 'm2_dtt', 'm2_dtt_q14_a4'),
+('m2_dtt_q15', 'Động cơ không đồng bộ ba pha là thiết bị như thế nào?', 'm2_dtt', 'm2_dtt_q15_a1'),
+('m2_dtt_q16', 'Từ trường quay trong máy điện 3 pha do yếu tố nào?', 'm2_dtt', 'm2_dtt_q16_a1'),
+('m2_dtt_q17', 'Động cơ điện xoay chiều một pha hoạt động dựa trên hiện tượng gì?', 'm2_dtt', 'm2_dtt_q17_a2'),
+('m2_dtt_q18', 'Tác dụng của tụ điện C trong còi điện một chiều dùng để làm gì?', 'm2_dtt', 'm2_dtt_q18_a3'),
+('m2_dtt_q19', 'Máy biến áp có số vòng dây cuộn sơ cấp lớn hơn 10 lần so với cuộn thứ cấp là máy gì?', 'm2_dtt', 'm2_dtt_q19_a2'),
+('m2_dtt_q20', 'Khi sử dụng ắc quy, phụ trách kỹ thuật về máy cần quan tâm tới các thông số kỹ thuật cơ bản nào?', 'm2_dtt', 'm2_dtt_q20_a1'),
+('m2_dtt_q21', 'Trụ cực của ắc quy axit được làm bằng gì?', 'm2_dtt', 'm2_dtt_q21_a1'),
+('m2_dtt_q22', 'Để đảo chiều quay động cơ điện 3 pha thì phải làm gì?', 'm2_dtt', 'm2_dtt_q22_a3'),
+('m2_dtt_q23', 'Quy trình đấu dây cho một mạch điện đúng là như thế nào?', 'm2_dtt', 'm2_dtt_q23_a3'),
+('m2_dtt_q24', 'Máy điện một chiều khi làm việc phát tia lửa điện lớn ở chổi than và cổ góp là do bị gì?', 'm2_dtt', 'm2_dtt_q24_a4'),
+('m2_dtt_q25', 'Hiện tượng sunfat hóa các bản cực bình ắc quy axit là như thế nào?', 'm2_dtt', 'm2_dtt_q25_a1'),
+('m2_dtt_q26', 'Động cơ điện một chiều ứng dụng làm động cơ khởi động động cơ đốt trong vì lý do chính gì?', 'm2_dtt', 'm2_dtt_q26_a1'),
+('m2_dtt_q27', 'Khi đấu dây mạch điện trên tàu thủy nội địa sử dụng nguồn điện một chiều cần chú ý các điều gì?', 'm2_dtt', 'm2_dtt_q27_a4'),
+('m2_dtt_q28', 'Tác dụng chính của cầu chì là gì?', 'm2_dtt', 'm2_dtt_q28_a2'),
+('m2_dtt_q29', 'Ắc quy trên tàu thường sử dụng loại nào?', 'm2_dtt', 'm2_dtt_q29_a3'),
+('m2_dtt_q30', 'Dòng điện một chiều chạy từ:', 'm2_dtt', 'm2_dtt_q30_a2')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id;
+
+-- Chèn câu trả lời
+INSERT INTO answers (id, text, question_id) VALUES
+('m2_dtt_q1_a1', 'Là mạch điện gồm nguồn điện ba pha, dây dẫn ba pha, tải ba pha và các thiết bị khống chế bảo vệ (nếu có).', 'm2_dtt_q1'), ('m2_dtt_q1_a2', 'Là mạch điện gồm nguồn điện, dây dẫn và tải.', 'm2_dtt_q1'), ('m2_dtt_q1_a3', 'Là mạch điện gồm nguồn và tải ba pha.', 'm2_dtt_q1'), ('m2_dtt_q1_a4', 'Là mạch điện gồm nguồn và dây dẫn ba pha.', 'm2_dtt_q1'),
+('m2_dtt_q2_a1', 'Cơ năng thành điện năng.', 'm2_dtt_q2'), ('m2_dtt_q2_a2', 'Điện năng thành cơ năng.', 'm2_dtt_q2'), ('m2_dtt_q2_a3', 'Nhiệt năng thành cơ năng.', 'm2_dtt_q2'), ('m2_dtt_q2_a4', 'Quang năng thành cơ năng.', 'm2_dtt_q2'),
+('m2_dtt_q3_a1', 'Dựa trên hiện tượng cảm ứng điện từ.', 'm2_dtt_q3'), ('m2_dtt_q3_a2', 'Dựa trên nguyên lý lực điện từ.', 'm2_dtt_q3'), ('m2_dtt_q3_a3', 'Dựa trên nguyên lý cảm ứng điện từ và lực điện từ.', 'm2_dtt_q3'), ('m2_dtt_q3_a4', 'Cả ba đáp án đều đúng.', 'm2_dtt_q3'),
+('m2_dtt_q4_a1', 'Điện áp dây của nguồn.', 'm2_dtt_q4'), ('m2_dtt_q4_a2', 'Điện áp dây của nguồn và hướng dẫn đấu dây của động cơ.', 'm2_dtt_q4'), ('m2_dtt_q4_a3', 'Điện áp của tải.', 'm2_dtt_q4'), ('m2_dtt_q4_a4', 'Hướng dẫn đấu dây của động cơ.', 'm2_dtt_q4'),
+('m2_dtt_q5_a1', 'Máy điện dùng biến đổi điện áp xoay chiều nhưng tần số không đổi.', 'm2_dtt_q5'), ('m2_dtt_q5_a2', 'Máy điện dùng biến đổi điện áp và tần số dòng điện.', 'm2_dtt_q5'), ('m2_dtt_q5_a3', 'Máy biến đổi tần số nhưng giữ nguyên điện áp.', 'm2_dtt_q5'), ('m2_dtt_q5_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_dtt_q5'),
+('m2_dtt_q6_a1', 'Giảm dòng điện phu cô trong lõi thép.', 'm2_dtt_q6'), ('m2_dtt_q6_a2', 'Đảm bảo độ bền cho các lá thép.', 'm2_dtt_q6'), ('m2_dtt_q6_a3', 'Chống rò điện từ lõi ra vỏ máy.', 'm2_dtt_q6'), ('m2_dtt_q6_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_dtt_q6'),
+('m2_dtt_q7_a1', 'Tần số của dòng điện.', 'm2_dtt_q7'), ('m2_dtt_q7_a2', 'Điện áp.', 'm2_dtt_q7'), ('m2_dtt_q7_a3', 'Cường độ dòng điện.', 'm2_dtt_q7'), ('m2_dtt_q7_a4', 'Điện áp và cường độ dòng điện.', 'm2_dtt_q7'),
+('m2_dtt_q8_a1', 'Cấu tạo chung đều là máy điện quay.', 'm2_dtt_q8'), ('m2_dtt_q8_a2', 'Cùng là máy biến đổi điện năng thành cơ năng.', 'm2_dtt_q8'), ('m2_dtt_q8_a3', 'Cùng là máy biến đổi cơ năng thành điện năng.', 'm2_dtt_q8'), ('m2_dtt_q8_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_dtt_q8'),
+('m2_dtt_q9_a1', 'Kiểu cần gạt.', 'm2_dtt_q9'), ('m2_dtt_q9_a2', 'Kiểu rô to di động.', 'm2_dtt_q9'), ('m2_dtt_q9_a3', 'Kiểu quán tính.', 'm2_dtt_q9'), ('m2_dtt_q9_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_dtt_q9'),
+('m2_dtt_q10_a1', 'Thay đổi số cặp cực.', 'm2_dtt_q10'), ('m2_dtt_q10_a2', 'Thay đổi điện áp, tần số nguồn cung cấp.', 'm2_dtt_q10'), ('m2_dtt_q10_a3', 'Thay đổi điện trở mạch rô to.', 'm2_dtt_q10'), ('m2_dtt_q10_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_dtt_q10'),
+('m2_dtt_q11_a1', 'Nhôm.', 'm2_dtt_q11'), ('m2_dtt_q11_a2', 'Kim loại.', 'm2_dtt_q11'), ('m2_dtt_q11_a3', 'Sắt từ.', 'm2_dtt_q11'), ('m2_dtt_q11_a4', 'Đồng.', 'm2_dtt_q11'),
+('m2_dtt_q12_a1', 'Cuộn sơ cấp nối với nguồn, cuộn thứ cấp nối với tải.', 'm2_dtt_q12'), ('m2_dtt_q12_a2', 'Cuộn sơ cấp hở mạch, cuộn thứ cấp đặt vào tải.', 'm2_dtt_q12'), ('m2_dtt_q12_a3', 'Cuộn sơ cấp đặt vào nguồn điện áp U1, cuộn thứ cấp hở mạch.', 'm2_dtt_q12'), ('m2_dtt_q12_a4', 'Cuộn sơ cấp đặt vào nguồn điện áp U1, cuộn thứ cấp ngắn mạch.', 'm2_dtt_q12'),
+('m2_dtt_q13_a1', 'Chỉ có tổn hao điện.', 'm2_dtt_q13'), ('m2_dtt_q13_a2', 'Chỉ có tổn hao từ.', 'm2_dtt_q13'), ('m2_dtt_q13_a3', 'Tổn hao từ và tổn hao điện.', 'm2_dtt_q13'), ('m2_dtt_q13_a4', 'Không bị tổn hao nào.', 'm2_dtt_q13'),
+('m2_dtt_q14_a1', 'Đấu nối tiếp.', 'm2_dtt_q14'), ('m2_dtt_q14_a2', 'Đấu song song.', 'm2_dtt_q14'), ('m2_dtt_q14_a3', 'Đấu hỗn hợp.', 'm2_dtt_q14'), ('m2_dtt_q14_a4', 'Tất cả các ý trên.', 'm2_dtt_q14'),
+('m2_dtt_q15_a1', 'Thiết bị điện biến điện năng xoay chiều thành cơ năng.', 'm2_dtt_q15'), ('m2_dtt_q15_a2', 'Nguyên tắc hoạt động của động cơ không đồng bộ ba pha dựa trên hiện tượng cảm ứng điện từ.', 'm2_dtt_q15'), ('m2_dtt_q15_a3', 'Động cơ không đồng bộ ba pha là thiết bị biến cơ năng thành điện năng.', 'm2_dtt_q15'), ('m2_dtt_q15_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_dtt_q15'),
+('m2_dtt_q16_a1', 'Dòng điện xoay chiều 3 pha.', 'm2_dtt_q16'), ('m2_dtt_q16_a2', 'Dòng điện xoay chiều một pha.', 'm2_dtt_q16'), ('m2_dtt_q16_a3', 'Hiện tượng cảm ứng điện từ.', 'm2_dtt_q16'), ('m2_dtt_q16_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_dtt_q16'),
+('m2_dtt_q17_a1', 'Điện trường.', 'm2_dtt_q17'), ('m2_dtt_q17_a2', 'Lực điện từ và cảm ứng điện từ.', 'm2_dtt_q17'), ('m2_dtt_q17_a3', 'Tán sắc ánh sáng.', 'm2_dtt_q17'), ('m2_dtt_q17_a4', 'Giao thoa ánh sáng.', 'm2_dtt_q17'),
+('m2_dtt_q18_a1', 'Lọc nhiễu nguồn cung cấp cho còi điện.', 'm2_dtt_q18'), ('m2_dtt_q18_a2', 'Tích trữ năng lượng trong quá trình hoạt động của còi điện.', 'm2_dtt_q18'), ('m2_dtt_q18_a3', 'Bảo vệ tiếp điểm trong còi điện một chiều.', 'm2_dtt_q18'), ('m2_dtt_q18_a4', 'Bảo vệ ắc quy.', 'm2_dtt_q18'),
+('m2_dtt_q19_a1', 'Tăng áp.', 'm2_dtt_q19'), ('m2_dtt_q19_a2', 'Hạ áp.', 'm2_dtt_q19'), ('m2_dtt_q19_a3', 'Làm giảm tần số dòng điện ở cuộn sơ cấp 10 lần.', 'm2_dtt_q19'), ('m2_dtt_q19_a4', 'Làm tăng tần số dòng điện ở cuộn sơ cấp 10 lần.', 'm2_dtt_q19'),
+('m2_dtt_q20_a1', 'Điện áp định mức, dung lượng định mức.', 'm2_dtt_q20'), ('m2_dtt_q20_a2', 'Điện áp định mức, dòng điện.', 'm2_dtt_q20'), ('m2_dtt_q20_a3', 'Dung lượng định mức, dòng điện định mức.', 'm2_dtt_q20'), ('m2_dtt_q20_a4', 'Dung lượng định mức.', 'm2_dtt_q20'),
+('m2_dtt_q21_a1', 'Chì.', 'm2_dtt_q21'), ('m2_dtt_q21_a2', 'Đồng.', 'm2_dtt_q21'), ('m2_dtt_q21_a3', 'Nhôm.', 'm2_dtt_q21'), ('m2_dtt_q21_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_dtt_q21'),
+('m2_dtt_q22_a1', 'Thay đổi điện áp nguồn.', 'm2_dtt_q22'), ('m2_dtt_q22_a2', 'Thay đổi vị trí của các dây pha.', 'm2_dtt_q22'), ('m2_dtt_q22_a3', 'Thay đổi vị trí hai dây pha đấu vào nguồn.', 'm2_dtt_q22'), ('m2_dtt_q22_a4', 'Thay đổi cách đấu dây của động cơ.', 'm2_dtt_q22'),
+('m2_dtt_q23_a1', 'Thiết bị đóng ngắt, bảo vệ - thiết bị tiêu thụ điện - nguồn điện.', 'm2_dtt_q23'), ('m2_dtt_q23_a2', 'Thiết bị tiêu thụ điện - thiết bị đóng ngắt, bảo vệ - nguồn điện.', 'm2_dtt_q23'), ('m2_dtt_q23_a3', 'Nguồn điện - thiết bị đóng ngắt, bảo vệ - thiết bị tiêu thụ điện.', 'm2_dtt_q23'), ('m2_dtt_q23_a4', 'Thiết bị tiêu thụ điện - nguồn điện - thiết bị đóng ngắt, bảo vệ.', 'm2_dtt_q23'),
+('m2_dtt_q24_a1', 'Cổ góp bị mài mòn không đều và bẩn.', 'm2_dtt_q24'), ('m2_dtt_q24_a2', 'Chổi than mòn, lò xo yếu.', 'm2_dtt_q24'), ('m2_dtt_q24_a3', 'Dòng tải lớn.', 'm2_dtt_q24'), ('m2_dtt_q24_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_dtt_q24'),
+('m2_dtt_q25_a1', 'Nạp bình nhanh no điện.', 'm2_dtt_q25'), ('m2_dtt_q25_a2', 'Nhanh phóng hết điện.', 'm2_dtt_q25'), ('m2_dtt_q25_a3', 'Dung dịch sôi nhanh.', 'm2_dtt_q25'), ('m2_dtt_q25_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_dtt_q25'),
+('m2_dtt_q26_a1', 'Có mô men xoắn khởi động lớn.', 'm2_dtt_q26'), ('m2_dtt_q26_a2', 'Có cấu tạo đơn giản.', 'm2_dtt_q26'), ('m2_dtt_q26_a3', 'Hoạt động an toàn.', 'm2_dtt_q26'), ('m2_dtt_q26_a4', 'Có công suất lớn.', 'm2_dtt_q26'),
+('m2_dtt_q27_a1', 'Màu dây, cực tính.', 'm2_dtt_q27'), ('m2_dtt_q27_a2', 'Có đủ các thiết bị đóng ngắt, bảo vệ.', 'm2_dtt_q27'), ('m2_dtt_q27_a3', 'Đấu dây mát (-) vào nguồn sau cùng.', 'm2_dtt_q27'), ('m2_dtt_q27_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_dtt_q27'),
+('m2_dtt_q28_a1', 'Ổn định dòng điện.', 'm2_dtt_q28'), ('m2_dtt_q28_a2', 'Ngắt mạch khi dòng quá tải.', 'm2_dtt_q28'), ('m2_dtt_q28_a3', 'Giảm điện áp.', 'm2_dtt_q28'), ('m2_dtt_q28_a4', 'Cấp điện cho tải.', 'm2_dtt_q28'),
+('m2_dtt_q29_a1', 'Ni-Cd.', 'm2_dtt_q29'), ('m2_dtt_q29_a2', 'Lithium.', 'm2_dtt_q29'), ('m2_dtt_q29_a3', 'Chì-axit.', 'm2_dtt_q29'), ('m2_dtt_q29_a4', 'Kẽm-carbon.', 'm2_dtt_q29'),
+('m2_dtt_q30_a1', 'Cực âm sang cực dương.', 'm2_dtt_q30'), ('m2_dtt_q30_a2', 'Cực dương sang cực âm.', 'm2_dtt_q30'), ('m2_dtt_q30_a3', 'Cực giữa sang 2 cực.', 'm2_dtt_q30'), ('m2_dtt_q30_a4', 'Cực yếu sang cực mạnh.', 'm2_dtt_q30')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === MÔN: MÁY TÀU THỦY (50 câu) ===
+
+-- Chèn câu hỏi
+INSERT INTO questions (id, text, subject_id, correct_answer_id) VALUES
+('m2_mtt_q31', 'Động cơ 4 kỳ hoàn thành một chu trình công tác trong', 'm2_mtt', 'm2_mtt_q31_a1'),
+('m2_mtt_q32', 'Một chu trình công tác của động cơ 4 kỳ theo thứ tự các kỳ', 'm2_mtt', 'm2_mtt_q32_a2'),
+('m2_mtt_q33', 'Tăng áp cho động cơ Diesel tàu thủy gồm:', 'm2_mtt', 'm2_mtt_q33_a2'),
+('m2_mtt_q34', 'Kể từ lúc bắt đầu một chu trình mới ở động cơ bốn kỳ cho đến khi trục khuỷu quay được một vòng thì', 'm2_mtt', 'm2_mtt_q34_a1'),
+('m2_mtt_q35', 'Cấu tạo piston được chia làm:', 'm2_mtt', 'm2_mtt_q35_a3'),
+('m2_mtt_q36', 'Xupap hút và xupap thải của động cơ Diesel 4 kỳ đều mở là khoảng thời gian:', 'm2_mtt', 'm2_mtt_q36_a2'),
+('m2_mtt_q37', 'Để nạp đầy khí mới và thải sạch khí cháy ra ngoài thì xupap nạp và thải phải được:', 'm2_mtt', 'm2_mtt_q37_a2'),
+('m2_mtt_q38', 'Động cơ Diesel không có bugi vì', 'm2_mtt', 'm2_mtt_q38_a1'),
+('m2_mtt_q39', 'Lượng dầu Diesel phun vào buồng đốt động cơ được điều chỉnh nhờ vào', 'm2_mtt', 'm2_mtt_q39_a3'),
+('m2_mtt_q40', 'Nhiên liệu được đưa vào buồng đốt của động cơ Diesel ở thời điểm', 'm2_mtt', 'm2_mtt_q40_a2'),
+('m2_mtt_q41', 'Pha phân phối khí là:', 'm2_mtt', 'm2_mtt_q41_a4'),
+('m2_mtt_q42', 'Khí sót là khí cháy', 'm2_mtt', 'm2_mtt_q42_a1'),
+('m2_mtt_q43', 'Trong động cơ Diesel 4 kỳ không khí sạch được đưa vào xilanh qua', 'm2_mtt', 'm2_mtt_q43_a1'),
+('m2_mtt_q44', 'Mục đích của việc tăng áp là:', 'm2_mtt', 'm2_mtt_q44_a2'),
+('m2_mtt_q45', 'Chi tiết nào dưới đây của tuabin', 'm2_mtt', 'm2_mtt_q45_a1'),
+('m2_mtt_q46', 'Thông số ảnh hưởng đến chất lượng phun nhiên liệu', 'm2_mtt', 'm2_mtt_q46_a4'),
+('m2_mtt_q47', 'Nhiệm vụ của bơm cao áp là:', 'm2_mtt', 'm2_mtt_q47_a1'),
+('m2_mtt_q48', 'Tạo ra áp lực để đẩy dầu đến bôi trơn đến các chi tiết máy là nhiệm vụ của', 'm2_mtt', 'm2_mtt_q48_a1'),
+('m2_mtt_q49', 'Ở động cơ đốt trong nhiệt độ làm mát máy nóng quá mức sẽ làm', 'm2_mtt', 'm2_mtt_q49_a1'),
+('m2_mtt_q50', 'Van điều tiết nhiệt độ trong hệ thống làm mát có nhiệm vụ', 'm2_mtt', 'm2_mtt_q50_a3'),
+('m2_mtt_q51', 'Hệ thống khởi động có nhiệm vụ', 'm2_mtt', 'm2_mtt_q51_a2'),
+('m2_mtt_q52', 'Đầu to thanh truyền được lắp ghép với', 'm2_mtt', 'm2_mtt_q52_a3'),
+('m2_mtt_q53', 'Thanh truyền là chi tiết nối', 'm2_mtt', 'm2_mtt_q53_a3'),
+('m2_mtt_q54', 'Động cơ Diesel sử dụng loại nhiên liệu', 'm2_mtt', 'm2_mtt_q54_a1'),
+('m2_mtt_q55', 'Xupap là chi tiết của hệ thống', 'm2_mtt', 'm2_mtt_q55_a1'),
+('m2_mtt_q56', 'Áp lực dầu bôi trơn giảm quá mức quy định do', 'm2_mtt', 'm2_mtt_q56_a2'),
+('m2_mtt_q57', 'Trong hệ thống cung cấp nhiên liệu, nhiên liệu đi theo thứ tự từ', 'm2_mtt', 'm2_mtt_q57_a3'),
+('m2_mtt_q58', 'Động cơ diesel có khí thải màu xanh lam do', 'm2_mtt', 'm2_mtt_q58_a4'),
+('m2_mtt_q59', 'Nguyên nhân làm cho nhiệt độ nước làm mát động cơ tăng quá mức quy định', 'm2_mtt', 'm2_mtt_q59_a4'),
+('m2_mtt_q60', 'Má khuỷu là phần nối giữa', 'm2_mtt', 'm2_mtt_q60_a1'),
+('m2_mtt_q61', 'Một đơn vị trục khuỷu gồm:', 'm2_mtt', 'm2_mtt_q61_a1'),
+('m2_mtt_q62', 'Đồ thị pha phân phối khí biểu diễn', 'm2_mtt', 'm2_mtt_q62_a4'),
+('m2_mtt_q63', 'Nhiệm vụ của thanh truyền', 'm2_mtt', 'm2_mtt_q63_a4'),
+('m2_mtt_q64', 'Nhiệm vụ của bơm cao áp là:', 'm2_mtt', 'm2_mtt_q64_a3'),
+('m2_mtt_q65', 'Nhiên liệu được đưa vào buồng đốt của động cơ Diesel ở thời điểm', 'm2_mtt', 'm2_mtt_q65_a2'),
+('m2_mtt_q66', 'Tác dụng của đối trọng trên trục khuỷu', 'm2_mtt', 'm2_mtt_q66_a1'),
+('m2_mtt_q67', 'Lượng nhiên liệu ở các bơm cao áp không đồng đều sẽ ảnh hưởng như thế nào đến động cơ', 'm2_mtt', 'm2_mtt_q67_a4'),
+('m2_mtt_q68', 'Công dụng của dầu bôi trơn', 'm2_mtt', 'm2_mtt_q68_a4'),
+('m2_mtt_q69', 'Động cơ Diesel hoạt động theo nguyên lý:', 'm2_mtt', 'm2_mtt_q69_a4'),
+('m2_mtt_q70', 'Tỷ số nén trong động cơ diesel thường nằm trong khoảng:', 'm2_mtt', 'm2_mtt_q70_a3'),
+('m2_mtt_q71', 'Mục đích của hệ thống nạp khí:', 'm2_mtt', 'm2_mtt_q71_a3'),
+('m2_mtt_q72', 'Thiết bị tăng áp có chức năng:', 'm2_mtt', 'm2_mtt_q72_a2'),
+('m2_mtt_q73', 'Trục cam (phối khí) điều khiển hoạt động của:', 'm2_mtt', 'm2_mtt_q73_a3'),
+('m2_mtt_q74', 'Khi động cơ hoạt động thì trục khuỷu chuyển đổi:', 'm2_mtt', 'm2_mtt_q74_a2'),
+('m2_mtt_q75', 'Nhiệm vụ của piston là:', 'm2_mtt', 'm2_mtt_q75_a3'),
+('m2_mtt_q76', 'Mức tiêu hao nhiên liệu phụ thuộc vào:', 'm2_mtt', 'm2_mtt_q76_a3'),
+('m2_mtt_q77', 'Bơm dầu bôi trơn thường đặt ở đâu?', 'm2_mtt', 'm2_mtt_q77_a3'),
+('m2_mtt_q78', 'Bánh đà có chức năng gì?', 'm2_mtt', 'm2_mtt_q78_a3'),
+('m2_mtt_q79', 'Chức năng chính của két nước là:', 'm2_mtt', 'm2_mtt_q79_a1'),
+('m2_mtt_q80', 'Nắp xilanh động cơ Diesel thường được chế tạo bằng vật liệu:', 'm2_mtt', 'm2_mtt_q80_a3')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id;
+
+-- Chèn câu trả lời
+INSERT INTO answers (id, text, question_id) VALUES
+('m2_mtt_q31_a1', '4 hành trình piston tương ứng với 2 vòng quay trục khuỷu.', 'm2_mtt_q31'), ('m2_mtt_q31_a2', '2 hành trình của piston tương ứng với 1 vòng quay trục khuỷu.', 'm2_mtt_q31'), ('m2_mtt_q31_a3', '4 hành trình của piston tương ứng với 3 vòng quay trục khuỷu.', 'm2_mtt_q31'), ('m2_mtt_q31_a4', '4 hành trình của piston tương ứng với 1 vòng quay trục khuỷu.', 'm2_mtt_q31'),
+('m2_mtt_q32_a1', 'Hút, nổ, xả, nén.', 'm2_mtt_q32'), ('m2_mtt_q32_a2', 'Hút, nén, nổ, xả.', 'm2_mtt_q32'), ('m2_mtt_q32_a3', 'Xả, nổ, nén, hút.', 'm2_mtt_q32'), ('m2_mtt_q32_a4', 'Nén, xả, hút, nổ.', 'm2_mtt_q32'),
+('m2_mtt_q33_a1', '1 phương pháp.', 'm2_mtt_q33'), ('m2_mtt_q33_a2', '3 phương pháp.', 'm2_mtt_q33'), ('m2_mtt_q33_a3', '2 phương pháp.', 'm2_mtt_q33'), ('m2_mtt_q33_a4', '4 phương pháp.', 'm2_mtt_q33'),
+('m2_mtt_q34_a1', 'Động cơ đã thực hiện xong kỳ nạp và nén khí.', 'm2_mtt_q34'), ('m2_mtt_q34_a2', 'Động cơ đã thực hiện xong kỳ nổ và thải khí.', 'm2_mtt_q34'), ('m2_mtt_q34_a3', 'Piston ở vị trí ĐCD và bắt đầu đi đến ĐCT.', 'm2_mtt_q34'), ('m2_mtt_q34_a4', 'Piston thực hiện được hai lần đi lên và hai lần đi xuống.', 'm2_mtt_q34'),
+('m2_mtt_q35_a1', '1 phần.', 'm2_mtt_q35'), ('m2_mtt_q35_a2', '2 phần.', 'm2_mtt_q35'), ('m2_mtt_q35_a3', '3 phần.', 'm2_mtt_q35'), ('m2_mtt_q35_a4', '4 phần.', 'm2_mtt_q35'),
+('m2_mtt_q36_a1', 'Cuối kỳ hút - đầu kỳ nén.', 'm2_mtt_q36'), ('m2_mtt_q36_a2', 'Cuối kỳ thải - Đầu kỳ hút.', 'm2_mtt_q36'), ('m2_mtt_q36_a3', 'Cuối kỳ nén - đầu kỳ nổ.', 'm2_mtt_q36'), ('m2_mtt_q36_a4', 'Cuối kỳ nổ - đầu kỳ thải.', 'm2_mtt_q36'),
+('m2_mtt_q37_a1', 'Mở sớm và đóng sớm.', 'm2_mtt_q37'), ('m2_mtt_q37_a2', 'Mở sớm và đóng muộn.', 'm2_mtt_q37'), ('m2_mtt_q37_a3', 'Mở muộn và đóng muộn.', 'm2_mtt_q37'), ('m2_mtt_q37_a4', 'Mở muộn và đóng sớm.', 'm2_mtt_q37'),
+('m2_mtt_q38_a1', 'Do đặc tính của nhiên liệu Diesel.', 'm2_mtt_q38'), ('m2_mtt_q38_a2', 'Nhiên liệu Diesel dễ bốc hơi.', 'm2_mtt_q38'), ('m2_mtt_q38_a3', 'Nhiên liệu Diesel khó cháy.', 'm2_mtt_q38'), ('m2_mtt_q38_a4', 'Nhiên liệu Diesel rẻ tiền.', 'm2_mtt_q38'),
+('m2_mtt_q39_a1', 'Vòi phun.', 'm2_mtt_q39'), ('m2_mtt_q39_a2', 'Bơm chuyển nhiên liệu.', 'm2_mtt_q39'), ('m2_mtt_q39_a3', 'Bơm cao áp.', 'm2_mtt_q39'), ('m2_mtt_q39_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_mtt_q39'),
+('m2_mtt_q40_a1', 'Kỳ hút.', 'm2_mtt_q40'), ('m2_mtt_q40_a2', 'Cuối kỳ nén.', 'm2_mtt_q40'), ('m2_mtt_q40_a3', 'Cuối kỳ hút.', 'm2_mtt_q40'), ('m2_mtt_q40_a4', 'Kỳ nén.', 'm2_mtt_q40'),
+('m2_mtt_q41_a1', 'Là sự lệch pha của hai xupap làm việc kế tiếp nhau.', 'm2_mtt_q41'), ('m2_mtt_q41_a2', 'Thời gian mở của xupap nạp.', 'm2_mtt_q41'), ('m2_mtt_q41_a3', 'Là thời gian mở của các xupap.', 'm2_mtt_q41'), ('m2_mtt_q41_a4', 'Là biểu đồ thể hiện góc đóng, mở của các xupap tính bằng độ.', 'm2_mtt_q41'),
+('m2_mtt_q42_a1', 'Không được thải hết ra khỏi xilanh ở cuối quá trình thải.', 'm2_mtt_q42'), ('m2_mtt_q42_a2', 'Còn sót lại trong xilanh động cơ xăng hai kỳ.', 'm2_mtt_q42'), ('m2_mtt_q42_a3', 'Còn sót lại trong xilanh động cơ diesel hai kỳ.', 'm2_mtt_q42'), ('m2_mtt_q42_a4', 'Còn sót lại trong quá trình nén.', 'm2_mtt_q42'),
+('m2_mtt_q43_a1', 'Xupap nạp', 'm2_mtt_q43'), ('m2_mtt_q43_a2', 'Vòi phun.', 'm2_mtt_q43'), ('m2_mtt_q43_a3', 'Xupap xả.', 'm2_mtt_q43'), ('m2_mtt_q43_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_mtt_q43'),
+('m2_mtt_q44_a1', 'Nâng cao hiệu suất nhiệt cho động cơ.', 'm2_mtt_q44'), ('m2_mtt_q44_a2', 'Tăng lượng không khí nạp.', 'm2_mtt_q44'), ('m2_mtt_q44_a3', 'Giảm thiểu độc hại do khí thải.', 'm2_mtt_q44'), ('m2_mtt_q44_a4', 'Tiết kiệm nhiên liệu.', 'm2_mtt_q44'),
+('m2_mtt_q45_a1', 'Cánh lửa, cánh gió.', 'm2_mtt_q45'), ('m2_mtt_q45_a2', 'Xupap.', 'm2_mtt_q45'), ('m2_mtt_q45_a3', 'Bánh răng.', 'm2_mtt_q45'), ('m2_mtt_q45_a4', 'Tất cả đều đúng.', 'm2_mtt_q45'),
+('m2_mtt_q46_a1', 'Số tia nhiên liệu phun ra khỏi vòi phun.', 'm2_mtt_q46'), ('m2_mtt_q46_a2', 'Áp suất phun nhiên liệu.', 'm2_mtt_q46'), ('m2_mtt_q46_a3', 'Kích thước lỗ phun.', 'm2_mtt_q46'), ('m2_mtt_q46_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_mtt_q46'),
+('m2_mtt_q47_a1', 'Tạo áp suất cao cho nhiên liệu.', 'm2_mtt_q47'), ('m2_mtt_q47_a2', 'Bơm dầu từ két chứa lên két trực nhật.', 'm2_mtt_q47'), ('m2_mtt_q47_a3', 'Tạo màng sương nhiên liệu.', 'm2_mtt_q47'), ('m2_mtt_q47_a4', 'Bơm dầu từ két trực nhật tới bơm chuyển nhiên liệu.', 'm2_mtt_q47'),
+('m2_mtt_q48_a1', 'Bơm dầu bôi trơn.', 'm2_mtt_q48'), ('m2_mtt_q48_a2', 'Bơm nhiên liệu.', 'm2_mtt_q48'), ('m2_mtt_q48_a3', 'Két làm mát.', 'm2_mtt_q48'), ('m2_mtt_q48_a4', 'Hệ thống bôi trơn.', 'm2_mtt_q48'),
+('m2_mtt_q49_a1', 'Chi tiết máy chóng mài mòn và không hoạt động được.', 'm2_mtt_q49'), ('m2_mtt_q49_a2', 'Nhiên liệu khó bay hơi.', 'm2_mtt_q49'), ('m2_mtt_q49_a3', 'Nhiên liệu khó cháy.', 'm2_mtt_q49'), ('m2_mtt_q49_a4', 'Động cơ hoạt động bình thường.', 'm2_mtt_q49'),
+('m2_mtt_q50_a1', 'Mở các cửa thông với các đường nước', 'm2_mtt_q50'), ('m2_mtt_q50_a2', 'Chặn nước, không cho nước vào các đường nước', 'm2_mtt_q50'), ('m2_mtt_q50_a3', 'Tự động điều chỉnh lưu lượng nước qua bầu làm mát theo giá trị đặt.', 'm2_mtt_q50'), ('m2_mtt_q50_a4', 'Đóng các cửa thông với các đường nước.', 'm2_mtt_q50'),
+('m2_mtt_q51_a1', 'Làm quay động cơ.', 'm2_mtt_q51'), ('m2_mtt_q51_a2', 'Làm quay trục khuỷu đến số vòng quay khởi động.', 'm2_mtt_q51'), ('m2_mtt_q51_a3', 'Làm động cơ hoạt động tốt hơn.', 'm2_mtt_q51'), ('m2_mtt_q51_a4', 'Làm trục khuỷu quay nhanh dần đều.', 'm2_mtt_q51'),
+('m2_mtt_q52_a1', 'Trục cam.', 'm2_mtt_q52'), ('m2_mtt_q52_a2', 'Chốt piston.', 'm2_mtt_q52'), ('m2_mtt_q52_a3', 'Cổ khuỷu.', 'm2_mtt_q52'), ('m2_mtt_q52_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_mtt_q52'),
+('m2_mtt_q53_a1', 'Giữa piston và má khuỷu.', 'm2_mtt_q53'), ('m2_mtt_q53_a2', 'Giữa piston và cổ trục.', 'm2_mtt_q53'), ('m2_mtt_q53_a3', 'Giữa piston và cổ khuỷu.', 'm2_mtt_q53'), ('m2_mtt_q53_a4', 'Giữa piston và chốt piston.', 'm2_mtt_q53'),
+('m2_mtt_q54_a1', 'Dầu DO, FO.', 'm2_mtt_q54'), ('m2_mtt_q54_a2', 'Xăng.', 'm2_mtt_q54'), ('m2_mtt_q54_a3', 'Khí gas', 'm2_mtt_q54'), ('m2_mtt_q54_a4', 'Xăng sinh học.', 'm2_mtt_q54'),
+('m2_mtt_q55_a1', 'Phân phối khí.', 'm2_mtt_q55'), ('m2_mtt_q55_a2', 'Bôi trơn.', 'm2_mtt_q55'), ('m2_mtt_q55_a3', 'Làm mát.', 'm2_mtt_q55'), ('m2_mtt_q55_a4', 'Đánh lửa.', 'm2_mtt_q55'),
+('m2_mtt_q56_a1', 'Nhiệt độ dầu quá cao.', 'm2_mtt_q56'), ('m2_mtt_q56_a2', 'Khe hở các chi tiết cần bôi trơn quá lớn.', 'm2_mtt_q56'), ('m2_mtt_q56_a3', 'Dầu bôi trơn bẩn.', 'm2_mtt_q56'), ('m2_mtt_q56_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_mtt_q56'),
+('m2_mtt_q57_a1', 'Két trực nhật, tới bơm cao áp, tới bơm chuyển nhiên liệu, tới vòi phun.', 'm2_mtt_q57'), ('m2_mtt_q57_a2', 'Bơm chuyển nhiên liệu, tới két trực nhật, tới bơm cao áp, tới vòi phun.', 'm2_mtt_q57'), ('m2_mtt_q57_a3', 'Két trực nhật, tới bơm chuyển nhiên liệu, tới bơm cao áp, tới vòi phun.', 'm2_mtt_q57'), ('m2_mtt_q57_a4', 'Bơm chuyển nhiên liệu, tới bơm cao áp, tới két trực nhật, tới vòi phun.', 'm2_mtt_q57'),
+('m2_mtt_q58_a1', 'Nhiên liệu phun quá nhiều.', 'm2_mtt_q58'), ('m2_mtt_q58_a2', 'Động cơ bị quá nóng.', 'm2_mtt_q58'), ('m2_mtt_q58_a3', 'Động cơ quá tải.', 'm2_mtt_q58'), ('m2_mtt_q58_a4', 'Dầu bôi trơn lọt vào buồng đốt.', 'm2_mtt_q58'),
+('m2_mtt_q59_a1', 'Động cơ bị quá tải.', 'm2_mtt_q59'), ('m2_mtt_q59_a2', 'Mất áp lực nước làm mát.', 'm2_mtt_q59'), ('m2_mtt_q59_a3', 'Sinh hàn nước làm mát bị bẩn.', 'm2_mtt_q59'), ('m2_mtt_q59_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_mtt_q59'),
+('m2_mtt_q60_a1', 'Cổ khuỷu với cổ trục.', 'm2_mtt_q60'), ('m2_mtt_q60_a2', 'Cổ khuỷu với thanh truyền.', 'm2_mtt_q60'), ('m2_mtt_q60_a3', 'Cổ trục với bệ đỡ.', 'm2_mtt_q60'), ('m2_mtt_q60_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_mtt_q60'),
+('m2_mtt_q61_a1', 'Cổ trục, cổ khuỷu, má khuỷu và đối trọng.', 'm2_mtt_q61'), ('m2_mtt_q61_a2', 'Đầu trục, đuôi trục và thân trục.', 'm2_mtt_q61'), ('m2_mtt_q61_a3', 'Cổ trục, cổ khuỷu.', 'm2_mtt_q61'), ('m2_mtt_q61_a4', 'Má khuỷu, đối trọng.', 'm2_mtt_q61'),
+('m2_mtt_q62_a1', 'Sự lệch pha của hai xupap làm việc kế tiếp nhau.', 'm2_mtt_q62'), ('m2_mtt_q62_a2', 'Thời gian mở của xupap nạp.', 'm2_mtt_q62'), ('m2_mtt_q62_a3', 'Thời gian mở của các xupap.', 'm2_mtt_q62'), ('m2_mtt_q62_a4', 'Biểu đồ thể hiện góc đóng, mở của các xupap tính bằng độ.', 'm2_mtt_q62'),
+('m2_mtt_q63_a1', 'Truyền lực từ piston xuống trục khuỷu ở kỳ cháy giãn nở.', 'm2_mtt_q63'), ('m2_mtt_q63_a2', 'Truyền lực từ trục khuỷu lên piston ở kỳ nén.', 'm2_mtt_q63'), ('m2_mtt_q63_a3', 'Biến chuyển động tịnh tiến của piston thành chuyển động quay của trục khuỷu.', 'm2_mtt_q63'), ('m2_mtt_q63_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_mtt_q63'),
+('m2_mtt_q64_a1', 'Tạo màng sương nhiên liệu.', 'm2_mtt_q64'), ('m2_mtt_q64_a2', 'Bơm dầu từ két trực nhật tới bơm chuyển nhiên liệu.', 'm2_mtt_q64'), ('m2_mtt_q64_a3', 'Tạo áp suất cao cho nhiên liệu.', 'm2_mtt_q64'), ('m2_mtt_q64_a4', 'Bơm dầu từ két chứa lên két trực nhật.', 'm2_mtt_q64'),
+('m2_mtt_q65_a1', 'Kỳ nạp.', 'm2_mtt_q65'), ('m2_mtt_q65_a2', 'Cuối kỳ nén.', 'm2_mtt_q65'), ('m2_mtt_q65_a3', 'Cuối kỳ nạp.', 'm2_mtt_q65'), ('m2_mtt_q65_a4', 'Kỳ nén.', 'm2_mtt_q65'),
+('m2_mtt_q66_a1', 'Cân bằng mômen quay để động cơ làm việc không bị rung động.', 'm2_mtt_q66'), ('m2_mtt_q66_a2', 'Tạo đà khi khởi động.', 'm2_mtt_q66'), ('m2_mtt_q66_a3', 'Giúp động cơ dể nổ hơn.', 'm2_mtt_q66'), ('m2_mtt_q66_a4', 'Tăng công suất của động cơ.', 'm2_mtt_q66'),
+('m2_mtt_q67_a1', 'Vòng quay động cơ không ổn định.', 'm2_mtt_q67'), ('m2_mtt_q67_a2', 'Động cơ làm việc rung.', 'm2_mtt_q67'), ('m2_mtt_q67_a3', 'Gây quá tải cục bộ cho một số xilanh.', 'm2_mtt_q67'), ('m2_mtt_q67_a4', 'Tất cả các đáp án trên.', 'm2_mtt_q67'),
+('m2_mtt_q68_a1', 'Bôi trơn các bề mặt có chuyển động trượt giữa các chi tiết nhằm giảm ma sát do đó giảm mài mòn, tăng tuổi thọ của chi tiết.', 'm2_mtt_q68'), ('m2_mtt_q68_a2', 'Rửa sạch bề mặt ma sát của các chi tiết, làm mát một số chi tiết.', 'm2_mtt_q68'), ('m2_mtt_q68_a3', 'Bao kín khe hở giữa các chi tiết máy, chống ôxy hóa (kết gỉ) bề mặt chi tiết nhờ những chất phụ gia trong dầu.', 'm2_mtt_q68'), ('m2_mtt_q68_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_mtt_q68'),
+('m2_mtt_q69_a1', 'Đánh lửa cưỡng bức.', 'm2_mtt_q69'), ('m2_mtt_q69_a2', 'Cháy sẵn.', 'm2_mtt_q69'), ('m2_mtt_q69_a3', 'Nén sinh công.', 'm2_mtt_q69'), ('m2_mtt_q69_a4', 'Tự cháy của nhiên liệu.', 'm2_mtt_q69'),
+('m2_mtt_q70_a1', '7 - 10.', 'm2_mtt_q70'), ('m2_mtt_q70_a2', '10 - 15.', 'm2_mtt_q70'), ('m2_mtt_q70_a3', '14 - 22.', 'm2_mtt_q70'), ('m2_mtt_q70_a4', '22 - 30.', 'm2_mtt_q70'),
+('m2_mtt_q71_a1', 'Cung cấp dầu bôi trơn.', 'm2_mtt_q71'), ('m2_mtt_q71_a2', 'Cung cấp nhiên liệu.', 'm2_mtt_q71'), ('m2_mtt_q71_a3', 'Cung cấp khí sạch vào xi lanh.', 'm2_mtt_q71'), ('m2_mtt_q71_a4', 'Làm mát khí cháy.', 'm2_mtt_q71'),
+('m2_mtt_q72_a1', 'Tăng áp suất dầu.', 'm2_mtt_q72'), ('m2_mtt_q72_a2', 'Tăng lượng không khí nạp.', 'm2_mtt_q72'), ('m2_mtt_q72_a3', 'Tăng áp suất nước làm mát.', 'm2_mtt_q72'), ('m2_mtt_q72_a4', 'Giảm tiếng ồn động cơ.', 'm2_mtt_q72'),
+('m2_mtt_q73_a1', 'Piston.', 'm2_mtt_q73'), ('m2_mtt_q73_a2', 'Thanh truyền.', 'm2_mtt_q73'), ('m2_mtt_q73_a3', 'Xuppap nạp và xả.', 'm2_mtt_q73'), ('m2_mtt_q73_a4', 'Bơm dầu.', 'm2_mtt_q73'),
+('m2_mtt_q74_a1', 'Chuyển động quay của trục khuỷu thành chuyển động tịnh tiến của piston.', 'm2_mtt_q74'), ('m2_mtt_q74_a2', 'Chuyển động tịnh tiến của piston thành chuyển động quay của trục khuỷu.', 'm2_mtt_q74'), ('m2_mtt_q74_a3', 'Chuyển động tịnh tiến của piston thành mô men soắn xoắn của trục khuỷu.', 'm2_mtt_q74'), ('m2_mtt_q74_a4', 'Mô men xoắn của trục khuỷu thành chuyển động quay của trục khuỷu.', 'm2_mtt_q74'),
+('m2_mtt_q75_a1', 'Đóng mở Xuppap.', 'm2_mtt_q75'), ('m2_mtt_q75_a2', 'Truyền chuyển động đến bơm dầu.', 'm2_mtt_q75'), ('m2_mtt_q75_a3', 'Kết hợp với xilanh và nắp xilanh tạo thành buồng đốt của động cơ.', 'm2_mtt_q75'), ('m2_mtt_q75_a4', 'Cắt nhiên liệu.', 'm2_mtt_q75'),
+('m2_mtt_q76_a1', 'Trọng lượng piston.', 'm2_mtt_q76'), ('m2_mtt_q76_a2', 'Số Xuppap.', 'm2_mtt_q76'), ('m2_mtt_q76_a3', 'Hiệu suất và tải động cơ.', 'm2_mtt_q76'), ('m2_mtt_q76_a4', 'Loại dầu nhờn.', 'm2_mtt_q76'),
+('m2_mtt_q77_a1', 'Trong két dầu.', 'm2_mtt_q77'), ('m2_mtt_q77_a2', 'Trên thân máy.', 'm2_mtt_q77'), ('m2_mtt_q77_a3', 'Dưới đáy cácte.', 'm2_mtt_q77'), ('m2_mtt_q77_a4', 'Trong xilanh.', 'm2_mtt_q77'),
+('m2_mtt_q78_a1', 'Giảm tốc độ.', 'm2_mtt_q78'), ('m2_mtt_q78_a2', 'Tăng công suất', 'm2_mtt_q78'), ('m2_mtt_q78_a3', 'Duy trì mô-men quay đều', 'm2_mtt_q78'), ('m2_mtt_q78_a4', 'Truyền lực tới piston.', 'm2_mtt_q78'),
+('m2_mtt_q79_a1', 'Lưu trữ nước.', 'm2_mtt_q79'), ('m2_mtt_q79_a2', 'Chứa dầu.', 'm2_mtt_q79'), ('m2_mtt_q79_a3', 'Lọc cặn.', 'm2_mtt_q79'), ('m2_mtt_q79_a4', 'Tạo áp suất.', 'm2_mtt_q79'),
+('m2_mtt_q80_a1', 'Nhôm.', 'm2_mtt_q80'), ('m2_mtt_q80_a2', 'Đồng.', 'm2_mtt_q80'), ('m2_mtt_q80_a3', 'Gang chịu nhiệt.', 'm2_mtt_q80'), ('m2_mtt_q80_a4', 'Thép không gỉ.', 'm2_mtt_q80')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === MÔN: KINH TẾ VẬN TẢI (10 câu) ===
+
+-- Chèn câu hỏi
+INSERT INTO questions (id, text, subject_id, correct_answer_id) VALUES
+('m2_ktvt_q81', 'Tốc độ thực tế của tàu là:', 'm2_ktvt', 'm2_ktvt_q81_a1'),
+('m2_ktvt_q82', 'Sức tải khởi hành của tàu P'' = 1 khi tàu', 'm2_ktvt', 'm2_ktvt_q82_a2'),
+('m2_ktvt_q83', 'Sức tải khởi hành của tàu P'' > 1 khi tàu', 'm2_ktvt', 'm2_ktvt_q83_a1'),
+('m2_ktvt_q84', 'Thời gian tàu đỗ là:', 'm2_ktvt', 'm2_ktvt_q84_a3'),
+('m2_ktvt_q85', 'Lý do làm cho sức tải khởi hành P'' < 1', 'm2_ktvt', 'm2_ktvt_q85_a1'),
+('m2_ktvt_q86', 'Trong kinh tế vận tải, “năng suất đầu máy” được hiểu là:', 'm2_ktvt', 'm2_ktvt_q86_a3'),
+('m2_ktvt_q87', 'Tính bay bụi, hút ẩm, bay hơi, toả mùi của hàng hóa thuộc đặc tính', 'm2_ktvt', 'm2_ktvt_q87_a1'),
+('m2_ktvt_q88', 'Năng suất của tàu là:', 'm2_ktvt', 'm2_ktvt_q88_a3'),
+('m2_ktvt_q89', 'Chi phí nhiên liệu phụ thuộc vào những yếu tố', 'm2_ktvt', 'm2_ktvt_q89_a4'),
+('m2_ktvt_q90', 'Biện pháp để hạ giá thành sản phẩm trong vận tải thủy', 'm2_ktvt', 'm2_ktvt_q90_a4')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id;
+
+-- Chèn câu trả lời
+INSERT INTO answers (id, text, question_id) VALUES
+('m2_ktvt_q81_a1', 'Tốc độ của tàu so với bờ, đã tính đến các ảnh hưởng của sóng, gió và chiều của dòng nước.', 'm2_ktvt_q81'), ('m2_ktvt_q81_a2', 'Tốc độ bình quân trong cả chuyến đi.', 'm2_ktvt_q81'), ('m2_ktvt_q81_a3', 'Tốc độ vận hành của con tàu đối với nước.', 'm2_ktvt_q81'), ('m2_ktvt_q81_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_ktvt_q81'),
+('m2_ktvt_q82_a1', 'Chở quá tải.', 'm2_ktvt_q82'), ('m2_ktvt_q82_a2', 'Chở đủ tải.', 'm2_ktvt_q82'), ('m2_ktvt_q82_a3', 'Chở không đủ tải.', 'm2_ktvt_q82'), ('m2_ktvt_q82_a4', 'Chạy không hàng.', 'm2_ktvt_q82'),
+('m2_ktvt_q83_a1', 'Chở quá tải.', 'm2_ktvt_q83'), ('m2_ktvt_q83_a2', 'Chở đủ tải.', 'm2_ktvt_q83'), ('m2_ktvt_q83_a3', 'Chở không đủ tải.', 'm2_ktvt_q83'), ('m2_ktvt_q83_a4', 'Chạy không hàng.', 'm2_ktvt_q83'),
+('m2_ktvt_q84_a1', 'Tổng thời gian tàu neo nghỉ dọc đường, lấy dầu.', 'm2_ktvt_q84'), ('m2_ktvt_q84_a2', 'Tổng thời gian tàu cập cầu nhận hàng, trả hàng.', 'm2_ktvt_q84'), ('m2_ktvt_q84_a3', 'Tổng các thời gian tàu đỗ cần thiết trong một chuyến đi hay một quay vòng để làm các thao tác kỹ thuật ở các bến và dọc đường.', 'm2_ktvt_q84'), ('m2_ktvt_q84_a4', 'Tổng thời gian tàu chờ làm các thủ tục xuất nhập bến, cảng.', 'm2_ktvt_q84'),
+('m2_ktvt_q85_a1', 'Hàng không đủ chở, hàng cồng kềnh nên xếp không hết trọng tải.', 'm2_ktvt_q85'), ('m2_ktvt_q85_a2', 'Đi vào khu vực luồng có mớn nước nông.', 'm2_ktvt_q85'), ('m2_ktvt_q85_a3', 'Đi trong mùa lũ phải giảm tải.', 'm2_ktvt_q85'), ('m2_ktvt_q85_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_ktvt_q85'),
+('m2_ktvt_q86_a1', 'Tổng lượng nhiên liệu mà động cơ tiêu thụ trong một hành trình', 'm2_ktvt_q86'), ('m2_ktvt_q86_a2', 'Sức kéo tối đa của đầu máy khi tàu đầy tải', 'm2_ktvt_q86'), ('m2_ktvt_q86_a3', 'Lượng công suất hữu ích mà đầu máy tạo ra trong một đơn vị thời gian', 'm2_ktvt_q86'), ('m2_ktvt_q86_a4', 'Thời gian đầu máy làm việc liên tục mà không cần bảo dưỡng', 'm2_ktvt_q86'),
+('m2_ktvt_q87_a1', 'Tính vật lý.', 'm2_ktvt_q87'), ('m2_ktvt_q87_a2', 'Tính hóa học.', 'm2_ktvt_q87'), ('m2_ktvt_q87_a3', 'Tính cơ học.', 'm2_ktvt_q87'), ('m2_ktvt_q87_a4', 'Tính sinh vật.', 'm2_ktvt_q87'),
+('m2_ktvt_q88_a1', 'Số tấn hàng hay hành khách tàu nhận theo hợp đồng.', 'm2_ktvt_q88'), ('m2_ktvt_q88_a2', 'Số tấn mà tàu có thể chở được.', 'm2_ktvt_q88'), ('m2_ktvt_q88_a3', 'Số lượng sản phẩm vận chuyển được tính bằng Tkm do 1 phương tiện làm ra trong một đơn vị thời gian.', 'm2_ktvt_q88'), ('m2_ktvt_q88_a4', 'Số tấn hàng mà tàu nhận được tại cảng.', 'm2_ktvt_q88'),
+('m2_ktvt_q89_a1', 'Thời gian hoạt động của đầu máy (t).', 'm2_ktvt_q89'), ('m2_ktvt_q89_a2', 'Tình trạng kỹ thuật của máy (suất tiêu hao nhiên liệu e).', 'm2_ktvt_q89'), ('m2_ktvt_q89_a3', 'Công suất máy (Nak), giá nhiên liệu (a).', 'm2_ktvt_q89'), ('m2_ktvt_q89_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_ktvt_q89'),
+('m2_ktvt_q90_a1', 'Giảm các chi phí không cần thiết như: chi phí vật liệu mau hỏng, chi phí sửa chữa đột xuất, chi phí bồi thường va chạm...', 'm2_ktvt_q90'), ('m2_ktvt_q90_a2', 'Tăng lượng hàng hóa luân chuyển.', 'm2_ktvt_q90'), ('m2_ktvt_q90_a3', 'Cải tạo luồng lạch.', 'm2_ktvt_q90'), ('m2_ktvt_q90_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_ktvt_q90')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === MÔN: THỰC HÀNH VẬN HÀNH MÁY TÀU THỦY (30 câu) ===
+
+-- Chèn câu hỏi
+INSERT INTO questions (id, text, subject_id, correct_answer_id) VALUES
+('m2_thvh_q91', 'Khi động cơ đang hoạt động phải chú ý đến những thông số kỹ thuật', 'm2_thvh', 'm2_thvh_q91_a2'),
+('m2_thvh_q92', 'Trước khi khởi động động cơ đối với hệ thống làm mát trực tiếp phải', 'm2_thvh', 'm2_thvh_q92_a3'),
+('m2_thvh_q93', 'Trước khi khởi động động cơ đối với hệ thống bôi trơn phải kiểm tra', 'm2_thvh', 'm2_thvh_q93_a3'),
+('m2_thvh_q94', 'Trước khi dừng động cơ', 'm2_thvh', 'm2_thvh_q94_a2'),
+('m2_thvh_q95', 'Sau khi dừng động cơ', 'm2_thvh', 'm2_thvh_q95_a1'),
+('m2_thvh_q96', 'Những công việc cần làm sau khi dừng động cơ', 'm2_thvh', 'm2_thvh_q96_a4'),
+('m2_thvh_q97', 'Khi dừng máy chính, cần thực hiện thao tác nào trước tiên?', 'm2_thvh', 'm2_thvh_q97_a4'),
+('m2_thvh_q98', 'Sau khi khởi động máy, điều gì cần kiểm tra ngay?', 'm2_thvh', 'm2_thvh_q98_a1'),
+('m2_thvh_q99', 'Nhiệt độ nước làm mát tăng cao có thể do:', 'm2_thvh', 'm2_thvh_q99_a4'),
+('m2_thvh_q100', 'Tác hại của việc máy làm việc liên tục quá tải:', 'm2_thvh', 'm2_thvh_q100_a3'),
+('m2_thvh_q101', 'Khi đi trong vùng nước cạn, máy chính nên được vận hành thế nào?', 'm2_thvh', 'm2_thvh_q101_a2'),
+('m2_thvh_q102', 'Màu khói của khí thải đen đậm là dấu hiệu của:', 'm2_thvh', 'm2_thvh_q102_a2'),
+('m2_thvh_q103', 'Dầu bôi trơn cần được thay định kỳ sau bao lâu (giờ máy)?', 'm2_thvh', 'm2_thvh_q103_a4'),
+('m2_thvh_q104', 'Khi kiểm tra lọc nhiên liệu, việc nào là sai?', 'm2_thvh', 'm2_thvh_q104_a3'),
+('m2_thvh_q105', 'Bảo dưỡng định kỳ có tác dụng gì?', 'm2_thvh', 'm2_thvh_q105_a3'),
+('m2_thvh_q106', 'Thiết bị chữa cháy cần đặt ở đâu trong buồng máy?', 'm2_thvh', 'm2_thvh_q106_a3'),
+('m2_thvh_q107', 'Khởi động động cơ không thành công, cần kiểm tra:', 'm2_thvh', 'm2_thvh_q107_a4'),
+('m2_thvh_q108', 'Nếu nước làm mát cạn sạch, cần:', 'm2_thvh', 'm2_thvh_q108_a2'),
+('m2_thvh_q109', 'Nguyên nhân khiến máy không tăng vòng quay được:', 'm2_thvh', 'm2_thvh_q109_a4'),
+('m2_thvh_q110', 'Trước khi khởi hành phương tiện, cần làm gì?', 'm2_thvh', 'm2_thvh_q110_a2'),
+('m2_thvh_q111', 'Van xả két nước thường mở khi:', 'm2_thvh', 'm2_thvh_q111_a3'),
+('m2_thvh_q112', 'Ắc quy cần được bảo quản ở đâu?', 'm2_thvh', 'm2_thvh_q112_a3'),
+('m2_thvh_q113', 'Độ nhớt dầu bôi trơn ảnh hưởng đến:', 'm2_thvh', 'm2_thvh_q113_a2'),
+('m2_thvh_q114', 'Khi động cơ chạy không tải quá lâu sẽ:', 'm2_thvh', 'm2_thvh_q114_a2'),
+('m2_thvh_q115', 'Trong trường hợp cháy buồng máy, thao tác đầu tiên là:', 'm2_thvh', 'm2_thvh_q115_a2'),
+('m2_thvh_q116', 'Khi nhiệt độ nước làm mát tăng đột ngột, việc cần làm là:', 'm2_thvh', 'm2_thvh_q116_a2'),
+('m2_thvh_q117', 'Sau mỗi chuyến hành trình dài, cần làm gì với máy chính?', 'm2_thvh', 'm2_thvh_q117_a2'),
+('m2_thvh_q118', 'Khi vận hành ban đêm, yếu tố quan trọng nhất là:', 'm2_thvh', 'm2_thvh_q118_a3'),
+('m2_thvh_q119', 'Để kiểm tra mức dầu bôi trơn, ta sử dụng:', 'm2_thvh', 'm2_thvh_q119_a3'),
+('m2_thvh_q120', 'Bọt khí trong ống dầu có thể gây ra:', 'm2_thvh', 'm2_thvh_q120_a2')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id;
+
+-- Chèn câu trả lời
+INSERT INTO answers (id, text, question_id) VALUES
+('m2_thvh_q91_a1', 'Áp lực dầu bôi trơn và lượng dầu bôi trơn.', 'm2_thvh_q91'), ('m2_thvh_q91_a2', 'Nhiệt độ nước làm mát, áp lực dầu bôi trơn và mức dầu trong két dầu trực nhật.', 'm2_thvh_q91'), ('m2_thvh_q91_a3', 'Lượng dầu bôi trơn và chất lượng dầu bôi trơn.', 'm2_thvh_q91'), ('m2_thvh_q91_a4', 'Lượng dầu bôi trơn và két dầu trực nhật.', 'm2_thvh_q91'),
+('m2_thvh_q92_a1', 'Kiểm tra nhiệt độ nước làm mát.', 'm2_thvh_q92'), ('m2_thvh_q92_a2', 'Bổ sung két nước giãn nở.', 'm2_thvh_q92'), ('m2_thvh_q92_a3', 'Mở van thông sông, kiểm tra đường ống, bơm nước.', 'm2_thvh_q92'), ('m2_thvh_q92_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_thvh_q92'),
+('m2_thvh_q93_a1', 'Nhiệt độ.', 'm2_thvh_q93'), ('m2_thvh_q93_a2', 'Bơm dầu.', 'm2_thvh_q93'), ('m2_thvh_q93_a3', 'Mức dầu và chất lượng dầu bôi trơn.', 'm2_thvh_q93'), ('m2_thvh_q93_a4', 'Áp lực.', 'm2_thvh_q93'),
+('m2_thvh_q94_a1', 'Đóng van nước, van dầu.', 'm2_thvh_q94'), ('m2_thvh_q94_a2', 'Cho động cơ chạy không tải 10 ÷ 15 phút ở vòng quay ổn định nhỏ nhất.', 'm2_thvh_q94'), ('m2_thvh_q94_a3', 'Đóng van nước, van dầu, ngắt cầu dao.', 'm2_thvh_q94'), ('m2_thvh_q94_a4', 'Bổ sung nhiên liệu và dầu bôi trơn.', 'm2_thvh_q94'),
+('m2_thvh_q95_a1', 'Đóng van thông sông.', 'm2_thvh_q95'), ('m2_thvh_q95_a2', 'Đưa cần đảo chiều về vị trí “stop”.', 'm2_thvh_q95'), ('m2_thvh_q95_a3', 'Đưa tay ga nhiên liệu về vị trí nhỏ nhất.', 'm2_thvh_q95'), ('m2_thvh_q95_a4', 'Đóng van thông sông và đưa cần đảo chiều về vị trí “stop”.', 'm2_thvh_q95'),
+('m2_thvh_q96_a1', 'Đóng van nước, van dầu.', 'm2_thvh_q96'), ('m2_thvh_q96_a2', 'Vệ sinh công nghiệp.', 'm2_thvh_q96'), ('m2_thvh_q96_a3', 'Via máy, kiểm tra và bổ sung nhiên liệu, dầu bôi trơn.', 'm2_thvh_q96'), ('m2_thvh_q96_a4', 'Tất cả các đáp án trên.', 'm2_thvh_q96'),
+('m2_thvh_q97_a1', 'Ngắt điện.', 'm2_thvh_q97'), ('m2_thvh_q97_a2', 'Ngừng bơm nhiên liệu.', 'm2_thvh_q97'), ('m2_thvh_q97_a3', 'Đóng van nước làm mát.', 'm2_thvh_q97'), ('m2_thvh_q97_a4', 'Giảm tốc độ máy về không tải.', 'm2_thvh_q97'),
+('m2_thvh_q98_a1', 'Áp suất dầu bôi trơn và nhiệt độ nước làm mát.', 'm2_thvh_q98'), ('m2_thvh_q98_a2', 'Màu khói thải.', 'm2_thvh_q98'), ('m2_thvh_q98_a3', 'Số vòng quay máy.', 'm2_thvh_q98'), ('m2_thvh_q98_a4', 'Độ rung của máy.', 'm2_thvh_q98'),
+('m2_thvh_q99_a1', 'Thiếu dầu bôi trơn.', 'm2_thvh_q99'), ('m2_thvh_q99_a2', 'Tắc két nước hoặc hỏng bơm.', 'm2_thvh_q99'), ('m2_thvh_q99_a3', 'Máy chạy quá tải.', 'm2_thvh_q99'), ('m2_thvh_q99_a4', 'b và c đúng.', 'm2_thvh_q99'),
+('m2_thvh_q100_a1', 'Tăng công suất.', 'm2_thvh_q100'), ('m2_thvh_q100_a2', 'Tiết kiệm nhiên liệu.', 'm2_thvh_q100'), ('m2_thvh_q100_a3', 'Nhanh hỏng piston, bạc.', 'm2_thvh_q100'), ('m2_thvh_q100_a4', 'Làm sạch buồng đốt.', 'm2_thvh_q100'),
+('m2_thvh_q101_a1', 'Tăng số vòng quay.', 'm2_thvh_q101'), ('m2_thvh_q101_a2', 'Giảm tốc độ, quan sát liên tục.', 'm2_thvh_q101'), ('m2_thvh_q101_a3', 'Tắt máy và chờ nước lên.', 'm2_thvh_q101'), ('m2_thvh_q101_a4', 'Không cần thay đổi gì.', 'm2_thvh_q101'),
+('m2_thvh_q102_a1', 'Động cơ hoạt động tốt.', 'm2_thvh_q102'), ('m2_thvh_q102_a2', 'Đốt nhiên liệu không hết.', 'm2_thvh_q102'), ('m2_thvh_q102_a3', 'Thiếu dầu bôi trơn.', 'm2_thvh_q102'), ('m2_thvh_q102_a4', 'Nhiên liệu quá loãng.', 'm2_thvh_q102'),
+('m2_thvh_q103_a1', '700 giờ.', 'm2_thvh_q103'), ('m2_thvh_q103_a2', '600 giờ.', 'm2_thvh_q103'), ('m2_thvh_q103_a3', '500 giờ.', 'm2_thvh_q103'), ('m2_thvh_q103_a4', 'Theo khuyến nghị của nhà sản xuất động cơ.', 'm2_thvh_q103'),
+('m2_thvh_q104_a1', 'Xả cặn.', 'm2_thvh_q104'), ('m2_thvh_q104_a2', 'Vệ sinh lưới lọc.', 'm2_thvh_q104'), ('m2_thvh_q104_a3', 'Bỏ qua vì không quan trọng.', 'm2_thvh_q104'), ('m2_thvh_q104_a4', 'Kiểm tra rò rỉ.', 'm2_thvh_q104'),
+('m2_thvh_q105_a1', 'Tiêu tốn thời gian.', 'm2_thvh_q105'), ('m2_thvh_q105_a2', 'Làm chậm hiệu suất.', 'm2_thvh_q105'), ('m2_thvh_q105_a3', 'Tăng độ bền và an toàn máy.', 'm2_thvh_q105'), ('m2_thvh_q105_a4', 'Không ảnh hưởng.', 'm2_thvh_q105'),
+('m2_thvh_q106_a1', 'Góc khuất.', 'm2_thvh_q106'), ('m2_thvh_q106_a2', 'Gần thiết bị phát nhiệt.', 'm2_thvh_q106'), ('m2_thvh_q106_a3', 'Dễ thấy, dễ tiếp cận.', 'm2_thvh_q106'), ('m2_thvh_q106_a4', 'Trong hộp kín.', 'm2_thvh_q106'),
+('m2_thvh_q107_a1', 'Nhiên liệu.', 'm2_thvh_q107'), ('m2_thvh_q107_a2', 'Hệ thống điện.', 'm2_thvh_q107'), ('m2_thvh_q107_a3', 'Van cấp nhiên liệu.', 'm2_thvh_q107'), ('m2_thvh_q107_a4', 'Tất cả các yếu tố trên.', 'm2_thvh_q107'),
+('m2_thvh_q108_a1', 'Tiếp tục chạy.', 'm2_thvh_q108'), ('m2_thvh_q108_a2', 'Dừng máy, để nguội và bổ sung nước.', 'm2_thvh_q108'), ('m2_thvh_q108_a3', 'Mở van khí thải.', 'm2_thvh_q108'), ('m2_thvh_q108_a4', 'Giảm tải máy.', 'm2_thvh_q108'),
+('m2_thvh_q109_a1', 'Nhiên liệu bẩn.', 'm2_thvh_q109'), ('m2_thvh_q109_a2', 'Lọc gió nghẹt.', 'm2_thvh_q109'), ('m2_thvh_q109_a3', 'Vòi phun hỏng.', 'm2_thvh_q109'), ('m2_thvh_q109_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_thvh_q109'),
+('m2_thvh_q110_a1', 'Kiểm tra hàng hoá hoặc hành khách.', 'm2_thvh_q110'), ('m2_thvh_q110_a2', 'Kiểm tra đầy đủ kỹ thuật và an toàn.', 'm2_thvh_q110'), ('m2_thvh_q110_a3', 'Cắm cờ tàu.', 'm2_thvh_q110'), ('m2_thvh_q110_a4', 'Nghe nhạc thư giãn.', 'm2_thvh_q110'),
+('m2_thvh_q111_a1', 'Máy đang chạy.', 'm2_thvh_q111'), ('m2_thvh_q111_a2', 'Khi kiểm tra nhiệt độ.', 'm2_thvh_q111'), ('m2_thvh_q111_a3', 'Khi thay nước làm mát.', 'm2_thvh_q111'), ('m2_thvh_q111_a4', 'Khi tăng tốc.', 'm2_thvh_q111'),
+('m2_thvh_q112_a1', 'Nơi ẩm thấp.', 'm2_thvh_q112'), ('m2_thvh_q112_a2', 'Buồng máy kín khí.', 'm2_thvh_q112'), ('m2_thvh_q112_a3', 'Khô ráo, thoáng.', 'm2_thvh_q112'), ('m2_thvh_q112_a4', 'Bất kỳ đâu.', 'm2_thvh_q112'),
+('m2_thvh_q113_a1', 'Tốc độ tàu.', 'm2_thvh_q113'), ('m2_thvh_q113_a2', 'Áp suất dầu và khả năng bôi trơn.', 'm2_thvh_q113'), ('m2_thvh_q113_a3', 'Nhiệt độ nước.', 'm2_thvh_q113'), ('m2_thvh_q113_a4', 'Dòng điện', 'm2_thvh_q113'),
+('m2_thvh_q114_a1', 'Tiết kiệm nhiên liệu.', 'm2_thvh_q114'), ('m2_thvh_q114_a2', 'Gây muội than, giảm hiệu suất.', 'm2_thvh_q114'), ('m2_thvh_q114_a3', 'Làm mát tốt hơn.', 'm2_thvh_q114'), ('m2_thvh_q114_a4', 'Không ảnh hưởng.', 'm2_thvh_q114'),
+('m2_thvh_q115_a1', 'Gọi người giúp.', 'm2_thvh_q115'), ('m2_thvh_q115_a2', 'Cắt nhiên liệu và điện.', 'm2_thvh_q115'), ('m2_thvh_q115_a3', 'Xịt nước vào.', 'm2_thvh_q115'), ('m2_thvh_q115_a4', 'Mở cửa cho khói ra.', 'm2_thvh_q115'),
+('m2_thvh_q116_a1', 'Tăng tốc độ máy.', 'm2_thvh_q116'), ('m2_thvh_q116_a2', 'Xin lệnh buồng lái giảm tốc độ động cơ, kiểm tra hệ thống làm mát.', 'm2_thvh_q116'), ('m2_thvh_q116_a3', 'Thêm dầu bôi trơn.', 'm2_thvh_q116'), ('m2_thvh_q116_a4', 'Không cần quan tâm.', 'm2_thvh_q116'),
+('m2_thvh_q117_a1', 'Dừng máy, nghỉ.', 'm2_thvh_q117'), ('m2_thvh_q117_a2', 'Kiểm tra tổng thể và bảo trì cơ bản.', 'm2_thvh_q117'), ('m2_thvh_q117_a3', 'Rửa tàu.', 'm2_thvh_q117'), ('m2_thvh_q117_a4', 'Sạc ắc quy.', 'm2_thvh_q117'),
+('m2_thvh_q118_a1', 'Có đèn pin.', 'm2_thvh_q118'), ('m2_thvh_q118_a2', 'Có bạn đi cùng.', 'm2_thvh_q118'), ('m2_thvh_q118_a3', 'Hệ thống chiếu sáng, tín hiệu và giám sát máy hoạt động tốt.', 'm2_thvh_q118'), ('m2_thvh_q118_a4', 'Có điện thoại sạc đầy.', 'm2_thvh_q118'),
+('m2_thvh_q119_a1', 'Thước đo nhiệt độ.', 'm2_thvh_q119'), ('m2_thvh_q119_a2', 'Đồng hồ đo áp suất.', 'm2_thvh_q119'), ('m2_thvh_q119_a3', 'Thước thăm dầu.', 'm2_thvh_q119'), ('m2_thvh_q119_a4', 'Van an toàn.', 'm2_thvh_q119'),
+('m2_thvh_q120_a1', 'Làm sạch dầu.', 'm2_thvh_q120'), ('m2_thvh_q120_a2', 'Giảm áp suất dầu.', 'm2_thvh_q120'), ('m2_thvh_q120_a3', 'Tăng nhiệt độ dầu.', 'm2_thvh_q120'), ('m2_thvh_q120_a4', 'Làm máy mạnh hơn.', 'm2_thvh_q120')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === MÔN: NGHIỆP VỤ MÁY TRƯỞNG (10 câu) ===
+
+-- Chèn câu hỏi
+INSERT INTO questions (id, text, subject_id, correct_answer_id) VALUES
+('m2_nvmt_q121', 'Thuyền viên có GCNKNCM máy trưởng hạng ba được đảm nhiệm chức danh máy trưởng của phương tiện lắp máy trong có tổng công suất máy chính', 'm2_nvmt', 'm2_nvmt_q121_a3'),
+('m2_nvmt_q122', 'Độ tuổi được dự kiểm tra lấy chứng chỉ thuỷ thủ, chứng chỉ thợ máy là:', 'm2_nvmt', 'm2_nvmt_q122_a4'),
+('m2_nvmt_q123', 'Thợ máy chịu sự quản lý trực tiếp của', 'm2_nvmt', 'm2_nvmt_q123_a4'),
+('m2_nvmt_q124', 'Thuyền viên có GCNKNCM máy trưởng hạng nhì được đảm nhiệm chức danh máy trưởng của phương tiện lắp máy trong có tổng công suất máy chính', 'm2_nvmt', 'm2_nvmt_q124_a3'),
+('m2_nvmt_q125', 'Máy trưởng là người giúp việc thuyền trưởng, trực tiếp phụ trách bộ phận máy và có trách nhiệm và quyền hạn sau đây:', 'm2_nvmt', 'm2_nvmt_q125_a4'),
+('m2_nvmt_q126', 'Tại sao máy trưởng phải lập kế hoạch trước khi nhận dầu:', 'm2_nvmt', 'm2_nvmt_q126_a4'),
+('m2_nvmt_q127', 'Thuyền viên có GCNKNCM máy trưởng hạng nhất được đảm nhiệm chức danh máy trưởng của', 'm2_nvmt', 'm2_nvmt_q127_a3'),
+('m2_nvmt_q128', 'Máy phó là người giúp việc cho máy trưởng, có trách nhiệm và quyền hạn', 'm2_nvmt', 'm2_nvmt_q128_a1'),
+('m2_nvmt_q129', 'Máy trưởng phân công công việc cho thuyền viên bộ phận mình quản lý căn cứ vào', 'm2_nvmt', 'm2_nvmt_q129_a3'),
+('m2_nvmt_q130', 'Người trực ca có trách nhiệm dừng ngay động cơ (sau khi được sự đồng ý của người điều khiển phương tiện) trong trường hợp', 'm2_nvmt', 'm2_nvmt_q130_a1')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id;
+
+-- Chèn câu trả lời
+INSERT INTO answers (id, text, question_id) VALUES
+('m2_nvmt_q121_a1', 'Từ trên 15 đến 150 sức ngựa.', 'm2_nvmt_q121'), ('m2_nvmt_q121_a2', 'Trên 400 sức ngựa.', 'm2_nvmt_q121'), ('m2_nvmt_q121_a3', 'Đến 250 sức ngựa.', 'm2_nvmt_q121'), ('m2_nvmt_q121_a4', 'Từ trên 250 đến 400 sức ngựa.', 'm2_nvmt_q121'),
+('m2_nvmt_q122_a1', 'Đủ 20 tuổi trở lên.', 'm2_nvmt_q122'), ('m2_nvmt_q122_a2', 'Đủ 17 tuổi trở lên.', 'm2_nvmt_q122'), ('m2_nvmt_q122_a3', 'Đủ 18 tuổi trở lên.', 'm2_nvmt_q122'), ('m2_nvmt_q122_a4', 'Đủ 16 tuổi trở lên.', 'm2_nvmt_q122'),
+('m2_nvmt_q123_a1', 'Máy trưởng.', 'm2_nvmt_q123'), ('m2_nvmt_q123_a2', 'Máy phó một.', 'm2_nvmt_q123'), ('m2_nvmt_q123_a3', 'Máy phó hai.', 'm2_nvmt_q123'), ('m2_nvmt_q123_a4', 'Máy trưởng và người phụ trách ca máy.', 'm2_nvmt_q123'),
+('m2_nvmt_q124_a1', 'Từ trên 15 đến 150 sức ngựa.', 'm2_nvmt_q124'), ('m2_nvmt_q124_a2', '150 sức ngựa.', 'm2_nvmt_q124'), ('m2_nvmt_q124_a3', 'Đến 1000 sức ngựa.', 'm2_nvmt_q124'), ('m2_nvmt_q124_a4', 'Trên 400 sức ngựa.', 'm2_nvmt_q124'),
+('m2_nvmt_q125_a1', 'Quản lý, nắm vững tình trạng kỹ thuật hệ thống động lực; tổ chức phân công, giám sát thuyền viên bộ phận máy trong quá trình vận hành.', 'm2_nvmt_q125'), ('m2_nvmt_q125_a2', 'Thực hiện đầy đủ quy định về vận hành máy móc, thiết bị; tổ chức bảo dưỡng thường xuyên, sửa chữa những hạng mục công việc được phép làm của máy móc, thiết bị để bảo đảm hệ thống máy hoạt động có hiệu quả.', 'm2_nvmt_q125'), ('m2_nvmt_q125_a3', 'Trực tiếp phụ trách một ca máy. Ngoài giờ đi ca, khi cần thiết phải có mặt ở buồng máy để kịp thời giải quyết công việc theo yêu cầu của thuyền trưởng hoặc đề nghị của máy phó.', 'm2_nvmt_q125'), ('m2_nvmt_q125_a4', 'Tất cả các đáp án trên đều đúng.', 'm2_nvmt_q125'),
+('m2_nvmt_q126_a1', 'Để hạn chế những sai sót gây hậu quả đâm va.', 'm2_nvmt_q126'), ('m2_nvmt_q126_a2', 'Để hạn chế những sai sót gây hậu quả chìm tàu.', 'm2_nvmt_q126'), ('m2_nvmt_q126_a3', 'Để hạn chế mất điều khiển tàu.', 'm2_nvmt_q126'), ('m2_nvmt_q126_a4', 'Để hạn chế những sai sót gây hậu quả tràn dầu g y cháy, nổ hay ô nhiễm môi trường trong quá trình nhận dầu.', 'm2_nvmt_q126'),
+('m2_nvmt_q127_a1', 'Phương tiện có tổng công suất máy chính từ trên 15 đến 500 sức ngựa.', 'm2_nvmt_q127'), ('m2_nvmt_q127_a2', 'Các loại phương tiện.', 'm2_nvmt_q127'), ('m2_nvmt_q127_a3', 'Phương tiện có tổng công suất máy chính trên 500 sức ngựa.', 'm2_nvmt_q127'), ('m2_nvmt_q127_a4', 'Phương tiện có tổng công suất máy chính từ trên 15 đến 1000 sức ngựa.', 'm2_nvmt_q127'),
+('m2_nvmt_q128_a1', 'Lập kế hoạch công tác của bộ phận máy để máy trưởng duyệt, trực tiếp bố trí công việc, phân công trực ca đối với thuyền viên thuộc bộ phận máy.', 'm2_nvmt_q128'), ('m2_nvmt_q128_a2', 'Bảo đảm cho các máy bơm nước của hệ thống cứu hoả, cứu đắm.', 'm2_nvmt_q128'), ('m2_nvmt_q128_a3', 'Quản lý các hồ sơ, tài liệu kỹ thuật thuộc bộ phận máy.', 'm2_nvmt_q128'), ('m2_nvmt_q128_a4', 'Phụ trách hệ thống máy nén khí, hệ thống ống nước, ống dầu, ống hơi.', 'm2_nvmt_q128'),
+('m2_nvmt_q129_a1', 'Khả năng, tay nghề thực tế của mỗi thuyền viên.', 'm2_nvmt_q129'), ('m2_nvmt_q129_a2', 'Thực tế công việc dưới tàu.', 'm2_nvmt_q129'), ('m2_nvmt_q129_a3', 'Khả năng chuyên môn thông qua giấy chứng nhận trình độ chuyên môn và tay nghề thực tế của thuyền viên.', 'm2_nvmt_q129'), ('m2_nvmt_q129_a4', 'Sự phân công trực tiếp của thuyền trưởng.', 'm2_nvmt_q129'),
+('m2_nvmt_q130_a1', 'Áp lực dầu bôi trơn giảm xuống dưới mức quy định và không có khả năng khắc phục ngay trong khi động cơ đang hoạt động.', 'm2_nvmt_q130'), ('m2_nvmt_q130_a2', 'Áp lực nhớt giảm xuống.', 'm2_nvmt_q130'), ('m2_nvmt_q130_a3', 'Có sự chênh lệch giữa áp lực nhớt trước và sau bầu lọc.', 'm2_nvmt_q130'), ('m2_nvmt_q130_a4', 'Có sự hao nhớt trong các te.', 'm2_nvmt_q130')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === KẾT THÚC SCRIPT ===

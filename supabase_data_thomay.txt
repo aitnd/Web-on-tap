@@ -1,0 +1,266 @@
+-- Hướng dẫn:
+-- 1. Vào project Supabase của anh.
+-- 2. Mở SQL Editor (biểu tượng </> ở menu bên trái).
+-- 3. Tạo một query mới ("+ New query").
+-- 4. Xóa hết nội dung cũ (nếu có) và dán TOÀN BỘ nội dung file này vào.
+-- 5. Nhấn "RUN".
+--
+-- Lưu ý: Script này được thiết kế để thêm bộ đề thi mới "Chứng chỉ Thợ máy".
+-- Anh chỉ cần chạy file này MỘT LẦN để thêm dữ liệu mới.
+
+-- === BƯỚC 1: TẠO VÀ CẬP NHẬT CẤU TRÚC BẢNG (NẾU CẦN) ===
+-- Các lệnh này đảm bảo các bảng và các cột cần thiết đều tồn tại.
+
+CREATE TABLE IF NOT EXISTS licenses (id TEXT PRIMARY KEY, name TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS subjects (id TEXT PRIMARY KEY, name TEXT NOT NULL, license_id TEXT REFERENCES licenses(id) ON DELETE CASCADE);
+CREATE TABLE IF NOT EXISTS questions (id TEXT PRIMARY KEY, text TEXT NOT NULL, image TEXT, subject_id TEXT REFERENCES subjects(id) ON DELETE CASCADE, correct_answer_id TEXT);
+CREATE TABLE IF NOT EXISTS answers (id TEXT PRIMARY KEY, text TEXT NOT NULL, question_id TEXT REFERENCES questions(id) ON DELETE CASCADE);
+
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'licenses' AND column_name = 'display_order') THEN ALTER TABLE licenses ADD COLUMN display_order INT; END IF; END$$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'subjects' AND column_name = 'display_order') THEN ALTER TABLE subjects ADD COLUMN display_order INT; END IF; END$$;
+
+-- === BƯỚC 2: CHÈN DỮ LIỆU BỘ ĐỀ MỚI ===
+
+-- === HẠNG BẰNG MỚI: CHỨNG CHỈ THỢ MÁY ===
+
+INSERT INTO licenses (id, name, display_order) VALUES
+('thomay', 'Chứng chỉ Thợ máy', 8)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, display_order = EXCLUDED.display_order;
+
+-- Thêm các môn học cho hạng bằng trên
+INSERT INTO subjects (id, name, license_id, display_order) VALUES
+('tm_luat', 'Luật Giao thông đường thủy nội địa', 'thomay', 1),
+('tm_antoan', 'An toàn cơ bản, đạo đức nghề nghiệp và bảo vệ môi trường', 'thomay', 2),
+('tm_maytau', 'Máy tàu thủy', 'thomay', 3),
+('tm_dientau', 'Điện tàu thủy', 'thomay', 4)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, license_id = EXCLUDED.license_id, display_order = EXCLUDED.display_order;
+
+-- === MÔN: LUẬT GIAO THÔNG ĐƯỜNG THỦY NỘI ĐỊA (23 câu) ===
+INSERT INTO questions (id, text, subject_id, correct_answer_id, image) VALUES
+('tm_luat_q1', 'Phương tiện xin vượt không được vượt trong những trường hợp:', 'tm_luat', 'tm_luat_q1_a4', NULL),
+('tm_luat_q2', 'Một tiếng còi ngắn có ý nghĩa:', 'tm_luat', 'tm_luat_q2_a1', NULL),
+('tm_luat_q3', 'Phương tiện bị vượt, nếu không thể cho vượt thì phát âm hiệu:', 'tm_luat', 'tm_luat_q3_a4', NULL),
+('tm_luat_q4', 'Phương tiện xin vượt phải phát âm hiệu:', 'tm_luat', 'tm_luat_q4_a2', NULL),
+('tm_luat_q5', 'Ba tiếng còi ngắn có ý nghĩa:', 'tm_luat', 'tm_luat_q5_a4', NULL),
+('tm_luat_q6', 'Báo hiệu luồng tàu đi gần bờ bên phải, ban đêm ánh sáng màu:', 'tm_luat', 'tm_luat_q6_a1', NULL),
+('tm_luat_q7', 'Báo hiệu luồng tàu đi gần bờ bên trái, ban đêm ánh sáng màu:', 'tm_luat', 'tm_luat_q7_a4', NULL),
+('tm_luat_q8', 'Báo hiệu cửa luồng ra vào cảng, bến đặt bên trái, ban đêm ánh sáng màu:', 'tm_luat', 'tm_luat_q8_a2', NULL),
+('tm_luat_q9', 'Phao tim luồng, ban đêm ánh sáng màu:', 'tm_luat', 'tm_luat_q9_a4', NULL),
+('tm_luat_q10', 'Báo hiệu nào thông báo vị trí có trạm bán xăng dầu:', 'tm_luat', 'tm_luat_q10_a1', 'https://i.imgur.com/8f8eGgY.png'),
+('tm_luat_q11', 'Báo hiệu chỉ vị trí giới hạn bên phải của luồng tàu chạy là:', 'tm_luat', 'tm_luat_q11_a2', 'https://i.imgur.com/rN5gXgJ.png'),
+('tm_luat_q12', 'Báo hiệu chỉ vị trí giới hạn bên trái của luồng tàu chạy là:', 'tm_luat', 'tm_luat_q12_a1', 'https://i.imgur.com/K3L5z1j.png'),
+('tm_luat_q13', 'Báo hiệu thông báo cấm đi lại với tốc độ cao là:', 'tm_luat', 'tm_luat_q13_a2', 'https://i.imgur.com/jB8S0r3.png'),
+('tm_luat_q14', 'Báo hiệu định hướng phía bên phải của luồng là:', 'tm_luat', 'tm_luat_q14_a4', 'https://i.imgur.com/O6L5XlW.png'),
+('tm_luat_q15', 'Báo hiệu thông báo chiều rộng vùng nước được phép neo đậu là:', 'tm_luat', 'tm_luat_q15_a4', 'https://i.imgur.com/Q9R4W8l.png'),
+('tm_luat_q16', 'Báo hiệu chỉ vị trí giới hạn vùng nước phía bên bờ phải của luồng tàu chạy là:', 'tm_luat', 'tm_luat_q16_a2', 'https://i.imgur.com/rN5gXgJ.png'),
+('tm_luat_q17', 'Báo hiệu nào thông báo cấm tàu thuyền quay trở:', 'tm_luat', 'tm_luat_q17_a1', 'https://i.imgur.com/R3x3f0w.png'),
+('tm_luat_q18', 'Báo hiệu thông báo cấm rẽ trái là:', 'tm_luat', 'tm_luat_q18_a2', 'https://i.imgur.com/f9O2O2v.png'),
+('tm_luat_q19', 'Báo hiệu thông báo cấm các đoàn kéo đẩy vượt nhau là:', 'tm_luat', 'tm_luat_q19_a1', 'https://i.imgur.com/jB8S0r3.png'),
+('tm_luat_q20', 'Báo hiệu thông báo được phép đi qua:', 'tm_luat', 'tm_luat_q20_a2', 'https://i.imgur.com/1B9X6R0.png'),
+('tm_luat_q21', 'Báo hiệu thông báo có bến phà, bến khách ngang sông là:', 'tm_luat', 'tm_luat_q21_a1', 'https://i.imgur.com/i8h0E1R.png'),
+('tm_luat_q22', 'Báo hiệu thông báo cấm vượt là:', 'tm_luat', 'tm_luat_q22_a4', 'https://i.imgur.com/jB8S0r3.png'),
+('tm_luat_q23', 'Báo hiệu nào thông báo cấm phương tiện cơ giới:', 'tm_luat', 'tm_luat_q23_a2', 'https://i.imgur.com/D8P3f9h.png')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id, image = EXCLUDED.image;
+
+INSERT INTO answers (id, text, question_id) VALUES
+('tm_luat_q1_a1', 'Nơi có báo hiệu cấm vượt.', 'tm_luat_q1'), ('tm_luat_q1_a2', 'Phía trước có phương tiện đi ngược lại hay có chướng ngại vật.', 'tm_luat_q1'), ('tm_luat_q1_a3', 'Nơi luồng giao nhau, luồng cong gấp.', 'tm_luat_q1'), ('tm_luat_q1_a4', 'Tất cả các đáp án trên.', 'tm_luat_q1'),
+('tm_luat_q2_a1', 'Đổi hướng đi sang phải.', 'tm_luat_q2'), ('tm_luat_q2_a2', 'Đổi hướng đi sang trái.', 'tm_luat_q2'), ('tm_luat_q2_a3', 'Đang chạy lùi.', 'tm_luat_q2'), ('tm_luat_q2_a4', 'Không thể nhường đường', 'tm_luat_q2'),
+('tm_luat_q3_a1', 'Hai tiếng ngắn.', 'tm_luat_q3'), ('tm_luat_q3_a2', 'Ba tiếng ngắn.', 'tm_luat_q3'), ('tm_luat_q3_a3', 'Bốn tiếng ngắn.', 'tm_luat_q3'), ('tm_luat_q3_a4', 'Năm tiếng ngắn nhanh, liên tiếp.', 'tm_luat_q3'),
+('tm_luat_q4_a1', 'Hai tiếng còi dài.', 'tm_luat_q4'), ('tm_luat_q4_a2', 'Một tiếng còi dài, lặp lại nhiều lần.', 'tm_luat_q4'), ('tm_luat_q4_a3', 'Ba tiếng còi dài.', 'tm_luat_q4'), ('tm_luat_q4_a4', 'Bốn tiếng còi dài.', 'tm_luat_q4'),
+('tm_luat_q5_a1', 'Sắp cập bến, rời bến, chào nhau.', 'tm_luat_q5'), ('tm_luat_q5_a2', 'Đổi hướng đi sang phải.', 'tm_luat_q5'), ('tm_luat_q5_a3', 'Đổi hướng đi sang trái.', 'tm_luat_q5'), ('tm_luat_q5_a4', 'Đang chạy lùi.', 'tm_luat_q5'),
+('tm_luat_q6_a1', 'Đỏ.', 'tm_luat_q6'), ('tm_luat_q6_a2', 'Vàng.', 'tm_luat_q6'), ('tm_luat_q6_a3', 'Trắng.', 'tm_luat_q6'), ('tm_luat_q6_a4', 'Xanh lục.', 'tm_luat_q6'),
+('tm_luat_q7_a1', 'Trắng.', 'tm_luat_q7'), ('tm_luat_q7_a2', 'Đỏ.', 'tm_luat_q7'), ('tm_luat_q7_a3', 'Vàng.', 'tm_luat_q7'), ('tm_luat_q7_a4', 'Xanh lục.', 'tm_luat_q7'),
+('tm_luat_q8_a1', 'Vàng.', 'tm_luat_q8'), ('tm_luat_q8_a2', 'Xanh lục.', 'tm_luat_q8'), ('tm_luat_q8_a3', 'Trắng.', 'tm_luat_q8'), ('tm_luat_q8_a4', 'Đỏ.', 'tm_luat_q8'),
+('tm_luat_q9_a1', 'Xanh lục.', 'tm_luat_q9'), ('tm_luat_q9_a2', 'Đỏ.', 'tm_luat_q9'), ('tm_luat_q9_a3', 'Vàng.', 'tm_luat_q9'), ('tm_luat_q9_a4', 'Trắng.', 'tm_luat_q9'),
+('tm_luat_q10_a1', 'Biển 1.', 'tm_luat_q10'), ('tm_luat_q10_a2', 'Biển 2.', 'tm_luat_q10'), ('tm_luat_q10_a3', 'Biển 3.', 'tm_luat_q10'), ('tm_luat_q10_a4', 'Biển 4.', 'tm_luat_q10'),
+('tm_luat_q11_a1', 'Phao 1.', 'tm_luat_q11'), ('tm_luat_q11_a2', 'Phao 2.', 'tm_luat_q11'), ('tm_luat_q11_a3', 'Phao 3.', 'tm_luat_q11'), ('tm_luat_q11_a4', 'Phao 4.', 'tm_luat_q11'),
+('tm_luat_q12_a1', 'Phao 1.', 'tm_luat_q12'), ('tm_luat_q12_a2', 'Phao 2.', 'tm_luat_q12'), ('tm_luat_q12_a3', 'Phao 3.', 'tm_luat_q12'), ('tm_luat_q12_a4', 'Phao 4.', 'tm_luat_q12'),
+('tm_luat_q13_a1', 'Biển 1.', 'tm_luat_q13'), ('tm_luat_q13_a2', 'Biển 2.', 'tm_luat_q13'), ('tm_luat_q13_a3', 'Biển 3.', 'tm_luat_q13'), ('tm_luat_q13_a4', 'Biển 4.', 'tm_luat_q13'),
+('tm_luat_q14_a1', 'Biển 1.', 'tm_luat_q14'), ('tm_luat_q14_a2', 'Biển 2.', 'tm_luat_q14'), ('tm_luat_q14_a3', 'Biển 3.', 'tm_luat_q14'), ('tm_luat_q14_a4', 'Biển 4.', 'tm_luat_q14'),
+('tm_luat_q15_a1', 'Biển 1.', 'tm_luat_q15'), ('tm_luat_q15_a2', 'Biển 2.', 'tm_luat_q15'), ('tm_luat_q15_a3', 'Biển 3.', 'tm_luat_q15'), ('tm_luat_q15_a4', 'Biển 4.', 'tm_luat_q15'),
+('tm_luat_q16_a1', 'Phao 1.', 'tm_luat_q16'), ('tm_luat_q16_a2', 'Phao 2.', 'tm_luat_q16'), ('tm_luat_q16_a3', 'Phao 3.', 'tm_luat_q16'), ('tm_luat_q16_a4', 'Phao 4.', 'tm_luat_q16'),
+('tm_luat_q17_a1', 'Biển 1.', 'tm_luat_q17'), ('tm_luat_q17_a2', 'Biển 2.', 'tm_luat_q17'), ('tm_luat_q17_a3', 'Biển 3.', 'tm_luat_q17'), ('tm_luat_q17_a4', 'Biển 4.', 'tm_luat_q17'),
+('tm_luat_q18_a1', 'Biển 1.', 'tm_luat_q18'), ('tm_luat_q18_a2', 'Biển 2.', 'tm_luat_q18'), ('tm_luat_q18_a3', 'Biển 3.', 'tm_luat_q18'), ('tm_luat_q18_a4', 'Biển 4.', 'tm_luat_q18'),
+('tm_luat_q19_a1', 'Biển 1.', 'tm_luat_q19'), ('tm_luat_q19_a2', 'Biển 2.', 'tm_luat_q19'), ('tm_luat_q19_a3', 'Biển 3.', 'tm_luat_q19'), ('tm_luat_q19_a4', 'Biển 4.', 'tm_luat_q19'),
+('tm_luat_q20_a1', 'Biển 1.', 'tm_luat_q20'), ('tm_luat_q20_a2', 'Biển 2.', 'tm_luat_q20'), ('tm_luat_q20_a3', 'Biển 3.', 'tm_luat_q20'), ('tm_luat_q20_a4', 'Biển 4.', 'tm_luat_q20'),
+('tm_luat_q21_a1', 'Biển 1.', 'tm_luat_q21'), ('tm_luat_q21_a2', 'Biển 2.', 'tm_luat_q21'), ('tm_luat_q21_a3', 'Biển 3.', 'tm_luat_q21'), ('tm_luat_q21_a4', 'Biển 4.', 'tm_luat_q21'),
+('tm_luat_q22_a1', 'Biển 1.', 'tm_luat_q22'), ('tm_luat_q22_a2', 'Biển 2.', 'tm_luat_q22'), ('tm_luat_q22_a3', 'Biển 3.', 'tm_luat_q22'), ('tm_luat_q22_a4', 'Biển 4.', 'tm_luat_q22'),
+('tm_luat_q23_a1', 'Biển 1.', 'tm_luat_q23'), ('tm_luat_q23_a2', 'Biển 2.', 'tm_luat_q23'), ('tm_luat_q23_a3', 'Biển 3.', 'tm_luat_q23'), ('tm_luat_q23_a4', 'Biển 4.', 'tm_luat_q23')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === MÔN: AN TOÀN CƠ BẢN, ĐẠO ĐỨC NGHỀ NGHIỆP VÀ BẢO VỆ MÔI TRƯỜNG (20 câu) ===
+INSERT INTO questions (id, text, subject_id, correct_answer_id, image) VALUES
+('tm_antoan_q24', 'Các trang bị bảo hộ cá nhân gồm:', 'tm_antoan', 'tm_antoan_q24_a4', NULL),
+('tm_antoan_q25', 'Các thiết bị an toàn trên tàu gồm:', 'tm_antoan', 'tm_antoan_q25_a1', NULL),
+('tm_antoan_q26', 'Một số tai nạn thường xảy ra trên tàu:', 'tm_antoan', 'tm_antoan_q26_a4', NULL),
+('tm_antoan_q27', 'Báo hiệu nào thông báo cấm làm:', 'tm_antoan', 'tm_antoan_q27_a2', 'https://i.imgur.com/r62Kq4Y.png'),
+('tm_antoan_q28', 'Báo hiệu nào thông báo lối đi an toàn:', 'tm_antoan', 'tm_antoan_q28_a4', 'https://i.imgur.com/z4PqgXv.png'),
+('tm_antoan_q29', 'Báo hiệu nào thông báo chú ý nguy hiểm:', 'tm_antoan', 'tm_antoan_q29_a3', 'https://i.imgur.com/i9T5C6f.png'),
+('tm_antoan_q30', 'Báo hiệu nào cấm hút thuốc:', 'tm_antoan', 'tm_antoan_q30_a3', 'https://i.imgur.com/2s9V5cE.png'),
+('tm_antoan_q31', 'Báo hiệu nào thông báo vị trí đặt thiết bị chữa cháy:', 'tm_antoan', 'tm_antoan_q31_a1', 'https://i.imgur.com/b9L7c7J.png'),
+('tm_antoan_q32', 'Trước lúc xuống hầm làm việc, thời gian thông gió tối thiểu để đẩy các chất độc ra ngoài là :', 'tm_antoan', 'tm_antoan_q32_a1', NULL),
+('tm_antoan_q33', 'Các phương pháp chữa cháy trên tàu thủy :', 'tm_antoan', 'tm_antoan_q33_a3', NULL),
+('tm_antoan_q34', 'Tam giác cháy gồm 3 yếu tố là:', 'tm_antoan', 'tm_antoan_q34_a2', NULL),
+('tm_antoan_q35', 'Để dập đám cháy xăng, dầu người thợ máy không được dùng:', 'tm_antoan', 'tm_antoan_q35_a1', NULL),
+('tm_antoan_q36', 'Chữa cháy buồng máy, buồng bơm (trường hợp cháy nhỏ) dùng:', 'tm_antoan', 'tm_antoan_q36_a1', NULL),
+('tm_antoan_q37', 'Nguyên nhân tàu bị thủng:', 'tm_antoan', 'tm_antoan_q37_a4', NULL),
+('tm_antoan_q38', 'Các yếu tố của môi trường ảnh hưởng đến sức khỏe người lao động gồm:', 'tm_antoan', 'tm_antoan_q38_a3', NULL),
+('tm_antoan_q39', 'Các yếu tố gây ra ô nhiễm môi trường gồm:', 'tm_antoan', 'tm_antoan_q39_a4', NULL),
+('tm_antoan_q40', 'Các công việc cần làm ngay khi tàu bị thủng:', 'tm_antoan', 'tm_antoan_q40_a4', NULL),
+('tm_antoan_q41', 'Hành động đầu tiên khi có người bị điện giật:', 'tm_antoan', 'tm_antoan_q41_a3', NULL),
+('tm_antoan_q42', 'Điều kiện cho những người làm việc trên phương tiện thủy:', 'tm_antoan', 'tm_antoan_q42_a4', NULL),
+('tm_antoan_q43', 'Khi phát hiện đồng nghiệp vi phạm quy trình an toàn trên tàu, bạn nên:', 'tm_antoan', 'tm_antoan_q43_a2', NULL)
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id, image = EXCLUDED.image;
+
+INSERT INTO answers (id, text, question_id) VALUES
+('tm_antoan_q24_a1', 'Mũ bảo hộ, găng tay vải, găng tay da, giày mũi sắt,', 'tm_antoan_q24'), ('tm_antoan_q24_a2', 'Chụp tai cách âm, kính hàn.', 'tm_antoan_q24'), ('tm_antoan_q24_a3', 'Kính bảo hộ lao động, áo quần bảo hộ, đai bảo hộ..', 'tm_antoan_q24'), ('tm_antoan_q24_a4', 'Tất cả đáp án trên.', 'tm_antoan_q24'),
+('tm_antoan_q25_a1', 'Trang thiết bị cứu hỏa, cứu sinh, cứu đắm, pháo sáng, các thiết bị thông tin cứu nạn, danh mục các trạm bờ trong thực hiện cứu hộ, cứu nạn.', 'tm_antoan_q25'), ('tm_antoan_q25_a2', 'Trang thiết bị cứu hỏa, cứu sinh, cứu đắm, pháo sáng.', 'tm_antoan_q25'), ('tm_antoan_q25_a3', 'Trang thiết cứu sinh, cứu đắm, pháo sáng, các thiết bị thông tin cứu nạn', 'tm_antoan_q25'), ('tm_antoan_q25_a4', 'Trang thiết bị cứu hỏa, danh mục các trạm bờ trong thực hiện cứu hộ, cứu nạn.', 'tm_antoan_q25'),
+('tm_antoan_q26_a1', 'Gãy tay, chân, hoặc bị thương một phần cơ thể.', 'tm_antoan_q26'), ('tm_antoan_q26_a2', 'Bị ngất do hít phải khí độc.', 'tm_antoan_q26'), ('tm_antoan_q26_a3', 'Bị bỏng, điện giật, chết đuối.', 'tm_antoan_q26'), ('tm_antoan_q26_a4', 'Tất cả các đáp án trên.', 'tm_antoan_q26'),
+('tm_antoan_q27_a1', 'Biển 1.', 'tm_antoan_q27'), ('tm_antoan_q27_a2', 'Biển 2.', 'tm_antoan_q27'), ('tm_antoan_q27_a3', 'Biển 3.', 'tm_antoan_q27'), ('tm_antoan_q27_a4', 'Biển 4.', 'tm_antoan_q27'),
+('tm_antoan_q28_a1', 'Biển 1.', 'tm_antoan_q28'), ('tm_antoan_q28_a2', 'Biển 2.', 'tm_antoan_q28'), ('tm_antoan_q28_a3', 'Biển 3.', 'tm_antoan_q28'), ('tm_antoan_q28_a4', 'Biển 4.', 'tm_antoan_q28'),
+('tm_antoan_q29_a1', 'Biển 1.', 'tm_antoan_q29'), ('tm_antoan_q29_a2', 'Biển 2.', 'tm_antoan_q29'), ('tm_antoan_q29_a3', 'Biển 3.', 'tm_antoan_q29'), ('tm_antoan_q29_a4', 'Biển 4.', 'tm_antoan_q29'),
+('tm_antoan_q30_a1', 'Biển 1.', 'tm_antoan_q30'), ('tm_antoan_q30_a2', 'Biển 2.', 'tm_antoan_q30'), ('tm_antoan_q30_a3', 'Biển 3.', 'tm_antoan_q30'), ('tm_antoan_q30_a4', 'Biển 4.', 'tm_antoan_q30'),
+('tm_antoan_q31_a1', 'Biển 1.', 'tm_antoan_q31'), ('tm_antoan_q31_a2', 'Biển 2.', 'tm_antoan_q31'), ('tm_antoan_q31_a3', 'Biển 3.', 'tm_antoan_q31'), ('tm_antoan_q31_a4', 'Biển 4.', 'tm_antoan_q31'),
+('tm_antoan_q32_a1', '30 phút.', 'tm_antoan_q32'), ('tm_antoan_q32_a2', '40 phút.', 'tm_antoan_q32'), ('tm_antoan_q32_a3', '50 phút.', 'tm_antoan_q32'), ('tm_antoan_q32_a4', '60 phút.', 'tm_antoan_q32'),
+('tm_antoan_q33_a1', 'Dập lửa.', 'tm_antoan_q33'), ('tm_antoan_q33_a2', 'Bịt kín, làm chìm.', 'tm_antoan_q33'), ('tm_antoan_q33_a3', 'Dập lửa, bịt kín, làm chìm.', 'tm_antoan_q33'), ('tm_antoan_q33_a4', 'Làm chìm.', 'tm_antoan_q33'),
+('tm_antoan_q34_a1', 'Nitơ, nguồn nhiệt, chất cháy.', 'tm_antoan_q34'), ('tm_antoan_q34_a2', 'Oxy, nguồn nhiệt, chất cháy.', 'tm_antoan_q34'), ('tm_antoan_q34_a3', 'Oxy, Nitơ, chất cháy.', 'tm_antoan_q34'), ('tm_antoan_q34_a4', 'Oxy, nguồn nhiệt, Nitơ.', 'tm_antoan_q34'),
+('tm_antoan_q35_a1', 'Nước.', 'tm_antoan_q35'), ('tm_antoan_q35_a2', 'Bình bọt.', 'tm_antoan_q35'), ('tm_antoan_q35_a3', 'Khí trơ.', 'tm_antoan_q35'), ('tm_antoan_q35_a4', 'Bình bột.', 'tm_antoan_q35'),
+('tm_antoan_q36_a1', 'Bình bọt xách tay.', 'tm_antoan_q36'), ('tm_antoan_q36_a2', 'Phương pháp bịt kín.', 'tm_antoan_q36'), ('tm_antoan_q36_a3', 'Hệ thống CO₂ .', 'tm_antoan_q36'), ('tm_antoan_q36_a4', 'Cả b và c', 'tm_antoan_q36'),
+('tm_antoan_q37_a1', 'Do va chạm giữa tàu với tàu.', 'tm_antoan_q37'), ('tm_antoan_q37_a2', 'Do va chạm giữa tàu với các vật thể khác.', 'tm_antoan_q37'), ('tm_antoan_q37_a3', 'Do mòn tự nhiên.', 'tm_antoan_q37'), ('tm_antoan_q37_a4', 'Tất cả các đáp án trên.', 'tm_antoan_q37'),
+('tm_antoan_q38_a1', 'Đất và nước .', 'tm_antoan_q38'), ('tm_antoan_q38_a2', 'Không khí.', 'tm_antoan_q38'), ('tm_antoan_q38_a3', 'Đất và nước, không khí, ô nhiễm tiếng ồn.', 'tm_antoan_q38'), ('tm_antoan_q38_a4', 'Ô nhiễm tiếng ồn.', 'tm_antoan_q38'),
+('tm_antoan_q39_a1', 'Do rác thải từ tàu.', 'tm_antoan_q39'), ('tm_antoan_q39_a2', 'Do hàng hóa dư thừa.', 'tm_antoan_q39'), ('tm_antoan_q39_a3', 'Do dầu mỡ.', 'tm_antoan_q39'), ('tm_antoan_q39_a4', 'Tất cả các đáp án trên.', 'tm_antoan_q39'),
+('tm_antoan_q40_a1', 'Báo động tàu bị thủng.', 'tm_antoan_q40'), ('tm_antoan_q40_a2', 'Dừng máy.', 'tm_antoan_q40'), ('tm_antoan_q40_a3', 'Đóng tất cả các cửa kín nước lại, các hệ thống dẫn nước phải khoá lại.', 'tm_antoan_q40'), ('tm_antoan_q40_a4', 'Tất cả các đáp án trên đều đúng.', 'tm_antoan_q40'),
+('tm_antoan_q41_a1', 'Bế nạn nhân ra khỏi nguồn điện.', 'tm_antoan_q41'), ('tm_antoan_q41_a2', 'Kéo nạn nhân ra khỏi nguồn điện.', 'tm_antoan_q41'), ('tm_antoan_q41_a3', 'Ngắt nguồn điện.', 'tm_antoan_q41'), ('tm_antoan_q41_a4', 'Gọi người đến giúp.', 'tm_antoan_q41'),
+('tm_antoan_q42_a1', 'Phải đủ tuổi theo quy định.', 'tm_antoan_q42'), ('tm_antoan_q42_a2', 'Được đào tạo, có giấy chứng nhận khả năng chuyên môn, chứng chỉ chuyên môn phù hợp (đã tốt nghiệp ngành học phù hợp).', 'tm_antoan_q42'), ('tm_antoan_q42_a3', 'Biết bơi, có giấy chứng nhận đạt tiêu chuẩn bơi lội tối thiểu 100m.', 'tm_antoan_q42'), ('tm_antoan_q42_a4', 'Tất cả các đáp án trên đều đúng.', 'tm_antoan_q42'),
+('tm_antoan_q43_a1', 'Làm ngơ vì đó không phải việc của mình.', 'tm_antoan_q43'), ('tm_antoan_q43_a2', 'Báo cáo với cấp trên có trách nhiệm.', 'tm_antoan_q43'), ('tm_antoan_q43_a3', 'Nhắc nhở riêng, nếu họ không nghe thì kệ.', 'tm_antoan_q43'), ('tm_antoan_q43_a4', 'Quay video làm bằng chứng.', 'tm_antoan_q43')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === MÔN: MÁY TÀU THỦY (39 câu) ===
+INSERT INTO questions (id, text, subject_id, correct_answer_id) VALUES
+('tm_maytau_q44', 'Động cơ 4 kỳ hoàn thành một chu trình công tác trong:', 'tm_maytau', 'tm_maytau_q44_a1'),
+('tm_maytau_q45', 'Cấu tạo piston được chia làm:', 'tm_maytau', 'tm_maytau_q45_a3'),
+('tm_maytau_q46', 'Nhiệm vụ của hệ thống cung cấp nhiên liệu:', 'tm_maytau', 'tm_maytau_q46_a4'),
+('tm_maytau_q47', 'Nhiệm vụ của hệ thống bôi trơn:', 'tm_maytau', 'tm_maytau_q47_a4'),
+('tm_maytau_q48', 'Trong động cơ Diesel nhiên liệu được đưa vào xy lanh qua:', 'tm_maytau', 'tm_maytau_q48_a2'),
+('tm_maytau_q49', 'Động cơ nhiệt được chia làm:', 'tm_maytau', 'tm_maytau_q49_a2'),
+('tm_maytau_q50', 'Hệ thống cung cấp nhiên liệu gồm có:', 'tm_maytau', 'tm_maytau_q50_a1'),
+('tm_maytau_q51', 'Một chu trình công tác của động cơ 4 kỳ theo thứ tự các kỳ:', 'tm_maytau', 'tm_maytau_q51_a2'),
+('tm_maytau_q52', 'Thời điểm xupap nạp và xupap xả của một xylanh trong động cơ Diesel 4 kỳ cùng mở:', 'tm_maytau', 'tm_maytau_q52_a2'),
+('tm_maytau_q53', 'Để nạp đầy khí mới và thải sạch khí cháy ra ngoài thì xupap nạp và thải phải được:', 'tm_maytau', 'tm_maytau_q53_a2'),
+('tm_maytau_q54', 'Xupap là chi tiết của hệ thống:', 'tm_maytau', 'tm_maytau_q54_a1'),
+('tm_maytau_q55', 'Trong hệ thống làm mát trực tiếp, nước vào làm mát cho động cơ đi theo thứ tự:', 'tm_maytau', 'tm_maytau_q55_a1'),
+('tm_maytau_q56', 'Trước khi khởi động động cơ đối với hệ thống bôi trơn phải kiểm tra:', 'tm_maytau', 'tm_maytau_q56_a3'),
+('tm_maytau_q57', 'Trước khi dừng động cơ:', 'tm_maytau', 'tm_maytau_q57_a2'),
+('tm_maytau_q58', 'Sau khi dừng động cơ:', 'tm_maytau', 'tm_maytau_q58_a1'),
+('tm_maytau_q59', 'Nhiệm vụ của bơm cao áp là:', 'tm_maytau', 'tm_maytau_q59_a1'),
+('tm_maytau_q60', 'Chốt piston là chi tiết nối:', 'tm_maytau', 'tm_maytau_q60_a2'),
+('tm_maytau_q61', 'Ống lót (xilanh) ướt có đặc điểm:', 'tm_maytau', 'tm_maytau_q61_a2'),
+('tm_maytau_q62', 'Ống lót (xilanh) khô có đặc điểm:', 'tm_maytau', 'tm_maytau_q62_a2'),
+('tm_maytau_q63', 'Động cơ 6 xilanh thẳng hàng, đủ ổ trục có số ổ trục là:', 'tm_maytau', 'tm_maytau_q63_a3'),
+('tm_maytau_q64', 'Bầu lọc ly tâm có những ưu điểm cơ bản là:', 'tm_maytau', 'tm_maytau_q64_a4'),
+('tm_maytau_q65', 'Thời gian thay dầu bôi trơn được tiến hành:', 'tm_maytau', 'tm_maytau_q65_a3'),
+('tm_maytau_q66', 'Trong quá trình nén của động cơ Diesel 4 kỳ:', 'tm_maytau', 'tm_maytau_q66_a3'),
+('tm_maytau_q67', 'Khi động cơ đang hoạt động phải chú ý đến những thông số kỹ thuật:', 'tm_maytau', 'tm_maytau_q67_a2'),
+('tm_maytau_q68', 'Một đơn vị trục khuỷu gồm:', 'tm_maytau', 'tm_maytau_q68_a1'),
+('tm_maytau_q69', 'Trong hệ thống cung cấp nhiên liệu, nhiên liệu đi theo thứ tự từ:', 'tm_maytau', 'tm_maytau_q69_a3'),
+('tm_maytau_q70', 'Trong quá trình nạp của động cơ Diesel 4 kỳ:', 'tm_maytau', 'tm_maytau_q70_a2'),
+('tm_maytau_q71', 'Trong quá trình thải của động cơ Diesel 4 kỳ:', 'tm_maytau', 'tm_maytau_q71_a1'),
+('tm_maytau_q72', 'Trong quá trình cháy giãn nở sinh công của động cơ Diesel 4 kỳ:', 'tm_maytau', 'tm_maytau_q72_a2'),
+('tm_maytau_q73', 'Yêu cầu chung đối với hệ thống cung cấp nhiên liệu:', 'tm_maytau', 'tm_maytau_q73_a4'),
+('tm_maytau_q74', 'Nắp xilanh có công dụng:', 'tm_maytau', 'tm_maytau_q74_a2'),
+('tm_maytau_q75', 'Tạo ra áp lực để đẩy dầu bôi trơn đến bôi trơn các chi tiết máy là nhiệm vụ của:', 'tm_maytau', 'tm_maytau_q75_a1'),
+('tm_maytau_q76', 'Ở động cơ đốt trong nhiệt độ làm mát máy nóng quá quy định sẽ làm:', 'tm_maytau', 'tm_maytau_q76_a1'),
+('tm_maytau_q77', 'Chọn đáp án đúng trong các câu dưới đây:', 'tm_maytau', 'tm_maytau_q77_a2'),
+('tm_maytau_q78', 'Động cơ Diesel có khí thải màu xanh lam do:', 'tm_maytau', 'tm_maytau_q78_a4'),
+('tm_maytau_q79', 'Để thay đổi số vòng quay của động cơ Diesel ta điều chỉnh ở:', 'tm_maytau', 'tm_maytau_q79_a2'),
+('tm_maytau_q80', 'Tỷ số nén của động cơ Diesel so với động cơ xăng có cùng số xilanh:', 'tm_maytau', 'tm_maytau_q80_a2'),
+('tm_maytau_q81', 'Đo nhiệt độ khí xả ta dùng thiết bị đo:', 'tm_maytau', 'tm_maytau_q81_a4'),
+('tm_maytau_q82', 'Các loại nhiên liệu nào dưới đây cần phải hâm :', 'tm_maytau', 'tm_maytau_q82_a3')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id;
+
+INSERT INTO answers (id, text, question_id) VALUES
+('tm_maytau_q44_a1', '4 hành trình piston tương ứng với 2 vòng quay trục khuỷu.', 'tm_maytau_q44'), ('tm_maytau_q44_a2', '2 hành trình của piston tương ứng với 1 vòng quay trục khuỷu.', 'tm_maytau_q44'), ('tm_maytau_q44_a3', '4 hành trình của piston tương ứng với 3 vòng quay trục khuỷu.', 'tm_maytau_q44'), ('tm_maytau_q44_a4', '4 hành trình của piston tương ứng với 1 vòng quay trục khuỷu.', 'tm_maytau_q44'),
+('tm_maytau_q45_a1', '1 phần.', 'tm_maytau_q45'), ('tm_maytau_q45_a2', '2 phần.', 'tm_maytau_q45'), ('tm_maytau_q45_a3', '3 phần.', 'tm_maytau_q45'), ('tm_maytau_q45_a4', '4 phần.', 'tm_maytau_q45'),
+('tm_maytau_q46_a1', 'Cung cấp một lượng nhiên liệu cho mỗi chu trình công tác của động cơ.', 'tm_maytau_q46'), ('tm_maytau_q46_a2', 'Lọc sạch nước và các tạp chất có lẫn trong nhiên liệu.', 'tm_maytau_q46'), ('tm_maytau_q46_a3', 'Chứa một lượng nhiên liệu đảm bảo cho động cơ hoạt động trong suốt hành trình của tàu.', 'tm_maytau_q46'), ('tm_maytau_q46_a4', 'Tất cả các đáp án trên đều đúng.', 'tm_maytau_q46'),
+('tm_maytau_q47_a1', 'Giảm ma sát, nâng cao tính chống mòn cho các bề mặt ma sát.', 'tm_maytau_q47'), ('tm_maytau_q47_a2', 'Tẩy rửa và làm mát cho các bề mặt ma sát.', 'tm_maytau_q47'), ('tm_maytau_q47_a3', 'Góp phần bao kín buồng cháy và giữ cho bề mặt các chi tiết không bị rỉ sét.', 'tm_maytau_q47'), ('tm_maytau_q47_a4', 'Tất cả các đáp án trên đều đúng.', 'tm_maytau_q47'),
+('tm_maytau_q48_a1', 'Xupap nạp.', 'tm_maytau_q48'), ('tm_maytau_q48_a2', 'Vòi phun.', 'tm_maytau_q48'), ('tm_maytau_q48_a3', 'Cửa nạp.', 'tm_maytau_q48'), ('tm_maytau_q48_a4', 'Tất cả các đáp án trên đều đúng.', 'tm_maytau_q48'),
+('tm_maytau_q49_a1', 'Động cơ đốt ngoài.', 'tm_maytau_q49'), ('tm_maytau_q49_a2', 'Động cơ đốt trong, động cơ đốt ngoài.', 'tm_maytau_q49'), ('tm_maytau_q49_a3', 'Động cơ đốt trong.', 'tm_maytau_q49'), ('tm_maytau_q49_a4', 'Không có phương án nào đúng.', 'tm_maytau_q49'),
+('tm_maytau_q50_a1', 'Két trực nhật, lọc thô, bơm tay, bơm chuyển nhiên liệu, van chặn, lọc tinh, bơm cao áp, vòi phun, đường dầu hồi.', 'tm_maytau_q50'), ('tm_maytau_q50_a2', 'Két trực nhật, lọc thô, bơm tay, bơm chuyển nhiên liệu.', 'tm_maytau_q50'), ('tm_maytau_q50_a3', 'Két trực nhật, lọc thô, bơm tay, bơm chuyển nhiên liệu, van chặn, lọc tinh.', 'tm_maytau_q50'), ('tm_maytau_q50_a4', 'Bơm tay, bơm chuyển nhiên liệu, van chặn, lọc tinh, bơm cao áp, vòi phun.', 'tm_maytau_q50'),
+('tm_maytau_q51_a1', 'Hút, nổ, xả, nén.', 'tm_maytau_q51'), ('tm_maytau_q51_a2', 'Hút, nén, nổ, xả.', 'tm_maytau_q51'), ('tm_maytau_q51_a3', 'Xả, nổ, nén, hút.', 'tm_maytau_q51'), ('tm_maytau_q51_a4', 'Nén, xả, hút, nổ.', 'tm_maytau_q51'),
+('tm_maytau_q52_a1', 'Cuối kỳ nạp - đầu kỳ nén.', 'tm_maytau_q52'), ('tm_maytau_q52_a2', 'Cuối kỳ thải - đầu kỳ nạp.', 'tm_maytau_q52'), ('tm_maytau_q52_a3', 'Cuối kỳ nén - đầu kỳ nổ.', 'tm_maytau_q52'), ('tm_maytau_q52_a4', 'Cuối kỳ nổ - đầu kỳ thải.', 'tm_maytau_q52'),
+('tm_maytau_q53_a1', 'Mở sớm và đóng sớm.', 'tm_maytau_q53'), ('tm_maytau_q53_a2', 'Mở sớm và đóng muộn.', 'tm_maytau_q53'), ('tm_maytau_q53_a3', 'Mở muộn và đóng muộn.', 'tm_maytau_q53'), ('tm_maytau_q53_a4', 'Mở muộn và đóng sớm.', 'tm_maytau_q53'),
+('tm_maytau_q54_a1', 'Phân phối khí.', 'tm_maytau_q54'), ('tm_maytau_q54_a2', 'Bôi trơn.', 'tm_maytau_q54'), ('tm_maytau_q54_a3', 'Làm mát.', 'tm_maytau_q54'), ('tm_maytau_q54_a4', 'Đánh lửa.', 'tm_maytau_q54'),
+('tm_maytau_q55_a1', 'Cửa thông sông, tới van thông sông, tới bơm, tới động cơ rồi thải ra ngoài.', 'tm_maytau_q55'), ('tm_maytau_q55_a2', 'Cửa thông sông, tới bơm, tới van thông sông, tới động cơ rồi thải ra ngoài.', 'tm_maytau_q55'), ('tm_maytau_q55_a3', 'Cửa thông sông, tới bơm, tới động cơ, tới van thông sông rồi thải ra ngoài.', 'tm_maytau_q55'), ('tm_maytau_q55_a4', 'Van thông sông, tới cửa thông sông, tới bơm, tới động cơ rồi thải ra ngoài.', 'tm_maytau_q55'),
+('tm_maytau_q56_a1', 'Nhiệt độ.', 'tm_maytau_q56'), ('tm_maytau_q56_a2', 'Bơm dầu.', 'tm_maytau_q56'), ('tm_maytau_q56_a3', 'Mức dầu và chất lượng dầu bôi trơn.', 'tm_maytau_q56'), ('tm_maytau_q56_a4', 'Áp lực.', 'tm_maytau_q56'),
+('tm_maytau_q57_a1', 'Đóng van nước, van dầu.', 'tm_maytau_q57'), ('tm_maytau_q57_a2', 'Cho động cơ chạy không tải 10 ÷ 15 phút ở vòng quay ổn định nhỏ nhất.', 'tm_maytau_q57'), ('tm_maytau_q57_a3', 'Đóng van nước, van dầu, ngắt cầu dao.', 'tm_maytau_q57'), ('tm_maytau_q57_a4', 'Bổ sung nhiên liệu và dầu bôi trơn.', 'tm_maytau_q57'),
+('tm_maytau_q58_a1', 'Đóng van thông sông, van dầu đốt, vệ sinh công nghiệp.', 'tm_maytau_q58'), ('tm_maytau_q58_a2', 'Đưa cần đảo chiều về vị trí “stop”.', 'tm_maytau_q58'), ('tm_maytau_q58_a3', 'Đưa tay ga nhiên liệu về vị trí nhỏ nhất.', 'tm_maytau_q58'), ('tm_maytau_q58_a4', 'Đóng van thông sông và đưa cần đảo chiều về vị trí “stop”.', 'tm_maytau_q58'),
+('tm_maytau_q59_a1', 'Tạo áp suất cao cho nhiên liệu.', 'tm_maytau_q59'), ('tm_maytau_q59_a2', 'Bơm dầu từ két chứa lên két trực nhật.', 'tm_maytau_q59'), ('tm_maytau_q59_a3', 'Tạo màng sương nhiên liệu.', 'tm_maytau_q59'), ('tm_maytau_q59_a4', 'Bơm dầu từ két trực nhật tới bơm chuyển nhiên liệu.', 'tm_maytau_q59'),
+('tm_maytau_q60_a1', 'Piston với xilanh', 'tm_maytau_q60'), ('tm_maytau_q60_a2', 'Piston với thanh truyền', 'tm_maytau_q60'), ('tm_maytau_q60_a3', 'Thanh truyền với trục khuỷu', 'tm_maytau_q60'), ('tm_maytau_q60_a4', 'Thanh truyền với đầu to trục khuỷu', 'tm_maytau_q60'),
+('tm_maytau_q61_a1', 'Không tiếp xúc với dầu làm mát', 'tm_maytau_q61'), ('tm_maytau_q61_a2', 'Tiếp xúc với nước làm mát', 'tm_maytau_q61'), ('tm_maytau_q61_a3', 'Không tiếp xúc với nước làm mát', 'tm_maytau_q61'), ('tm_maytau_q61_a4', 'Tất cả các đáp án trên đều sai.', 'tm_maytau_q61'),
+('tm_maytau_q62_a1', 'Tiếp xúc với nước làm mát', 'tm_maytau_q62'), ('tm_maytau_q62_a2', 'Không tiếp xúc với dầu làm mát', 'tm_maytau_q62'), ('tm_maytau_q62_a3', 'Không tiếp xúc với nước làm mát', 'tm_maytau_q62'), ('tm_maytau_q62_a4', 'Tất cả các đáp án trên đều đúng.', 'tm_maytau_q62'),
+('tm_maytau_q63_a1', '5 ổ trục', 'tm_maytau_q63'), ('tm_maytau_q63_a2', '6 ổ trục', 'tm_maytau_q63'), ('tm_maytau_q63_a3', '7 ổ trục', 'tm_maytau_q63'), ('tm_maytau_q63_a4', '8 ổ trục', 'tm_maytau_q63'),
+('tm_maytau_q64_a1', 'Không cần phải thay thế lõi lọc.', 'tm_maytau_q64'), ('tm_maytau_q64_a2', 'Khả năng lọc tốt, chất lượng dầu sạch', 'tm_maytau_q64'), ('tm_maytau_q64_a3', 'Trở lực trong bầu lọc thấp', 'tm_maytau_q64'), ('tm_maytau_q64_a4', 'Tất cả các đáp án trên đều đúng.', 'tm_maytau_q64'),
+('tm_maytau_q65_a1', 'Theo định kỳ.', 'tm_maytau_q65'), ('tm_maytau_q65_a2', 'Bất thường.', 'tm_maytau_q65'), ('tm_maytau_q65_a3', 'Theo định kỳ và bất thường.', 'tm_maytau_q65'), ('tm_maytau_q65_a4', 'Tất cả các đáp án trên đều sai.', 'tm_maytau_q65'),
+('tm_maytau_q66_a1', 'Xupap nạp đóng, xupap thải mở', 'tm_maytau_q66'), ('tm_maytau_q66_a2', 'Xupap nạp mở, xupap thải đóng', 'tm_maytau_q66'), ('tm_maytau_q66_a3', 'Cả xupap nạp và xupap thải đều đóng', 'tm_maytau_q66'), ('tm_maytau_q66_a4', 'Tất cả các đáp án trên đều sai', 'tm_maytau_q66'),
+('tm_maytau_q67_a1', 'Áp lực dầu bôi trơn và số lượng dầu bôi trơn.', 'tm_maytau_q67'), ('tm_maytau_q67_a2', 'Nhiệt độ nước làm mát, áp lực dầu bôi trơn và mức dầu trong két dầu trực nhật.', 'tm_maytau_q67'), ('tm_maytau_q67_a3', 'Số lượng dầu bôi trơn và chất lượng dầu bôi trơn.', 'tm_maytau_q67'), ('tm_maytau_q67_a4', 'Số lượng dầu bôi trơn và két dầu trực nhật.', 'tm_maytau_q67'),
+('tm_maytau_q68_a1', 'Cổ trục, cổ khuỷu, má khuỷu và đối trọng.', 'tm_maytau_q68'), ('tm_maytau_q68_a2', 'Đầu trục, đuôi trục và thân trục.', 'tm_maytau_q68'), ('tm_maytau_q68_a3', 'Cổ trục, cổ khuỷu.', 'tm_maytau_q68'), ('tm_maytau_q68_a4', 'Má khuỷu, đối trọng.', 'tm_maytau_q68'),
+('tm_maytau_q69_a1', 'Két trực nhật, tới bơm cao áp, tới bơm chuyển nhiên liệu, tới vòi phun.', 'tm_maytau_q69'), ('tm_maytau_q69_a2', 'Bơm chuyển nhiên liệu, tới két trực nhật, tới bơm cao áp, tới vòi phun.', 'tm_maytau_q69'), ('tm_maytau_q69_a3', 'Két trực nhật, tới bơm chuyển nhiên liệu, tới bơm cao áp, tới vòi phun.', 'tm_maytau_q69'), ('tm_maytau_q69_a4', 'Bơm chuyển nhiên liệu, tới bơm cao áp, tới két trực nhật, tới vòi phun.', 'tm_maytau_q69'),
+('tm_maytau_q70_a1', 'Xupap nạp đóng, xupap thải mở', 'tm_maytau_q70'), ('tm_maytau_q70_a2', 'Xupap nạp mở, xupap thải đóng', 'tm_maytau_q70'), ('tm_maytau_q70_a3', 'Cả xupap nạp và xupap thải đều đóng', 'tm_maytau_q70'), ('tm_maytau_q70_a4', 'Cả xupap nạp và xupap thải đều mở', 'tm_maytau_q70'),
+('tm_maytau_q71_a1', 'Xupap nạp đóng, xupap thải mở', 'tm_maytau_q71'), ('tm_maytau_q71_a2', 'Xupap nạp mở, xupap thải đóng', 'tm_maytau_q71'), ('tm_maytau_q71_a3', 'Cả xupap nạp và xupap thải đều mở', 'tm_maytau_q71'), ('tm_maytau_q71_a4', 'Cả xupap nạp và xupap thải đều đóng', 'tm_maytau_q71'),
+('tm_maytau_q72_a1', 'Xupap nạp đóng, xupap thải mở', 'tm_maytau_q72'), ('tm_maytau_q72_a2', 'Cả xupap nạp và xupap thải đều đóng', 'tm_maytau_q72'), ('tm_maytau_q72_a3', 'Cả xupap nạp và xupap thải đều mở', 'tm_maytau_q72'), ('tm_maytau_q72_a4', 'Tất cả các đáp án trên đều sai', 'tm_maytau_q72'),
+('tm_maytau_q73_a1', 'Hoạt động lâu bền, có độ tin cậy cao.', 'tm_maytau_q73'), ('tm_maytau_q73_a2', 'Dễ dàng vận hành, sử dụng, bảo dưỡng và sửa chữa', 'tm_maytau_q73'), ('tm_maytau_q73_a3', 'Dễ chế tạo, giá thành thấp.', 'tm_maytau_q73'), ('tm_maytau_q73_a4', 'Tất cả các đáp án trên đều đúng.', 'tm_maytau_q73'),
+('tm_maytau_q74_a1', 'Nhận lực của khí cháy', 'tm_maytau_q74'), ('tm_maytau_q74_a2', 'Cùng với xilanh và piston tạo thành thể tích làm việc của động cơ', 'tm_maytau_q74'), ('tm_maytau_q74_a3', 'Chịu lực va đập', 'tm_maytau_q74'), ('tm_maytau_q74_a4', 'Chịu nhiệt độ cao', 'tm_maytau_q74'),
+('tm_maytau_q75_a1', 'Bơm dầu nhờn', 'tm_maytau_q75'), ('tm_maytau_q75_a2', 'Bơm nhiên liệu', 'tm_maytau_q75'), ('tm_maytau_q75_a3', 'Két làm mát.', 'tm_maytau_q75'), ('tm_maytau_q75_a4', 'Hệ thống bôi trơn.', 'tm_maytau_q75'),
+('tm_maytau_q76_a1', 'Chi tiết máy chóng mài mòn và không hoạt động được.', 'tm_maytau_q76'), ('tm_maytau_q76_a2', 'Nhiên liệu khó bay hơi.', 'tm_maytau_q76'), ('tm_maytau_q76_a3', 'Nhiên liệu khó cháy.', 'tm_maytau_q76'), ('tm_maytau_q76_a4', 'Động cơ hoạt động bình thường.', 'tm_maytau_q76'),
+('tm_maytau_q77_a1', 'Cổ khuỷu dùng để lắp đầu nhỏ của thanh truyền.', 'tm_maytau_q77'), ('tm_maytau_q77_a2', 'Thanh truyền biến chuyển động tịnh tiến piston thành chuyển động quay trục khuỷu.', 'tm_maytau_q77'), ('tm_maytau_q77_a3', 'Nhiệm vụ của piston làm trục khuỷu quay.', 'tm_maytau_q77'), ('tm_maytau_q77_a4', 'Chốt piston nối má khuỷu và cổ khuỷu.', 'tm_maytau_q77'),
+('tm_maytau_q78_a1', 'Nhiên liệu phun quá nhiều', 'tm_maytau_q78'), ('tm_maytau_q78_a2', 'Động cơ bị quá nóng', 'tm_maytau_q78'), ('tm_maytau_q78_a3', 'Động cơ quá tải', 'tm_maytau_q78'), ('tm_maytau_q78_a4', 'Xéc măng bị quá mòn, dầu bôi trơn lẫn vào nhiên liệu.', 'tm_maytau_q78'),
+('tm_maytau_q79_a1', 'Bơm chuyển nhiên liệu.', 'tm_maytau_q79'), ('tm_maytau_q79_a2', 'Ở tay ga.', 'tm_maytau_q79'), ('tm_maytau_q79_a3', 'Vòi phun.', 'tm_maytau_q79'), ('tm_maytau_q79_a4', 'Ở vít giới hạn vị trí ga.', 'tm_maytau_q79'),
+('tm_maytau_q80_a1', 'Thấp hơn', 'tm_maytau_q80'), ('tm_maytau_q80_a2', 'Cao hơn', 'tm_maytau_q80'), ('tm_maytau_q80_a3', 'Bằng nhau', 'tm_maytau_q80'), ('tm_maytau_q80_a4', 'Tùy thuộc vào loại động cơ.', 'tm_maytau_q80'),
+('tm_maytau_q81_a1', 'Lưu lượng kế.', 'tm_maytau_q81'), ('tm_maytau_q81_a2', 'Động lực kế.', 'tm_maytau_q81'), ('tm_maytau_q81_a3', 'Khí áp kế.', 'tm_maytau_q81'), ('tm_maytau_q81_a4', 'Nhiệt kế.', 'tm_maytau_q81'),
+('tm_maytau_q82_a1', 'Dầu Diesel.', 'tm_maytau_q82'), ('tm_maytau_q82_a2', 'Xăng.', 'tm_maytau_q82'), ('tm_maytau_q82_a3', 'Dầu FO.', 'tm_maytau_q82'), ('tm_maytau_q82_a4', 'Cả 3 loại trên.', 'tm_maytau_q82')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === MÔN: ĐIỆN TÀU THỦY (18 câu) ===
+INSERT INTO questions (id, text, subject_id, correct_answer_id) VALUES
+('tm_dientau_q83', 'Đơn vị của điện áp là:', 'tm_dientau', 'tm_dientau_q83_a1'),
+('tm_dientau_q84', 'Đơn vị của dòng điện là:', 'tm_dientau', 'tm_dientau_q84_a2'),
+('tm_dientau_q85', 'Các phương pháp đấu ghép ắc quy là:', 'tm_dientau', 'tm_dientau_q85_a3'),
+('tm_dientau_q86', 'Đấu song song ắc quy để tăng:', 'tm_dientau', 'tm_dientau_q86_a1'),
+('tm_dientau_q87', 'Đấu hỗn hợp ắc quy để tăng:', 'tm_dientau', 'tm_dientau_q87_a3'),
+('tm_dientau_q88', 'Đấu nối tiếp ắc quy để tăng:', 'tm_dientau', 'tm_dientau_q88_a4'),
+('tm_dientau_q89', 'Khi sử dụng ắc quy cần chú ý tới các thông số kỹ thuật cơ bản:', 'tm_dientau', 'tm_dientau_q89_a1'),
+('tm_dientau_q90', 'Các chế độ làm việc của ắc quy cần quan tâm là:', 'tm_dientau', 'tm_dientau_q90_a2'),
+('tm_dientau_q91', 'Dung dịch trong ắc quy axít thường dùng trên tàu thuỷ là:', 'tm_dientau', 'tm_dientau_q91_a3'),
+('tm_dientau_q92', 'Hai bình ắc quy 12V đấu nối tiếp có điện áp là:', 'tm_dientau', 'tm_dientau_q92_a4'),
+('tm_dientau_q93', 'Theo cơ cấu ly hợp, mạch điện khởi động máy Diesel bao gồm:', 'tm_dientau', 'tm_dientau_q93_a4'),
+('tm_dientau_q94', 'Tác dụng chính của tụ điện trong còi điện một chiều:', 'tm_dientau', 'tm_dientau_q94_a3'),
+('tm_dientau_q95', 'Quy trình đấu dây cho một mạch điện đúng là:', 'tm_dientau', 'tm_dientau_q95_a3'),
+('tm_dientau_q96', 'Để đo điện áp giữa hai điểm của mạch điện, ta dùng đồng hồ:', 'tm_dientau', 'tm_dientau_q96_a1'),
+('tm_dientau_q97', 'Để đo dòng điện của mạch điện, ta dùng đồng hồ:', 'tm_dientau', 'tm_dientau_q97_a1'),
+('tm_dientau_q98', 'Đơn vị của điện trở là:', 'tm_dientau', 'tm_dientau_q98_a3'),
+('tm_dientau_q99', 'Hiện tượng sunfat hóa các bản cực bình ắc quy axit là:', 'tm_dientau', 'tm_dientau_q99_a4'),
+('tm_dientau_q100', 'Trụ cực của ắc quy axit được làm bằng:', 'tm_dientau', 'tm_dientau_q100_a1')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id;
+
+INSERT INTO answers (id, text, question_id) VALUES
+('tm_dientau_q83_a1', 'Vôn (V).', 'tm_dientau_q83'), ('tm_dientau_q83_a2', 'Ampe (A).', 'tm_dientau_q83'), ('tm_dientau_q83_a3', 'Oát (W).', 'tm_dientau_q83'), ('tm_dientau_q83_a4', 'Ôm (Ω).', 'tm_dientau_q83'),
+('tm_dientau_q84_a1', 'Vôn (V).', 'tm_dientau_q84'), ('tm_dientau_q84_a2', 'Ampe (A).', 'tm_dientau_q84'), ('tm_dientau_q84_a3', 'Ôm (Ω).', 'tm_dientau_q84'), ('tm_dientau_q84_a4', 'Oát (W).', 'tm_dientau_q84'),
+('tm_dientau_q85_a1', 'Đấu nối tiếp.', 'tm_dientau_q85'), ('tm_dientau_q85_a2', 'Đấu song song.', 'tm_dientau_q85'), ('tm_dientau_q85_a3', 'Đấu nối tiếp, đấu song song, đấu hỗn hợp.', 'tm_dientau_q85'), ('tm_dientau_q85_a4', 'Đấu song song, đấu hỗn hợp.', 'tm_dientau_q85'),
+('tm_dientau_q86_a1', 'Dung lượng.', 'tm_dientau_q86'), ('tm_dientau_q86_a2', 'Điện áp.', 'tm_dientau_q86'), ('tm_dientau_q86_a3', 'Cả dung lượng và điện áp.', 'tm_dientau_q86'), ('tm_dientau_q86_a4', 'Dòng điện và điện áp.', 'tm_dientau_q86'),
+('tm_dientau_q87_a1', 'Dung lượng.', 'tm_dientau_q87'), ('tm_dientau_q87_a2', 'Điện áp.', 'tm_dientau_q87'), ('tm_dientau_q87_a3', 'Cả dung lượng và điện áp.', 'tm_dientau_q87'), ('tm_dientau_q87_a4', 'Dòng điện.', 'tm_dientau_q87'),
+('tm_dientau_q88_a1', 'Dung lượng.', 'tm_dientau_q88'), ('tm_dientau_q88_a2', 'Cả dung lượng và điện áp.', 'tm_dientau_q88'), ('tm_dientau_q88_a3', 'Dòng điện và điện áp.', 'tm_dientau_q88'), ('tm_dientau_q88_a4', 'Điện áp.', 'tm_dientau_q88'),
+('tm_dientau_q89_a1', 'Điện áp định mức, dung lượng định mức.', 'tm_dientau_q89'), ('tm_dientau_q89_a2', 'Điện áp định mức, dòng điện.', 'tm_dientau_q89'), ('tm_dientau_q89_a3', 'Dung lượng định mức, dòng điện định mức.', 'tm_dientau_q89'), ('tm_dientau_q89_a4', 'Dung lượng định mức.', 'tm_dientau_q89'),
+('tm_dientau_q90_a1', 'Nạp điện.', 'tm_dientau_q90'), ('tm_dientau_q90_a2', 'Nạp điện, phóng điện.', 'tm_dientau_q90'), ('tm_dientau_q90_a3', 'Phóng điện.', 'tm_dientau_q90'), ('tm_dientau_q90_a4', 'Không có chế độ nào.', 'tm_dientau_q90'),
+('tm_dientau_q91_a1', 'HCl.', 'tm_dientau_q91'), ('tm_dientau_q91_a2', 'HNO₃.', 'tm_dientau_q91'), ('tm_dientau_q91_a3', 'H₂SO₄.', 'tm_dientau_q91'), ('tm_dientau_q91_a4', 'Tất cả các đáp án trên đều đúng.', 'tm_dientau_q91'),
+('tm_dientau_q92_a1', '9V.', 'tm_dientau_q92'), ('tm_dientau_q92_a2', '12V.', 'tm_dientau_q92'), ('tm_dientau_q92_a3', '6V.', 'tm_dientau_q92'), ('tm_dientau_q92_a4', '24V.', 'tm_dientau_q92'),
+('tm_dientau_q93_a1', 'Kiểu cần gạt.', 'tm_dientau_q93'), ('tm_dientau_q93_a2', 'Kiểu rô to di động.', 'tm_dientau_q93'), ('tm_dientau_q93_a3', 'Kiểu quán tính.', 'tm_dientau_q93'), ('tm_dientau_q93_a4', 'Tất cả các đáp án trên đều đúng.', 'tm_dientau_q93'),
+('tm_dientau_q94_a1', 'Lọc nhiễu nguồn cung cấp cho còi điện.', 'tm_dientau_q94'), ('tm_dientau_q94_a2', 'Tích trữ năng lượng trong quá trình hoạt động của còi điện.', 'tm_dientau_q94'), ('tm_dientau_q94_a3', 'Bảo vệ tiếp điểm trong còi điện một chiều.', 'tm_dientau_q94'), ('tm_dientau_q94_a4', 'Bảo vệ ắc quy.', 'tm_dientau_q94'),
+('tm_dientau_q95_a1', 'Thiết bị đóng ngắt, bảo vệ - thiết bị tiêu thụ điện - nguồn điện.', 'tm_dientau_q95'), ('tm_dientau_q95_a2', 'Thiết bị tiêu thụ điện - thiết bị đóng ngắt, bảo vệ - nguồn điện.', 'tm_dientau_q95'), ('tm_dientau_q95_a3', 'Nguồn điện - thiết bị đóng ngắt, bảo vệ - thiết bị tiêu thụ điện', 'tm_dientau_q95'), ('tm_dientau_q95_a4', 'Thiết bị tiêu thụ điện - nguồn điện - thiết bị đóng ngắt, bảo vệ.', 'tm_dientau_q95'),
+('tm_dientau_q96_a1', 'Vôn kế.', 'tm_dientau_q96'), ('tm_dientau_q96_a2', 'Ôm kế.', 'tm_dientau_q96'), ('tm_dientau_q96_a3', 'Ampe kế.', 'tm_dientau_q96'), ('tm_dientau_q96_a4', 'Tất cả các đáp án trên đều đúng.', 'tm_dientau_q96'),
+('tm_dientau_q97_a1', 'Ampe kế.', 'tm_dientau_q97'), ('tm_dientau_q97_a2', 'Ôm kế.', 'tm_dientau_q97'), ('tm_dientau_q97_a3', 'Vôn kế.', 'tm_dientau_q97'), ('tm_dientau_q97_a4', 'Áp kế.', 'tm_dientau_q97'),
+('tm_dientau_q98_a1', 'Vôn (V).', 'tm_dientau_q98'), ('tm_dientau_q98_a2', 'Ampe (A).', 'tm_dientau_q98'), ('tm_dientau_q98_a3', 'Ôm (Ω).', 'tm_dientau_q98'), ('tm_dientau_q98_a4', 'Oát (W).', 'tm_dientau_q98'),
+('tm_dientau_q99_a1', 'Nạp bình nhanh no điện.', 'tm_dientau_q99'), ('tm_dientau_q99_a2', 'Nhanh phóng hết điện.', 'tm_dientau_q99'), ('tm_dientau_q99_a3', 'Dung dịch sôi nhanh.', 'tm_dientau_q99'), ('tm_dientau_q99_a4', 'Tất cả các đáp án trên đều đúng.', 'tm_dientau_q99'),
+('tm_dientau_q100_a1', 'Chì.', 'tm_dientau_q100'), ('tm_dientau_q100_a2', 'Đồng.', 'tm_dientau_q100'), ('tm_dientau_q100_a3', 'Nhôm.', 'tm_dientau_q100'), ('tm_dientau_q100_a4', 'Tất cả các phương án trên.', 'tm_dientau_q100')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === KẾT THÚC SCRIPT ===

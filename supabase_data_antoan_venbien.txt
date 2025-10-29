@@ -1,0 +1,149 @@
+-- Hướng dẫn:
+-- 1. Vào project Supabase của anh.
+-- 2. Mở SQL Editor (biểu tượng </> ở menu bên trái).
+-- 3. Tạo một query mới ("+ New query").
+-- 4. Xóa hết nội dung cũ (nếu có) và dán TOÀN BỘ nội dung file này vào.
+-- 5. Nhấn "RUN".
+--
+-- Lưu ý: Script này được thiết kế để thêm bộ đề thi mới "Chứng chỉ An toàn ven biển".
+-- Anh chỉ cần chạy file này MỘT LẦN để thêm dữ liệu mới.
+
+-- === BƯỚC 1: TẠO VÀ CẬP NHẬT CẤU TRÚC BẢNG (NẾU CẦN) ===
+CREATE TABLE IF NOT EXISTS licenses (id TEXT PRIMARY KEY, name TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS subjects (id TEXT PRIMARY KEY, name TEXT NOT NULL, license_id TEXT REFERENCES licenses(id) ON DELETE CASCADE);
+CREATE TABLE IF NOT EXISTS questions (id TEXT PRIMARY KEY, text TEXT NOT NULL, image TEXT, subject_id TEXT REFERENCES subjects(id) ON DELETE CASCADE, correct_answer_id TEXT);
+CREATE TABLE IF NOT EXISTS answers (id TEXT PRIMARY KEY, text TEXT NOT NULL, question_id TEXT REFERENCES questions(id) ON DELETE CASCADE);
+
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'licenses' AND column_name = 'display_order') THEN ALTER TABLE licenses ADD COLUMN display_order INT; END IF; END$$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'subjects' AND column_name = 'display_order') THEN ALTER TABLE subjects ADD COLUMN display_order INT; END IF; END$$;
+
+-- === BƯỚC 2: CHÈN DỮ LIỆU BỘ ĐỀ MỚI ===
+
+-- === HẠNG BẰNG MỚI: CHỨNG CHỈ AN TOÀN VEN BIỂN ===
+
+INSERT INTO licenses (id, name, display_order) VALUES
+('antoan-ven-bien', 'Chứng chỉ An toàn ven biển', 12)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, display_order = EXCLUDED.display_order;
+
+-- Thêm các môn học cho hạng bằng trên
+INSERT INTO subjects (id, name, license_id, display_order) VALUES
+('atvb_antoan_coban', 'An toàn cơ bản và bảo vệ môi trường', 'antoan-ven-bien', 1),
+('atvb_antoan_sinhmang', 'An toàn sinh mạng trên biển', 'antoan-ven-bien', 2)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, license_id = EXCLUDED.license_id, display_order = EXCLUDED.display_order;
+
+
+-- === MÔN: An toàn cơ bản và bảo vệ môi trường (20 câu) ===
+INSERT INTO questions (id, text, subject_id, correct_answer_id) VALUES
+('atvb_q1', 'Mục đích chính của các quy định về an toàn lao động trên tàu là gì?', 'atvb_antoan_coban', 'atvb_q1_a3'),
+('atvb_q2', 'Thiết bị bảo hộ cá nhân nào bắt buộc sử dụng khi làm việc trên cao từ 2m trở lên?', 'atvb_antoan_coban', 'atvb_q2_a2'),
+('atvb_q3', 'Biển báo nào phải được treo tại nơi làm việc nguy hiểm?', 'atvb_antoan_coban', 'atvb_q3_a1'),
+('atvb_q4', 'Nguyên nhân chính gây tai nạn lao động trên tàu bao gồm?', 'atvb_antoan_coban', 'atvb_q4_a2'),
+('atvb_q5', 'Khi làm việc trên cao, điều kiện thời tiết nào là phù hợp?', 'atvb_antoan_coban', 'atvb_q5_a2'),
+('atvb_q6', 'Thời gian thông gió tối thiểu cho hầm chứa nhiên liệu hoặc hóa chất độc hại trước khi xuống làm việc là bao lâu?', 'atvb_antoan_coban', 'atvb_q6_a3'),
+('atvb_q7', 'Khi làm việc ngoài mạn tàu, dụng cụ làm việc cần được để ở đâu?', 'atvb_antoan_coban', 'atvb_q7_a2'),
+('atvb_q8', 'Khi xếp dỡ hàng hóa dưới hầm, thứ tự lấy hàng như thế nào?', 'atvb_antoan_coban', 'atvb_q8_a2'),
+('atvb_q9', 'Khi có sự cố hoặc nghi ngờ thiết bị có sự cố, trước hết thuyền viên phải', 'atvb_antoan_coban', 'atvb_q9_a3'),
+('atvb_q10', 'Theo định nghĩa của Luật Bảo vệ Môi trường Việt Nam, môi trường là gì?', 'atvb_antoan_coban', 'atvb_q10_a2'),
+('atvb_q11', 'Theo Tổ chức Y tế Thế giới thì ô nhiễm môi trường được định nghĩa như thế nào?', 'atvb_antoan_coban', 'atvb_q11_a2'),
+('atvb_q12', 'Yếu tố nào sau đây thuộc về thủy quyển?', 'atvb_antoan_coban', 'atvb_q12_a3'),
+('atvb_q13', 'Nguồn ô nhiễm nước tại cảng chủ yếu do đâu?', 'atvb_antoan_coban', 'atvb_q13_a2'),
+('atvb_q14', 'Loài thủy sinh xâm nhập từ nước dằn tàu có tác động như thế nào đến môi trường?', 'atvb_antoan_coban', 'atvb_q14_a3'),
+('atvb_q15', 'Khí thải từ phương tiện thủy gây ô nhiễm không khí bao gồm chất nào sau đây?', 'atvb_antoan_coban', 'atvb_q15_a1'),
+('atvb_q16', 'Biện pháp nào sau đây giúp giảm ô nhiễm do rác thải từ tàu?', 'atvb_antoan_coban', 'atvb_q16_a2'),
+('atvb_q17', 'Để giảm ô nhiễm do nước dằn tàu, cần làm gì?', 'atvb_antoan_coban', 'atvb_q17_a2'),
+('atvb_q18', 'Tàu chở dầu mới có trọng tải từ 500 tấn trở lên phải trang bị gì để phòng chống ô nhiễm?', 'atvb_antoan_coban', 'atvb_q18_a2'),
+('atvb_q19', 'Theo Luật Bảo vệ Môi trường Việt Nam, nguyên tắc nào được áp dụng cho người gây ô nhiễm?', 'atvb_antoan_coban', 'atvb_q19_a1'),
+('atvb_q20', 'Thiết bị nào sau đây được sử dụng để lọc dầu trong nước đảm bảo nồng độ không vượt quá 15 ppm?', 'atvb_antoan_coban', 'atvb_q20_a2')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id;
+
+INSERT INTO answers (id, text, question_id) VALUES
+('atvb_q1_a1', 'Tăng năng suất lao động.', 'atvb_q1'), ('atvb_q1_a2', 'Đảm bảo sức khỏe cho thuyền viên.', 'atvb_q1'), ('atvb_q1_a3', 'Phòng ngừa tai nạn và giảm thiểu hậu quả nghiêm trọng cho thuyền viên.', 'atvb_q1'), ('atvb_q1_a4', 'Giảm chi phí vận hành tàu.', 'atvb_q1'),
+('atvb_q2_a1', 'Găng tay da.', 'atvb_q2'), ('atvb_q2_a2', 'Dây an toàn.', 'atvb_q2'), ('atvb_q2_a3', 'Kính hàn.', 'atvb_q2'), ('atvb_q2_a4', 'Chụp tai cách âm.', 'atvb_q2'),
+('atvb_q3_a1', 'Cấm hút thuốc.', 'atvb_q3'), ('atvb_q3_a2', 'Không phận sự miễn vào.', 'atvb_q3'), ('atvb_q3_a3', 'Cấm sử dụng tai nghe.', 'atvb_q3'), ('atvb_q3_a4', 'Khu vực an toàn.', 'atvb_q3'),
+('atvb_q4_a1', 'Thiếu thiết bị hiện đại.', 'atvb_q4'), ('atvb_q4_a2', 'Thiếu hiểu biết và không tuân thủ quy tắc an toàn lao động.', 'atvb_q4'), ('atvb_q4_a3', 'Thiếu nhân sự.', 'atvb_q4'), ('atvb_q4_a4', 'Thời tiết xấu.', 'atvb_q4'),
+('atvb_q5_a1', 'Gió mạnh cấp 5.', 'atvb_q5'), ('atvb_q5_a2', 'Gió nhẹ dưới cấp 3, không mưa.', 'atvb_q5'), ('atvb_q5_a3', 'Nhiệt độ từ 20°C - 30°C.', 'atvb_q5'), ('atvb_q5_a4', 'Mưa nhỏ nhiệt độ dưới 20°C.', 'atvb_q5'),
+('atvb_q6_a1', '30 phút.', 'atvb_q6'), ('atvb_q6_a2', '15 phút.', 'atvb_q6'), ('atvb_q6_a3', '60 phút.', 'atvb_q6'), ('atvb_q6_a4', '45 phút.', 'atvb_q6'),
+('atvb_q7_a1', 'Trên ca bản.', 'atvb_q7'), ('atvb_q7_a2', 'Trong túi hoặc xô.', 'atvb_q7'), ('atvb_q7_a3', 'Trong túi quần.', 'atvb_q7'), ('atvb_q7_a4', 'Trên boong tàu.', 'atvb_q7'),
+('atvb_q8_a1', 'Từ dưới lên, từ trong ra ngoài.', 'atvb_q8'), ('atvb_q8_a2', 'Từ trên xuống, từ ngoài vào trong.', 'atvb_q8'), ('atvb_q8_a3', 'Ngẫu nhiên theo kiện hàng.', 'atvb_q8'), ('atvb_q8_a4', 'Từ trong ra ngoài, từ dưới lên.', 'atvb_q8'),
+('atvb_q9_a1', 'Tiến hành tự sửa chữa, khắc phục', 'atvb_q9'), ('atvb_q9_a2', 'Lập tức rời khỏi hiện trường', 'atvb_q9'), ('atvb_q9_a3', 'Báo cho người chịu trách an toàn biết', 'atvb_q9'), ('atvb_q9_a4', 'Dừng hoạt động', 'atvb_q9'),
+('atvb_q10_a1', 'Các yếu tố tự nhiên bao quanh con người', 'atvb_q10'), ('atvb_q10_a2', 'Các yếu tố tự nhiên và nhân tạo ảnh hưởng đến đời sống, sản xuất, phát triển của con người', 'atvb_q10'), ('atvb_q10_a3', 'Chỉ các yếu tố vật lý và hóa học', 'atvb_q10'), ('atvb_q10_a4', 'Các yếu tố kinh tế và xã hội', 'atvb_q10'),
+('atvb_q11_a1', 'Sự thay đổi thành phần môi trường.', 'atvb_q11'), ('atvb_q11_a2', 'Sự đẩy chất thải hoặc năng lượng vào môi trường gây ảnh hưởng tiêu cực.', 'atvb_q11'), ('atvb_q11_a3', 'Sự suy giảm chất lượng đất.', 'atvb_q11'), ('atvb_q11_a4', 'Sự thay đổi khí hậu.', 'atvb_q11'),
+('atvb_q12_a1', 'Không khí bao quanh mặt đất.', 'atvb_q12'), ('atvb_q12_a2', 'Phần rắn của trái đất.', 'atvb_q12'), ('atvb_q12_a3', 'Đại dương, sông, hồ và nước ngầm.', 'atvb_q12'), ('atvb_q12_a4', 'Các quần xã sinh vật.', 'atvb_q12'),
+('atvb_q13_a1', 'Hoạt động giao thông đường bộ.', 'atvb_q13'), ('atvb_q13_a2', 'Rác, nước thải từ phương tiện, cảng và nước ballast.', 'atvb_q13'), ('atvb_q13_a3', 'Khí thải từ tàu.', 'atvb_q13'), ('atvb_q13_a4', 'Tiếng ồn từ máy móc.', 'atvb_q13'),
+('atvb_q14_a1', 'Không gây ảnh hưởng.', 'atvb_q14'), ('atvb_q14_a2', 'Tăng đa dạng sinh học.', 'atvb_q14'), ('atvb_q14_a3', 'Gây mất cân bằng sinh thái, không thể phục hồi.', 'atvb_q14'), ('atvb_q14_a4', 'Giảm ô nhiễm nước.', 'atvb_q14'),
+('atvb_q15_a1', 'SO2, NO2, CO, và O3.', 'atvb_q15'), ('atvb_q15_a2', 'H2S và HCl.', 'atvb_q15'), ('atvb_q15_a3', 'Chỉ CO2.', 'atvb_q15'), ('atvb_q15_a4', 'Chỉ bụi PM10.', 'atvb_q15'),
+('atvb_q16_a1', 'Đốt rác trên tàu khi neo đậu.', 'atvb_q16'), ('atvb_q16_a2', 'Thu gom và phân loại rác theo quy định Marpol 73/78.', 'atvb_q16'), ('atvb_q16_a3', 'Đổ rác xuống nước.', 'atvb_q16'), ('atvb_q16_a4', 'Không ghi sổ nhật ký rác.', 'atvb_q16'),
+('atvb_q17_a1', 'Xả trực tiếp xuống nước.', 'atvb_q17'), ('atvb_q17_a2', 'Thải vào thiết bị tiếp nhận trên bờ sau khi kiểm tra.', 'atvb_q17'), ('atvb_q17_a3', 'Bơm nước dằn ra sông.', 'atvb_q17'), ('atvb_q17_a4', 'Không cần xử lý.', 'atvb_q17'),
+('atvb_q18_a1', 'Két thu hồi hỗn hợp dầu nước.', 'atvb_q18'), ('atvb_q18_a2', 'Két lắng chứa nước rửa hầm hàng và cặn dầu.', 'atvb_q18'), ('atvb_q18_a3', 'Khay hứng dầu.', 'atvb_q18'), ('atvb_q18_a4', 'Hệ thống thông gió.', 'atvb_q18'),
+('atvb_q19_a1', 'Người gây ra ô nhiễm phải trả tiền.', 'atvb_q19'), ('atvb_q19_a2', 'Miễn phí xử lý ô nhiễm.', 'atvb_q19'), ('atvb_q19_a3', 'Nhà nước chịu chi phí.', 'atvb_q19'), ('atvb_q19_a4', 'Không có trách nhiệm.', 'atvb_q19'),
+('atvb_q20_a1', 'Két lắng.', 'atvb_q20'), ('atvb_q20_a2', 'Máy phân ly dầu nước.', 'atvb_q20'), ('atvb_q20_a3', 'Két dầu bẩn.', 'atvb_q20'), ('atvb_q20_a4', 'Hệ thống bơm chuyển.', 'atvb_q20')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === MÔN: An toàn sinh mạng trên biển (30 câu) ===
+INSERT INTO questions (id, text, subject_id, correct_answer_id) VALUES
+('atvb_q21', 'Thời gian tối đa cho một ca trực buồng lái thông thường là bao lâu?', 'atvb_antoan_sinhmang', 'atvb_q21_a3'),
+('atvb_q22', 'Trong điều kiện nào thuyền trưởng có thể quyết định để một thuyền phó trực ca buồng lái một mình?', 'atvb_antoan_sinhmang', 'atvb_q22_a2'),
+('atvb_q23', 'Khi giao ca đêm, thuyền phó nhận ca phải đảm bảo điều gì trước khi nhận nhiệm vụ?', 'atvb_antoan_sinhmang', 'atvb_q23_a2'),
+('atvb_q24', 'Sĩ quan trực ca phải báo cáo ngay cho thuyền trưởng trong trường hợp nào?', 'atvb_antoan_sinhmang', 'atvb_q24_a2'),
+('atvb_q25', 'Khi tàu neo đậu, nhiệm vụ quan trọng của thuyền viên trực ca là gì?', 'atvb_antoan_sinhmang', 'atvb_q25_a2'),
+('atvb_q26', 'Khi trực ca bờ, thuyền phó cần chú ý điều gì khi tàu đậu tại cầu?', 'atvb_antoan_sinhmang', 'atvb_q26_a1'),
+('atvb_q27', 'Nguyên nhân chính gây cháy nổ trên phương tiện thủy do con người là gì?', 'atvb_antoan_sinhmang', 'atvb_q27_a2'),
+('atvb_q28', 'Cháy nổ trên tàu có thể xảy ra do nguyên nhân nào sau đây?', 'atvb_antoan_sinhmang', 'atvb_q28_a1'),
+('atvb_q29', 'Khi phát hiện cháy trên tàu, việc đầu tiên cần làm là gì?', 'atvb_antoan_sinhmang', 'atvb_q29_a2'),
+('atvb_q30', 'Khi xảy ra cháy tàu ở trong cảng, thuyền viên phải làm gì?', 'atvb_antoan_sinhmang', 'atvb_q30_a1'),
+('atvb_q31', 'Tam giác cháy bao gồm các yếu tố nào?', 'atvb_antoan_sinhmang', 'atvb_q31_a2'),
+('atvb_q32', 'Đám cháy loại A là gì?', 'atvb_antoan_sinhmang', 'atvb_q32_a2'),
+('atvb_q33', 'Chất chữa cháy nào phù hợp nhất để dập tắt đám cháy loại A?', 'atvb_antoan_sinhmang', 'atvb_q33_a1'),
+('atvb_q34', 'Tại sao không nên dùng nước để chữa cháy xăng dầu?', 'atvb_antoan_sinhmang', 'atvb_q34_a2'),
+('atvb_q35', 'Khí CO2 chữa cháy có tác dụng gì?', 'atvb_antoan_sinhmang', 'atvb_q35_a2'),
+('atvb_q36', 'Bình chữa cháy CO2 cần được bảo quản ở đâu?', 'atvb_antoan_sinhmang', 'atvb_q36_a2'),
+('atvb_q37', 'Bọt chữa cháy có tác dụng chính là gì?', 'atvb_antoan_sinhmang', 'atvb_q37_a2'),
+('atvb_q38', 'Phương pháp chữa cháy “bịt kín” thường được sử dụng ở đâu?', 'atvb_antoan_sinhmang', 'atvb_q38_a2'),
+('atvb_q39', 'Khi chữa cháy buồng máy, nếu đám cháy lớn cần làm gì?', 'atvb_antoan_sinhmang', 'atvb_q39_a2'),
+('atvb_q40', 'Để chữa cháy dầu, chất chữa cháy nào là hiệu quả nhất?', 'atvb_antoan_sinhmang', 'atvb_q40_a2'),
+('atvb_q41', 'Mục đích chính của việc cứu sinh trên tàu là gì?', 'atvb_antoan_sinhmang', 'atvb_q41_a2'),
+('atvb_q42', 'Thuyền viên cần được huấn luyện kỹ năng cứu sinh nào sau đây?', 'atvb_antoan_sinhmang', 'atvb_q42_a1'),
+('atvb_q43', 'Bè cứu sinh bơm hơi phải được đặt ở đâu trên tàu?', 'atvb_antoan_sinhmang', 'atvb_q43_a2'),
+('atvb_q44', 'Khi tàu va chạm, nhiệm vụ đầu tiên của thuyền viên là gì?', 'atvb_antoan_sinhmang', 'atvb_q44_a2'),
+('atvb_q45', 'Khi phát hiện lỗ thủng trên vỏ tàu, dụng cụ nào được sử dụng để xác định vị trí?', 'atvb_antoan_sinhmang', 'atvb_q45_a1'),
+('atvb_q46', 'Để bịt lỗ thủng lớn hơn 5cm² trên vỏ tàu, cần sử dụng gì?', 'atvb_antoan_sinhmang', 'atvb_q46_a2'),
+('atvb_q47', 'Khi phải rời tàu, ai là người rời tàu cuối cùng?', 'atvb_antoan_sinhmang', 'atvb_q47_a2'),
+('atvb_q48', 'Khi cấp cứu người đuối nước, cần giữ tư thế nào khi đưa lên bờ?', 'atvb_antoan_sinhmang', 'atvb_q48_a2'),
+('atvb_q49', 'Phương pháp CPR (hô hấp nhân tạo và nén ngực) được áp dụng khi nào?', 'atvb_antoan_sinhmang', 'atvb_q49_a2'),
+('atvb_q50', 'Khi cấp cứu người bị gãy xương, điều cần tránh là gì?', 'atvb_antoan_sinhmang', 'atvb_q50_a1')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id;
+
+INSERT INTO answers (id, text, question_id) VALUES
+('atvb_q21_a1', '6 giờ.', 'atvb_q21'), ('atvb_q21_a2', '8 giờ.', 'atvb_q21'), ('atvb_q21_a3', '4 giờ.', 'atvb_q21'), ('atvb_q21_a4', '12 giờ.', 'atvb_q21'),
+('atvb_q22_a1', 'Khi thời tiết xấu và tầm nhìn hạn chế.', 'atvb_q22'), ('atvb_q22_a2', 'Khi vùng biển an toàn, tầm nhìn tốt và thuyền phó có đủ năng lực.', 'atvb_q22'), ('atvb_q22_a3', 'Khi mật độ tàu bè qua lại đông đúc.', 'atvb_q22'), ('atvb_q22_a4', 'Khi tàu không có thiết bị lái tự động.', 'atvb_q22'),
+('atvb_q23_a1', 'Hoàn thành tuần tra boong tàu trước.', 'atvb_q23'), ('atvb_q23_a2', 'Thị giác của mình và thủy thủ đã quen với bóng tối.', 'atvb_q23'), ('atvb_q23_a3', 'Kiểm tra tất cả đèn hành trình.', 'atvb_q23'), ('atvb_q23_a4', 'Ghi chép nhật ký ca trước.', 'atvb_q23'),
+('atvb_q24_a1', 'Khi thời tiết bình thường và tầm nhìn tốt.', 'atvb_q24'), ('atvb_q24_a2', 'Khi nhận được tín hiệu cấp cứu hoặc cảnh báo hàng hải quan trọng.', 'atvb_q24'), ('atvb_q24_a3', 'Khi tàu di chuyển đúng tuyến đường.', 'atvb_q24'), ('atvb_q24_a4', 'Khi thủy thủ hoàn thành nhiệm vụ cảnh giới.', 'atvb_q24'),
+('atvb_q25_a1', 'Kiểm tra hàng hóa trong hầm.', 'atvb_q25'), ('atvb_q25_a2', 'Theo dõi vị trí neo và tình hình thời tiết để tránh neo trôi, neo bò.', 'atvb_q25'), ('atvb_q25_a3', 'Ghi chép nhật ký máy.', 'atvb_q25'), ('atvb_q25_a4', 'Kiểm tra thiết bị cứu sinh.', 'atvb_q25'),
+('atvb_q26_a1', 'Độ sâu mạn tàu, thủy triều và dây buộc tàu.', 'atvb_q26'), ('atvb_q26_a2', 'Tình trạng radar trên buồng lái.', 'atvb_q26'), ('atvb_q26_a3', 'Kiểm tra thiết bị chữa cháy.', 'atvb_q26'), ('atvb_q26_a4', 'Ghi chép nhật ký boong.', 'atvb_q26'),
+('atvb_q27_a1', 'Sử dụng thiết bị hiện đại không đúng cách', 'atvb_q27'), ('atvb_q27_a2', 'Vi phạm quy định an toàn phòng chống cháy nổ.', 'atvb_q27'), ('atvb_q27_a3', 'Thiếu thiết bị chữa cháy.', 'atvb_q27'), ('atvb_q27_a4', 'Thời tiết khắc nghiệt', 'atvb_q27'),
+('atvb_q28_a1', 'Chập điện hoặc tia lửa từ máy hàn khi chưa đảm bảo an toàn.', 'atvb_q28'), ('atvb_q28_a2', 'Sử dụng áo phao không đúng cách.', 'atvb_q28'), ('atvb_q28_a3', 'Thiếu dây neo.', 'atvb_q28'), ('atvb_q28_a4', 'Tầm nhìn hạn chế.', 'atvb_q28'),
+('atvb_q29_a1', 'Mở cửa thông gió để giảm khói.', 'atvb_q29'), ('atvb_q29_a2', 'Phát tín hiệu báo động cháy và thông báo vị trí đám cháy.', 'atvb_q29'), ('atvb_q29_a3', 'Sử dụng nước để dập lửa ngay.', 'atvb_q29'), ('atvb_q29_a4', 'Kiểm tra thiết bị cứu sinh.', 'atvb_q29'),
+('atvb_q30_a1', 'Báo ngay cho thuyền trưởng, lực lượng chữa cháy của cảng và địa phương.', 'atvb_q30'), ('atvb_q30_a2', 'Tiếp tục xếp dỡ hàng hóa.', 'atvb_q30'), ('atvb_q30_a3', 'Đóng tất cả cửa hầm hàng.', 'atvb_q30'), ('atvb_q30_a4', 'Chờ lệnh từ thuyền trưởng.', 'atvb_q30'),
+('atvb_q31_a1', 'Nước, không khí, nhiệt độ.', 'atvb_q31'), ('atvb_q31_a2', 'Chất cháy, oxy, nguồn nhiệt.', 'atvb_q31'), ('atvb_q31_a3', 'Khí CO2, ánh sáng, chất lỏng.', 'atvb_q31'), ('atvb_q31_a4', 'Điện, khói, vật liệu rắn.', 'atvb_q31'),
+('atvb_q32_a1', 'Cháy chất lỏng như xăng dầu', 'atvb_q32'), ('atvb_q32_a2', 'Cháy vật liệu rắn thông thường như gỗ, giấy', 'atvb_q32'), ('atvb_q32_a3', 'Cháy khí hoặc hơi', 'atvb_q32'), ('atvb_q32_a4', 'Cháy kim loại', 'atvb_q32'),
+('atvb_q33_a1', 'Nước.', 'atvb_q33'), ('atvb_q33_a2', 'Khí CO2.', 'atvb_q33'), ('atvb_q33_a3', 'Bột chữa cháy BC.', 'atvb_q33'), ('atvb_q33_a4', 'Bọt hóa học.', 'atvb_q33'),
+('atvb_q34_a1', 'Nước làm tăng nhiệt độ cháy.', 'atvb_q34'), ('atvb_q34_a2', 'Nước nặng hơn xăng dầu, làm lửa lan rộng.', 'atvb_q34'), ('atvb_q34_a3', 'Nước gây chập điện.', 'atvb_q34'), ('atvb_q34_a4', 'Nước làm giảm oxy.', 'atvb_q34'),
+('atvb_q35_a1', 'Tăng nhiệt độ đám cháy.', 'atvb_q35'), ('atvb_q35_a2', 'Làm lạnh và làm ngạt bằng cách giảm nồng độ oxy.', 'atvb_q35'), ('atvb_q35_a3', 'Tạo màng ngăn chất cháy.', 'atvb_q35'), ('atvb_q35_a4', 'Làm ướt bề mặt chất cháy.', 'atvb_q35'),
+('atvb_q36_a1', 'Nơi ẩm ướt để tránh khô khí.', 'atvb_q36'), ('atvb_q36_a2', 'Nơi thoáng mát, dễ thấy và dễ lấy.', 'atvb_q36'), ('atvb_q36_a3', 'Trong hầm hàng để tiết kiệm không gian.', 'atvb_q36'), ('atvb_q36_a4', 'Gần nguồn nhiệt để sẵn sàng sử dụng.', 'atvb_q36'),
+('atvb_q37_a1', 'Làm lạnh đám cháy.', 'atvb_q37'), ('atvb_q37_a2', 'Ngăn cách chất cháy với không khí.', 'atvb_q37'), ('atvb_q37_a3', 'Tăng nồng độ oxy.', 'atvb_q37'), ('atvb_q37_a4', 'Giảm áp suất trong khu vực cháy.', 'atvb_q37'),
+('atvb_q38_a1', 'Trên boong tàu.', 'atvb_q38'), ('atvb_q38_a2', 'Trong các khu vực kín như buồng máy với hệ thống CO2', 'atvb_q38'), ('atvb_q38_a3', 'Khu vực sinh hoạt.', 'atvb_q38'), ('atvb_q38_a4', 'Hầm hàng chứa xăng dầu.', 'atvb_q38'),
+('atvb_q39_a1', 'Phun nước trực tiếp vào buồng máy.', 'atvb_q39'), ('atvb_q39_a2', 'Ngừng thông gió, đóng cửa và phun CO2.', 'atvb_q39'), ('atvb_q39_a3', 'Mở cửa để giảm khói.', 'atvb_q39'), ('atvb_q39_a4', 'Sử dụng bột chữa cháy ABC.', 'atvb_q39'),
+('atvb_q40_a1', 'Nước', 'atvb_q40'), ('atvb_q40_a2', 'Bọt chữa cháy', 'atvb_q40'), ('atvb_q40_a3', 'Cát', 'atvb_q40'), ('atvb_q40_a4', 'Khí argon', 'atvb_q40'),
+('atvb_q41_a1', 'Tăng hiệu quả vận hành tàu.', 'atvb_q41'), ('atvb_q41_a2', 'Bảo tồn tính mạng và kéo dài thời gian chờ cứu hộ.', 'atvb_q41'), ('atvb_q41_a3', 'Giảm chi phí bảo trì tàu', 'atvb_q41'), ('atvb_q41_a4', 'Đảm bảo hàng hóa an toàn.', 'atvb_q41'),
+('atvb_q42_a1', 'Mặc áo phao đúng quy cách và bơi khi mặc áo phao.', 'atvb_q42'), ('atvb_q42_a2', 'Sửa chữa áo phao.', 'atvb_q42'), ('atvb_q42_a3', 'Ghi chép nhật ký cứu sinh.', 'atvb_q42'), ('atvb_q42_a4', 'Kiểm tra radar.', 'atvb_q42'),
+('atvb_q43_a1', 'Trong hầm hàng để bảo vệ.', 'atvb_q43'), ('atvb_q43_a2', 'Trong hộp có sức nổi riêng, ở nơi dễ thả và không cản trở việc nổi tự do của nó.', 'atvb_q43'), ('atvb_q43_a3', 'Trên boong tàu mà không cần hộp.', 'atvb_q43'), ('atvb_q43_a4', 'Gần buồng máy.', 'atvb_q43'),
+('atvb_q44_a1', 'Kiểm tra hàng hóa.', 'atvb_q44'), ('atvb_q44_a2', 'Kiểm tra mức độ hư hỏng và tập trung xử lý sự cố.', 'atvb_q44'), ('atvb_q44_a3', 'Ghi chép nhật ký sự cố.', 'atvb_q44'), ('atvb_q44_a4', 'Thả neo ngay lập tức.', 'atvb_q44'),
+('atvb_q45_a1', 'Vợt hoặc quan sát bằng mắt thường.', 'atvb_q45'), ('atvb_q45_a2', 'Radar.', 'atvb_q45'), ('atvb_q45_a3', 'Máy đo độ sâu.', 'atvb_q45'), ('atvb_q45_a4', 'Bình CO2.', 'atvb_q45'),
+('atvb_q46_a1', 'Miếng gỗ tròn.', 'atvb_q46'), ('atvb_q46_a2', 'Bạt chống thủng chuyên dùng và dây buộc.', 'atvb_q46'), ('atvb_q46_a3', 'Roăng cao su.', 'atvb_q46'), ('atvb_q46_a4', 'Băng gạc.', 'atvb_q46'),
+('atvb_q47_a1', 'Thủy thủ.', 'atvb_q47'), ('atvb_q47_a2', 'Thuyền trưởng.', 'atvb_q47'), ('atvb_q47_a3', 'Máy trưởng.', 'atvb_q47'), ('atvb_q47_a4', 'Thuyền phó.', 'atvb_q47'),
+('atvb_q48_a1', 'Đầu cao hơn ngực.', 'atvb_q48'), ('atvb_q48_a2', 'Đầu thấp hơn ngực để giảm nguy cơ nuốt nước.', 'atvb_q48'), ('atvb_q48_a3', 'Nằm nghiêng hoàn toàn.', 'atvb_q48'), ('atvb_q48_a4', 'Ngồi thẳng.', 'atvb_q48'),
+('atvb_q49_a1', 'Khi nạn nhân còn thở nhưng bất tỉnh.', 'atvb_q49'), ('atvb_q49_a2', 'Khi nạn nhân ngừng thở và mạch không đập.', 'atvb_q49'), ('atvb_q49_a3', 'Khi nạn nhân bị gãy xương.', 'atvb_q49'), ('atvb_q49_a4', 'Khi nạn nhân bị sốc nhẹ.', 'atvb_q49'),
+('atvb_q50_a1', 'Co kéo hoặc lắc chi bị gãy.', 'atvb_q50'), ('atvb_q50_a2', 'Sử dụng nẹp cố định.', 'atvb_q50'), ('atvb_q50_a3', 'Di chuyển bằng cáng cứng.', 'atvb_q50'), ('atvb_q50_a4', 'Băng ép vết thương.', 'atvb_q50')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === KẾT THÚC SCRIPT ===

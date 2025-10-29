@@ -1,0 +1,363 @@
+-- Hướng dẫn: File 2/2 cho hạng T1
+-- Chạy file này SAU KHI đã chạy file 'supabase_data_t1_luat.txt'.
+-- File này sẽ thêm 3 môn còn lại (100 câu).
+-- 1. Vào project Supabase của anh.
+-- 2. Mở SQL Editor.
+-- 3. Tạo một query mới và dán TOÀN BỘ nội dung file này vào.
+-- 4. Nhấn "RUN".
+
+-- === BƯỚC 1: TẠO VÀ CẬP NHẬT CẤU TRÚC BẢNG (NẾU CẦN) ===
+CREATE TABLE IF NOT EXISTS licenses (id TEXT PRIMARY KEY, name TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS subjects (id TEXT PRIMARY KEY, name TEXT NOT NULL, license_id TEXT REFERENCES licenses(id) ON DELETE CASCADE);
+CREATE TABLE IF NOT EXISTS questions (id TEXT PRIMARY KEY, text TEXT NOT NULL, image TEXT, subject_id TEXT REFERENCES subjects(id) ON DELETE CASCADE, correct_answer_id TEXT);
+CREATE TABLE IF NOT EXISTS answers (id TEXT PRIMARY KEY, text TEXT NOT NULL, question_id TEXT REFERENCES questions(id) ON DELETE CASCADE);
+
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'licenses' AND column_name = 'display_order') THEN ALTER TABLE licenses ADD COLUMN display_order INT; END IF; END$$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'subjects' AND column_name = 'display_order') THEN ALTER TABLE subjects ADD COLUMN display_order INT; END IF; END$$;
+
+
+-- === BƯỚC 2: CHÈN DỮ LIỆU CÁC MÔN CÒN LẠI ===
+
+-- === HẠNG BẰNG: THUYỀN TRƯỞNG HẠNG NHẤT - T1 ===
+-- Lệnh này để đảm bảo hạng bằng tồn tại, an toàn để chạy lại.
+INSERT INTO licenses (id, name, display_order) VALUES
+('thuyentruong-h1', 'Thuyền trưởng hạng nhất - T1', 4)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, display_order = EXCLUDED.display_order;
+
+-- Thêm các môn học còn lại
+INSERT INTO subjects (id, name, license_id, display_order) VALUES
+('t1_ktvt', 'Kinh tế vận tải', 'thuyentruong-h1', 2),
+('t1_hh', 'Hàng hải và thiết bị hàng hải', 'thuyentruong-h1', 3),
+('t1_nvtt', 'Nghiệp vụ thuyền trưởng', 'thuyentruong-h1', 4)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, license_id = EXCLUDED.license_id, display_order = EXCLUDED.display_order;
+
+
+-- === MÔN: KINH TẾ VẬN TẢI (35 câu) ===
+
+INSERT INTO questions (id, text, subject_id) VALUES
+('t1_ktvt_q151', 'Chi phí nhiên liệu tính theo TKm của ngành vận tải thủy nội địa so với các ngành vận tải đường sắt, đường bộ và đường hàng không:', 't1_ktvt'),
+('t1_ktvt_q152', 'Năng suất lao động của vận tải thủy nội địa:', 't1_ktvt'),
+('t1_ktvt_q153', 'Ngành vận tải thủy nội địa có những đặc điểm:', 't1_ktvt'),
+('t1_ktvt_q154', 'Trường hợp phát hiện hàng hóa có hiện tượng tự bốc cháy, rò rỉ, đổ vỡ thì người kinh doanh vận tải phải thực hiện', 't1_ktvt'),
+('t1_ktvt_q155', 'Trước khi vận tải nếu phát hiện hàng hóa thuộc loại nguy hiểm, hàng hóa cấm lưu thông thì người kinh doanh vận tải', 't1_ktvt'),
+('t1_ktvt_q156', 'Trên đường vận tải nếu phát hiện hàng hóa thông thường không đúng với kê khai của người thuê vận tải thì người kinh doanh vận tải', 't1_ktvt'),
+('t1_ktvt_q157', 'Trên đường vận tải nếu phát hiện hàng hóa thuộc loại nguy hiểm, hàng hóa cấm lưu thông thì người thuê vận tải', 't1_ktvt'),
+('t1_ktvt_q158', 'Trường hợp phương tiện không xuất bến đúng thời gian quy định, hành khách phải chờ đợi qua đêm thì người kinh doanh vận tải', 't1_ktvt'),
+('t1_ktvt_q159', 'Trường hợp hành lý ký gửi, bao gửi hư hỏng, thiếu hụt hoặc mất mát do lỗi của người kinh doanh vận tải thì phải bồi thường', 't1_ktvt'),
+('t1_ktvt_q160', 'Kiểm định hàng hóa gồm phương pháp nào?', 't1_ktvt'),
+('t1_ktvt_q161', 'Kiểm định hàng hóa bằng phương pháp cảm quan có ưu điểm gì?', 't1_ktvt'),
+('t1_ktvt_q162', 'Năng suất lao động của thuyền viên là', 't1_ktvt'),
+('t1_ktvt_q163', 'Năng suất lao động của đầu máy là', 't1_ktvt'),
+('t1_ktvt_q164', 'Đơn vị tính năng suất lao động đối với tàu (đoàn tàu) là', 't1_ktvt'),
+('t1_ktvt_q165', 'Năng suất lao động của vận tải càng cao thì', 't1_ktvt'),
+('t1_ktvt_q166', 'Biện pháp nào để nâng cao năng suất lao động và năng suất phương tiện?', 't1_ktvt'),
+('t1_ktvt_q167', 'Giá thành vận chuyển là', 't1_ktvt'),
+('t1_ktvt_q168', 'Giá cước được xây dựng dựa vào yếu tố nào?', 't1_ktvt'),
+('t1_ktvt_q169', 'Biện pháp nào để hạ giá thành vận chuyển?', 't1_ktvt'),
+('t1_ktvt_q170', 'Nguyên nhân nào gây ra sự cố thương vụ ?', 't1_ktvt'),
+('t1_ktvt_q171', 'Hợp đồng vận chuyển là', 't1_ktvt'),
+('t1_ktvt_q172', 'Quyền và nghĩa vụ của bên vận chuyển là', 't1_ktvt'),
+('t1_ktvt_q173', 'Quyền và nghĩa vụ của bên vận chuyển là', 't1_ktvt'),
+('t1_ktvt_q174', 'Phương pháp xác định trọng lượng hàng hóa bằng vạch mớn nước trên vỏ tàu có tác dụng nào?', 't1_ktvt'),
+('t1_ktvt_q175', 'Mục đích đo lường và kiểm định là', 't1_ktvt'),
+('t1_ktvt_q176', 'Đơn vị tính năng suất lao động đối với thuyền viên là', 't1_ktvt'),
+('t1_ktvt_q177', 'Giá thành vận tải thủy nội địa càng hạ thể hiện khả năng nào của doanh nghiệp vận tải?', 't1_ktvt'),
+('t1_ktvt_q178', 'Khoản mục chi phí nào của lương để tính giá thành?', 't1_ktvt'),
+('t1_ktvt_q179', 'Để nâng cao năng suất lao động vận tải, thuyền trưởng phải làm gì?', 't1_ktvt'),
+('t1_ktvt_q180', 'Sự cố thương vụ là', 't1_ktvt'),
+('t1_ktvt_q181', 'Phương tiện vận tải bị trưng dụng do lệnh của cơ quan có thẩm quyền thì thuyền trưởng, người lái phương tiện phải thông báo cho ai?', 't1_ktvt'),
+('t1_ktvt_q182', 'Chi phí khấu hao bao gồm', 't1_ktvt'),
+('t1_ktvt_q183', 'Giá thành phụ thuộc vào mấy yếu tố cơ bản?', 't1_ktvt'),
+('t1_ktvt_q184', 'Giá thành phụ thuộc vào yếu tố cơ bản nào?', 't1_ktvt'),
+('t1_ktvt_q185', 'Nội dung của hợp đồng vận chuyển là thể hiện', 't1_ktvt')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id;
+
+UPDATE questions SET correct_answer_id = 't1_ktvt_q151_a3' WHERE id = 't1_ktvt_q151';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q152_a3' WHERE id = 't1_ktvt_q152';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q153_a1' WHERE id = 't1_ktvt_q153';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q154_a1' WHERE id = 't1_ktvt_q154';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q155_a4' WHERE id = 't1_ktvt_q155';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q156_a4' WHERE id = 't1_ktvt_q156';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q157_a4' WHERE id = 't1_ktvt_q157';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q158_a2' WHERE id = 't1_ktvt_q158';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q159_a3' WHERE id = 't1_ktvt_q159';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q160_a4' WHERE id = 't1_ktvt_q160';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q161_a3' WHERE id = 't1_ktvt_q161';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q162_a1' WHERE id = 't1_ktvt_q162';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q163_a1' WHERE id = 't1_ktvt_q163';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q164_a3' WHERE id = 't1_ktvt_q164';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q165_a1' WHERE id = 't1_ktvt_q165';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q166_a2' WHERE id = 't1_ktvt_q166';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q167_a4' WHERE id = 't1_ktvt_q167';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q168_a3' WHERE id = 't1_ktvt_q168';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q169_a1' WHERE id = 't1_ktvt_q169';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q170_a2' WHERE id = 't1_ktvt_q170';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q171_a1' WHERE id = 't1_ktvt_q171';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q172_a4' WHERE id = 't1_ktvt_q172';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q173_a1' WHERE id = 't1_ktvt_q173';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q174_a1' WHERE id = 't1_ktvt_q174';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q175_a3' WHERE id = 't1_ktvt_q175';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q176_a1' WHERE id = 't1_ktvt_q176';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q177_a1' WHERE id = 't1_ktvt_q177';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q178_a3' WHERE id = 't1_ktvt_q178';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q179_a4' WHERE id = 't1_ktvt_q179';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q180_a1' WHERE id = 't1_ktvt_q180';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q181_a3' WHERE id = 't1_ktvt_q181';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q182_a4' WHERE id = 't1_ktvt_q182';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q183_a1' WHERE id = 't1_ktvt_q183';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q184_a4' WHERE id = 't1_ktvt_q184';
+UPDATE questions SET correct_answer_id = 't1_ktvt_q185_a3' WHERE id = 't1_ktvt_q185';
+
+INSERT INTO answers (id, text, question_id) VALUES
+('t1_ktvt_q151_a1', 'Cao hơn', 't1_ktvt_q151'), ('t1_ktvt_q151_a2', 'Cao hơn đường sắt, thấp hơn đường bộ', 't1_ktvt_q151'), ('t1_ktvt_q151_a3', 'Thấp hơn', 't1_ktvt_q151'), ('t1_ktvt_q151_a4', 'Bằng nhau', 't1_ktvt_q151'),
+('t1_ktvt_q152_a1', 'Bằng vận tải đường sắt', 't1_ktvt_q152'), ('t1_ktvt_q152_a2', 'Cao hơn vận tải đường bộ', 't1_ktvt_q152'), ('t1_ktvt_q152_a3', 'Thấp hơn vận tải hàng không', 't1_ktvt_q152'), ('t1_ktvt_q152_a4', 'Bằng vận tải đường sắt và đường bộ.', 't1_ktvt_q152'),
+('t1_ktvt_q153_a1', 'Tốc độ vận tải thấp và giá thành vận tải thấp.', 't1_ktvt_q153'), ('t1_ktvt_q153_a2', 'Tốc độ vận tải cao và giá thành vận tải thấp.', 't1_ktvt_q153'), ('t1_ktvt_q153_a3', 'Tốc độ vận tải thấp và giá thành vận tải cao.', 't1_ktvt_q153'), ('t1_ktvt_q153_a4', 'Tốc độ vận tải cao và giá thành vận tải cao.', 't1_ktvt_q153'),
+('t1_ktvt_q154_a1', 'Các biện pháp ngăn chặn để bảo vệ người, hàng hóa và phương tiện.', 't1_ktvt_q154'), ('t1_ktvt_q154_a2', 'Lập biên bản có xác nhận của người thuê vận tải.', 't1_ktvt_q154'), ('t1_ktvt_q154_a3', 'Báo cho cơ quan Cảng vụ biết.', 't1_ktvt_q154'), ('t1_ktvt_q154_a4', 'Báo cho Cảnh sát giao thông đường thủy biết.', 't1_ktvt_q154'),
+('t1_ktvt_q155_a1', 'Không báo cho người thuê vận tải biết và tiếp tục vận tải đến nơi trả hàng', 't1_ktvt_q155'), ('t1_ktvt_q155_a2', 'Báo cho người thuê vận tải biết và cho tàu dừng lại', 't1_ktvt_q155'), ('t1_ktvt_q155_a3', 'Báo cho người thuê vận tải biết và vận tải quay về nơi nhận hàng', 't1_ktvt_q155'), ('t1_ktvt_q155_a4', 'Phải đưa lên bờ và thông báo cho Cảng vụ hoặc hoặc cơ quan có thẩm quyền biết để xử lý theo quy định của pháp luật.', 't1_ktvt_q155'),
+('t1_ktvt_q156_a1', 'Báo cho người thuê vận tải biết và tiếp tục vận tải đến nơi trả hàng', 't1_ktvt_q156'), ('t1_ktvt_q156_a2', 'Báo cho người thuê vận tải biết và cho tàu dừng lại', 't1_ktvt_q156'), ('t1_ktvt_q156_a3', 'Báo cho người thuê vận tải biết và vận tải quay về nơi nhận hàng', 't1_ktvt_q156'), ('t1_ktvt_q156_a4', 'Không báo cho người thuê vận tải biết và tiếp tục vận tải đến nơi trả hàng', 't1_ktvt_q156'),
+('t1_ktvt_q157_a1', 'Phải thanh toán các chi phí cho cơ quan Cảng vụ.', 't1_ktvt_q157'), ('t1_ktvt_q157_a2', 'Phải thanh toán các chi phí cho cơ quan Công an.', 't1_ktvt_q157'), ('t1_ktvt_q157_a3', 'Phải thanh toán các chi phí cho cơ quan bảo hiểm theo quy định.', 't1_ktvt_q157'), ('t1_ktvt_q157_a4', 'Phải thanh toán các chi phí và tổn thất phát sinh cho người kinh doanh vận tải.', 't1_ktvt_q157'),
+('t1_ktvt_q158_a1', 'Phải bố trí nơi ăn, nghỉ cho hành khách và không chịu chi phí', 't1_ktvt_q158'), ('t1_ktvt_q158_a2', 'Phải bố trí nơi ăn, nghỉ cho hành khách và chịu 100% các chi phí', 't1_ktvt_q158'), ('t1_ktvt_q158_a3', 'Phải bố trí nơi ăn, nghỉ cho hành khách và chịu 75% các chi phí', 't1_ktvt_q158'), ('t1_ktvt_q158_a4', 'Phải bố trí nơi ăn, nghỉ cho hành khách và chịu 50% chi phí một phần theo quy định', 't1_ktvt_q158'),
+('t1_ktvt_q159_a1', 'Theo yêu cầu của bên vận tải.', 't1_ktvt_q159'), ('t1_ktvt_q159_a2', 'Theo 50% giá trị trên hóa đơn mua hàng và các chi phí hợp lý khác.', 't1_ktvt_q159'), ('t1_ktvt_q159_a3', 'Theo giá trị đã kê khai đối với hành lý ký gửi, bao gửi có kê khai giá trị.', 't1_ktvt_q159'), ('t1_ktvt_q159_a4', 'Theo khả năng tài chính của bên kinh doanh vận tải.', 't1_ktvt_q159'),
+('t1_ktvt_q160_a1', 'Phương pháp cảm quan', 't1_ktvt_q160'), ('t1_ktvt_q160_a2', 'Phương pháp phân tích trong phòng thí nghiệm', 't1_ktvt_q160'), ('t1_ktvt_q160_a3', 'Phương pháp kiểm tra ngẫu nhiên', 't1_ktvt_q160'), ('t1_ktvt_q160_a4', 'Phương pháp cảm quan và phương pháp phân tích trong phòng thí nghiệm', 't1_ktvt_q160'),
+('t1_ktvt_q161_a1', 'Chậm nhưng không phải mua sắm các thiết bị phức tạp', 't1_ktvt_q161'), ('t1_ktvt_q161_a2', 'Không phải mua sắm các thiết bị phức tạp', 't1_ktvt_q161'), ('t1_ktvt_q161_a3', 'Nhanh, đơn giản, không phải mua sắm các thiết bị phức tạp', 't1_ktvt_q161'), ('t1_ktvt_q161_a4', 'Độ chính xác cao', 't1_ktvt_q161'),
+('t1_ktvt_q162_a1', 'Số sản phẩm làm ra của một thuyền viên trong một đơn vị thời gian.', 't1_ktvt_q162'), ('t1_ktvt_q162_a2', 'Số sản phẩm làm ra của tất cả thuyền viên trên tàu trong một đơn vị thời gian.', 't1_ktvt_q162'), ('t1_ktvt_q162_a3', 'Số sản phẩm làm ra của một sức ngựa trong một đơn vị thời gian.', 't1_ktvt_q162'), ('t1_ktvt_q162_a4', 'Số sản phẩm làm ra của một tấn phương tiện trong một đơn vị thời gian.', 't1_ktvt_q162'),
+('t1_ktvt_q163_a1', 'Số sản phẩm làm ra của một sức ngựa trong một đơn vị thời gian.', 't1_ktvt_q163'), ('t1_ktvt_q163_a2', 'Số sản phẩm làm ra của mười (10) sức ngựa trong một đơn vị thời gian.', 't1_ktvt_q163'), ('t1_ktvt_q163_a3', 'Số sản phẩm làm ra của một trăm (100) sức ngựa trong một đơn vị thời gian.', 't1_ktvt_q163'), ('t1_ktvt_q163_a4', 'Số sản phẩm làm ra của công suất máy trong một đơn vị thời gian.', 't1_ktvt_q163'),
+('t1_ktvt_q164_a1', 'Tkm/người/Nvd', 't1_ktvt_q164'), ('t1_ktvt_q164_a2', 'Tm/Hp/ Nvd', 't1_ktvt_q164'), ('t1_ktvt_q164_a3', 'Tkm/Tpt/Nvd', 't1_ktvt_q164'), ('t1_ktvt_q164_a4', 'Tkm/Tpt', 't1_ktvt_q164'),
+('t1_ktvt_q165_a1', 'Giá thành vận tải hạ', 't1_ktvt_q165'), ('t1_ktvt_q165_a2', 'Giá thành vận tải tăng', 't1_ktvt_q165'), ('t1_ktvt_q165_a3', 'Giá thành vận tải không thay đổi', 't1_ktvt_q165'), ('t1_ktvt_q165_a4', 'Khi tăng khi giảm', 't1_ktvt_q165'),
+('t1_ktvt_q166_a1', 'Tận dụng hết trọng tải của phương tiện', 't1_ktvt_q166'), ('t1_ktvt_q166_a2', 'Tận dụng hết trọng tải và dung tích của phương tiện', 't1_ktvt_q166'), ('t1_ktvt_q166_a3', 'Cố gắng khai thác hàng chuyên tuyến, chạy hàng một chiều', 't1_ktvt_q166'), ('t1_ktvt_q166_a4', 'Hạn chế sử dụng các phương tiện có công suất lớn', 't1_ktvt_q166'),
+('t1_ktvt_q167_a1', 'Tổng chi phí cần thiết trong quá trình sản xuất vận tải thủy nội địa để làm ra 1 tấn hàng', 't1_ktvt_q167'), ('t1_ktvt_q167_a2', 'Tổng các khoản chi phí cần thiết và hợp lý để làm ra một số lượng sản phẩm là 1 tấn phương tiện', 't1_ktvt_q167'), ('t1_ktvt_q167_a3', 'Tổng chi phí cần thiết trong quá trình sản xuất vận tải thủy nội địa', 't1_ktvt_q167'), ('t1_ktvt_q167_a4', 'Tổng chi phí cần thiết trong quá trình sản xuất vận tải thủy nội địa để làm ra 1Tkm hay 1000Tkm.', 't1_ktvt_q167'),
+('t1_ktvt_q168_a1', 'Tổng chi phí lương và các khoản phụ cấp', 't1_ktvt_q168'), ('t1_ktvt_q168_a2', 'Tổng chi phí nhiên liệu', 't1_ktvt_q168'), ('t1_ktvt_q168_a3', 'Cơ sở giá thành', 't1_ktvt_q168'), ('t1_ktvt_q168_a4', 'Tổng chi phí xếp dỡ ở 2 đầu bến', 't1_ktvt_q168'),
+('t1_ktvt_q169_a1', 'Tăng lượng hàng hóa luân chuyển', 't1_ktvt_q169'), ('t1_ktvt_q169_a2', 'Tăng lượng hàng hóa vận chuyển', 't1_ktvt_q169'), ('t1_ktvt_q169_a3', 'Tăng cường các hợp đồng chạy hàng 2 chiều', 't1_ktvt_q169'), ('t1_ktvt_q169_a4', 'Tăng các khoản chi phí vật rẻ mau hỏng', 't1_ktvt_q169'),
+('t1_ktvt_q170_a1', 'Xếp dỡ hàng đúng kỹ thuật, hạn chế rách vỡ rơi vãi hàng.', 't1_ktvt_q170'), ('t1_ktvt_q170_a2', 'Phương tiện vận chuyển không chuyên dùng, không phù hợp với loại hàng.', 't1_ktvt_q170'), ('t1_ktvt_q170_a3', 'Bao gói đúng kỹ thuật, nên hàng ít bị hư hỏng.', 't1_ktvt_q170'), ('t1_ktvt_q170_a4', 'Giao nhận hàng tại bến, giữa giấy tờ và hàng thực tế khớp nhau.', 't1_ktvt_q170'),
+('t1_ktvt_q171_a1', 'Sự thỏa thuận giữa bên vận chuyển và bên thuê vận chuyển', 't1_ktvt_q171'), ('t1_ktvt_q171_a2', 'Sự thỏa thuận giữa bên vận chuyển và bên kinh doanh vận tải', 't1_ktvt_q171'), ('t1_ktvt_q171_a3', 'Sự thỏa thuận giữa bên vận chuyển và chủ tàu', 't1_ktvt_q171'), ('t1_ktvt_q171_a4', 'Sự thỏa thuận giữa bên thuê vận chuyển và chủ hàng', 't1_ktvt_q171'),
+('t1_ktvt_q172_a1', 'Phương tiện vận chuyển phải đáp ứng yêu cầu tiếp nhận.', 't1_ktvt_q172'), ('t1_ktvt_q172_a2', 'Phương tiện phải vận chuyển và bảo quản hàng hoá phù hợp với tính chất hàng hoá.', 't1_ktvt_q172'), ('t1_ktvt_q172_a3', 'Có thể thay đổi phương tiện vận chuyển dựa theo tình hình thực tế của doanh nghiệp vận tải.', 't1_ktvt_q172'), ('t1_ktvt_q172_a4', 'Phương tiện vận chuyển phải đáp ứng yêu cầu tiếp nhận, vận chuyển và bảo quản hàng hoá phù hợp với tính chất hàng hoá.', 't1_ktvt_q172'),
+('t1_ktvt_q173_a1', 'Được quyền từ chối vận chuyển tài sản không đúng với loại tài sản đã thoả thuận trong hợp đồng', 't1_ktvt_q173'), ('t1_ktvt_q173_a2', 'Được quyền từ chối nhận những hàng hoá không đảm bảo các tiêu chuẩn đóng gói cần thiết theo thoả thuận của các bên', 't1_ktvt_q173'), ('t1_ktvt_q173_a3', 'Được quyền từ chối vận chuyển hàng hoá cấm lưu thông, hàng hoá có tính chất nguy hiểm, độc hại.', 't1_ktvt_q173'), ('t1_ktvt_q173_a4', 'Yêu cầu bên thuê vận chuyển phải sắp xếp hàng hóa theo đúng hướng dẫn.', 't1_ktvt_q173'),
+('t1_ktvt_q174_a1', 'Nhanh chóng', 't1_ktvt_q174'), ('t1_ktvt_q174_a2', 'Chính xác', 't1_ktvt_q174'), ('t1_ktvt_q174_a3', 'Chỉ dùng xác định các loại hàng có khối lượng nhỏ', 't1_ktvt_q174'), ('t1_ktvt_q174_a4', 'Dùng để xác định hàng hóa có giá trị cao', 't1_ktvt_q174'),
+('t1_ktvt_q175_a1', 'Biết trọng lượng của hàng để điều phương tiện vận chuyển cho phù hợp.', 't1_ktvt_q175'), ('t1_ktvt_q175_a2', 'Biết thể tích chiếm chỗ của hàng để điều phương tiện vận chuyển cho phù hợp.', 't1_ktvt_q175'), ('t1_ktvt_q175_a3', 'Biết trọng lượng và thể tích chiếm chỗ của hàng hóa để điều phương tiện vận chuyển cho phù hợp.', 't1_ktvt_q175'), ('t1_ktvt_q175_a4', 'Không phải tính toán các biện pháp bảo quản hàng trong thời gian vận chuyển', 't1_ktvt_q175'),
+('t1_ktvt_q176_a1', 'Tkm/người/Nvd', 't1_ktvt_q176'), ('t1_ktvt_q176_a2', 'Tm/Hp/ Nvd', 't1_ktvt_q176'), ('t1_ktvt_q176_a3', 'Tkm/Tpt/Nvd', 't1_ktvt_q176'), ('t1_ktvt_q176_a4', 'Tkm/Tpt', 't1_ktvt_q176'),
+('t1_ktvt_q177_a1', 'Quá trình sản xuất vận tải của doanh nghiệp hợp lý', 't1_ktvt_q177'), ('t1_ktvt_q177_a2', 'Quá trình sản xuất vận tải của doanh nghiệp không hợp lý', 't1_ktvt_q177'), ('t1_ktvt_q177_a3', 'Sự đi xuống của doanh nghiệp', 't1_ktvt_q177'), ('t1_ktvt_q177_a4', 'Tích lũy vốn cho doanh nghiệp ít', 't1_ktvt_q177'),
+('t1_ktvt_q178_a1', 'Khoản chi trả cho cán bộ công nhân viên đã trực tiếp tham gia vào quá trình sản xuất vận tải', 't1_ktvt_q178'), ('t1_ktvt_q178_a2', 'Khoản chi trả cho cán bộ công nhân viên đã gián tiếp tham gia vào quá trình sản xuất vận tải', 't1_ktvt_q178'), ('t1_ktvt_q178_a3', 'Khoản chi trả cho cán bộ công nhân viên đã trực tiếp và gián tiếp tham gia vào quá trình sản xuất vận tải', 't1_ktvt_q178'), ('t1_ktvt_q178_a4', 'Khoản chi trả cho cán bộ công nhân viên trong toàn doanh nghiệp vận tải', 't1_ktvt_q178'),
+('t1_ktvt_q179_a1', 'Trên đường đi, đỗ đúng cung, đúng chặng và bám bờ, bám bãi, lợi dụng con nước', 't1_ktvt_q179'), ('t1_ktvt_q179_a2', 'Tận dụng hết trọng tải và dung tích của phương tiện', 't1_ktvt_q179'), ('t1_ktvt_q179_a3', 'Áp dụng các kinh nghiệm chạy tàu tiên tiến', 't1_ktvt_q179'), ('t1_ktvt_q179_a4', 'Tất cả các ý trên', 't1_ktvt_q179'),
+('t1_ktvt_q180_a1', 'Hàng hóa trong các quá trình vận chuyển bị hư hỏng, biến chất', 't1_ktvt_q180'), ('t1_ktvt_q180_a2', 'Hàng hóa trong các quá trình vận chuyển hao hụt trong giới hạn cho phép', 't1_ktvt_q180'), ('t1_ktvt_q180_a3', 'Hàng hóa trong các quá trình vận chuyển được an toàn trọn vẹn', 't1_ktvt_q180'), ('t1_ktvt_q180_a4', 'Hàng hóa trong các quá trình vận chuyển không bị hư hỏng, biến chất', 't1_ktvt_q180'),
+('t1_ktvt_q181_a1', 'Cho người kinh doanh vận tải biết', 't1_ktvt_q181'), ('t1_ktvt_q181_a2', 'Cho người thuê vận tải biết', 't1_ktvt_q181'), ('t1_ktvt_q181_a3', 'Cho người kinh doanh vận tải biết và người thuê vận tải biết để phối hợp thực hiện', 't1_ktvt_q181'), ('t1_ktvt_q181_a4', 'Cho các phương tiện của doanh nghiệp biết để hỗ trợ khắc phục', 't1_ktvt_q181'),
+('t1_ktvt_q182_a1', 'Khấu hao cơ bản', 't1_ktvt_q182'), ('t1_ktvt_q182_a2', 'Khấu hao sửa chữa lớn', 't1_ktvt_q182'), ('t1_ktvt_q182_a3', 'Khấu hao sửa chữa vừa và nhỏ', 't1_ktvt_q182'), ('t1_ktvt_q182_a4', 'Khấu hao cơ bản và khấu hao sửa chữa lớn', 't1_ktvt_q182'),
+('t1_ktvt_q183_a1', '2 yếu tố', 't1_ktvt_q183'), ('t1_ktvt_q183_a2', '3 yếu tố', 't1_ktvt_q183'), ('t1_ktvt_q183_a3', '4 yếu tố', 't1_ktvt_q183'), ('t1_ktvt_q183_a4', '5 yếu tố', 't1_ktvt_q183'),
+('t1_ktvt_q184_a1', 'Tổng chi phí và tổng lượng hàng hóa vận chuyển', 't1_ktvt_q184'), ('t1_ktvt_q184_a2', 'Tổng lượng hàng hóa vận chuyển', 't1_ktvt_q184'), ('t1_ktvt_q184_a3', 'Tổng lượng hàng hóa luân chuyển', 't1_ktvt_q184'), ('t1_ktvt_q184_a4', 'Tổng chi phí và tổng lượng hàng hóa luân chuyển', 't1_ktvt_q184'),
+('t1_ktvt_q185_a1', 'Quyền và nghĩa vụ của bên vận chuyển', 't1_ktvt_q185'), ('t1_ktvt_q185_a2', 'Quyền và nghĩa vụ của bên thuê vận chuyển', 't1_ktvt_q185'), ('t1_ktvt_q185_a3', 'Quyền và nghĩa vụ của bên vận chuyển và bên thuê vận chuyển', 't1_ktvt_q185'), ('t1_ktvt_q185_a4', 'Quyền và nghĩa vụ của bên vận chuyển, bên thuê vận chuyển và bộ phận trung gian', 't1_ktvt_q185')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === MÔN: HÀNG HẢI VÀ THIẾT BỊ HÀNG HẢI (40 câu) ===
+
+INSERT INTO questions (id, text, subject_id) VALUES
+('t1_hh_q186', 'Trái đất tự quay quanh mình nó theo chiều', 't1_hh'),
+('t1_hh_q187', 'Mặt phẳng chân trời thật là', 't1_hh'),
+('t1_hh_q188', 'Vòng tròn lớn nằm trong mặt phẳng vuông góc với trục trái đất, đi qua tâm trái đất là', 't1_hh'),
+('t1_hh_q189', 'Vĩ độ của một điểm trên bề mặt trái đất được xác định bởi', 't1_hh'),
+('t1_hh_q190', 'Kinh độ của một điểm trên bề mặt trái đất được xác định bỏi', 't1_hh'),
+('t1_hh_q191', 'Phương vị thật của mục tiêu là', 't1_hh'),
+('t1_hh_q192', 'Hướng đi thật của tàu là', 't1_hh'),
+('t1_hh_q193', 'Hướng đi la bàn của tàu là', 't1_hh'),
+('t1_hh_q194', 'Hướng đi địa từ của tàu là', 't1_hh'),
+('t1_hh_q195', 'Góc mạn là', 't1_hh'),
+('t1_hh_q196', 'Phương vị la bàn của mục tiêu là', 't1_hh'),
+('t1_hh_q197', 'Độ lệch địa từ là', 't1_hh'),
+('t1_hh_q198', 'Sai số riêng la bàn từ là', 't1_hh'),
+('t1_hh_q199', 'Các mặt máy sử dụng trên tàu thường dùng', 't1_hh'),
+('t1_hh_q200', 'Trên radar CPA trong đồ giải radar có ý nghĩa là', 't1_hh'),
+('t1_hh_q201', 'Độ cao của an ten radar càng lớn thì', 't1_hh'),
+('t1_hh_q202', 'Trên radar TCPA trong đồ giải radar nghĩa có ý nghĩa là', 't1_hh'),
+('t1_hh_q203', 'Trong một vùng có nhiều radar hoạt động trên một giải tần có thể xuất hiện', 't1_hh'),
+('t1_hh_q204', 'Để đo được phương vị đến mục tiêu thì phải bố trí anten và tia quét sao cho', 't1_hh'),
+('t1_hh_q205', 'Trên radar núm chức năng đo khoảng cách tới mục tiêu có ký hiệu là', 't1_hh'),
+('t1_hh_q206', 'Trên radar núm chức năng đo phương vị điện tử tới mục tiêu có ký hiệu là', 't1_hh'),
+('t1_hh_q207', 'Thiết bị phản xạ sóng Radar phục vụ cho tìm kiếm và cứu nạn là', 't1_hh'),
+('t1_hh_q208', 'Núm chức năng A/C RAIN trên máy radar dùng để', 't1_hh'),
+('t1_hh_q209', 'Núm chức năng của A/C SEA trên máy radar dùng để', 't1_hh'),
+('t1_hh_q210', 'Số 0 hải đồ được tính từ', 't1_hh'),
+('t1_hh_q211', 'Trên hải đồ Việt Nam, có chỗ ghi 1₅ có ý nghĩa là', 't1_hh'),
+('t1_hh_q212', 'Trên hải đồ Việt Nam ký hiệu ............... chỉ đường đẳng sâu nào?', 't1_hh'),
+('t1_hh_q213', 'Trên hải đồ Việt Nam ký hiệu ------ chỉ đường đẳng sâu nào?', 't1_hh'),
+('t1_hh_q214', 'Trên hải đồ Việt Nam ký hiệu -... -... -... -... -... chỉ đường đẳng sâu nào?', 't1_hh'),
+('t1_hh_q215', 'Tốc độ kế thủy lực xác định', 't1_hh'),
+('t1_hh_q216', 'Máy đo sâu thông thường hiển thị', 't1_hh'),
+('t1_hh_q217', 'Khâu vệ tinh của hệ thống GPS gồm', 't1_hh'),
+('t1_hh_q218', 'GPS có mấy chế độ màn hình?', 't1_hh'),
+('t1_hh_q219', 'Nút ENT trên máy GPS có tác dụng', 't1_hh'),
+('t1_hh_q220', 'EPIRB là', 't1_hh'),
+('t1_hh_q221', 'Phương thức kích hoạt EPIRB gồm', 't1_hh'),
+('t1_hh_q222', 'Phương thức thông tin của EPIRB là', 't1_hh'),
+('t1_hh_q223', 'Đơn vị đo vận tốc Hải lý/giờ (Nơ) thường dùng để chỉ', 't1_hh'),
+('t1_hh_q224', 'Một hải lý ở vĩ độ 45° có chiều dài bao nhiêu?', 't1_hh'),
+('t1_hh_q225', 'Một hải lý có chiều dài là bằng bao nhiêu liên?', 't1_hh')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id;
+
+UPDATE questions SET correct_answer_id = 't1_hh_q186_a1' WHERE id = 't1_hh_q186';
+UPDATE questions SET correct_answer_id = 't1_hh_q187_a1' WHERE id = 't1_hh_q187';
+UPDATE questions SET correct_answer_id = 't1_hh_q188_a2' WHERE id = 't1_hh_q188';
+UPDATE questions SET correct_answer_id = 't1_hh_q189_a4' WHERE id = 't1_hh_q189';
+UPDATE questions SET correct_answer_id = 't1_hh_q190_a1' WHERE id = 't1_hh_q190';
+UPDATE questions SET correct_answer_id = 't1_hh_q191_a2' WHERE id = 't1_hh_q191';
+UPDATE questions SET correct_answer_id = 't1_hh_q192_a4' WHERE id = 't1_hh_q192';
+UPDATE questions SET correct_answer_id = 't1_hh_q193_a2' WHERE id = 't1_hh_q193';
+UPDATE questions SET correct_answer_id = 't1_hh_q194_a2' WHERE id = 't1_hh_q194';
+UPDATE questions SET correct_answer_id = 't1_hh_q195_a2' WHERE id = 't1_hh_q195';
+UPDATE questions SET correct_answer_id = 't1_hh_q196_a1' WHERE id = 't1_hh_q196';
+UPDATE questions SET correct_answer_id = 't1_hh_q197_a1' WHERE id = 't1_hh_q197';
+UPDATE questions SET correct_answer_id = 't1_hh_q198_a1' WHERE id = 't1_hh_q198';
+UPDATE questions SET correct_answer_id = 't1_hh_q199_a4' WHERE id = 't1_hh_q199';
+UPDATE questions SET correct_answer_id = 't1_hh_q200_a3' WHERE id = 't1_hh_q200';
+UPDATE questions SET correct_answer_id = 't1_hh_q201_a1' WHERE id = 't1_hh_q201';
+UPDATE questions SET correct_answer_id = 't1_hh_q202_a2' WHERE id = 't1_hh_q202';
+UPDATE questions SET correct_answer_id = 't1_hh_q203_a3' WHERE id = 't1_hh_q203';
+UPDATE questions SET correct_answer_id = 't1_hh_q204_a1' WHERE id = 't1_hh_q204';
+UPDATE questions SET correct_answer_id = 't1_hh_q205_a2' WHERE id = 't1_hh_q205';
+UPDATE questions SET correct_answer_id = 't1_hh_q206_a1' WHERE id = 't1_hh_q206';
+UPDATE questions SET correct_answer_id = 't1_hh_q207_a2' WHERE id = 't1_hh_q207';
+UPDATE questions SET correct_answer_id = 't1_hh_q208_a1' WHERE id = 't1_hh_q208';
+UPDATE questions SET correct_answer_id = 't1_hh_q209_a2' WHERE id = 't1_hh_q209';
+UPDATE questions SET correct_answer_id = 't1_hh_q210_a2' WHERE id = 't1_hh_q210';
+UPDATE questions SET correct_answer_id = 't1_hh_q211_a2' WHERE id = 't1_hh_q211';
+UPDATE questions SET correct_answer_id = 't1_hh_q212_a1' WHERE id = 't1_hh_q212';
+UPDATE questions SET correct_answer_id = 't1_hh_q213_a2' WHERE id = 't1_hh_q213';
+UPDATE questions SET correct_answer_id = 't1_hh_q214_a1' WHERE id = 't1_hh_q214';
+UPDATE questions SET correct_answer_id = 't1_hh_q215_a1' WHERE id = 't1_hh_q215';
+UPDATE questions SET correct_answer_id = 't1_hh_q216_a2' WHERE id = 't1_hh_q216';
+UPDATE questions SET correct_answer_id = 't1_hh_q217_a1' WHERE id = 't1_hh_q217';
+UPDATE questions SET correct_answer_id = 't1_hh_q218_a1' WHERE id = 't1_hh_q218';
+UPDATE questions SET correct_answer_id = 't1_hh_q219_a1' WHERE id = 't1_hh_q219';
+UPDATE questions SET correct_answer_id = 't1_hh_q220_a3' WHERE id = 't1_hh_q220';
+UPDATE questions SET correct_answer_id = 't1_hh_q221_a4' WHERE id = 't1_hh_q221';
+UPDATE questions SET correct_answer_id = 't1_hh_q222_a1' WHERE id = 't1_hh_q222';
+UPDATE questions SET correct_answer_id = 't1_hh_q223_a4' WHERE id = 't1_hh_q223';
+UPDATE questions SET correct_answer_id = 't1_hh_q224_a2' WHERE id = 't1_hh_q224';
+UPDATE questions SET correct_answer_id = 't1_hh_q225_a3' WHERE id = 't1_hh_q225';
+
+INSERT INTO answers (id, text, question_id) VALUES
+('t1_hh_q186_a1', 'Từ Tây sang Đông', 't1_hh_q186'), ('t1_hh_q186_a2', 'Từ Đông sang Tây', 't1_hh_q186'), ('t1_hh_q186_a3', 'Từ Bắc xuống Nam', 't1_hh_q186'), ('t1_hh_q186_a4', 'Từ Nam lên Bắc', 't1_hh_q186'),
+('t1_hh_q187_a1', 'Mặt phẳng đi qua mắt người quan sát và vuông góc với đường thẳng đứng', 't1_hh_q187'), ('t1_hh_q187_a2', 'Mặt phẳng thẳng đứng chứa trục của trái đất', 't1_hh_q187'), ('t1_hh_q187_a3', 'Mặt phẳng thẳng đứng vuông góc với mặt phẳng Bắc Nam', 't1_hh_q187'), ('t1_hh_q187_a4', 'Là mặt phẳng bất kỳ', 't1_hh_q187'),
+('t1_hh_q188_a1', 'Vòng tròn kinh tuyến', 't1_hh_q188'), ('t1_hh_q188_a2', 'Vòng tròn xích đạo', 't1_hh_q188'), ('t1_hh_q188_a3', 'Vòng tròn vĩ tuyến', 't1_hh_q188'), ('t1_hh_q188_a4', 'Vòng tròn kinh tuyến gốc', 't1_hh_q188'),
+('t1_hh_q189_a1', 'Số đo cung kinh tuyến chắn giữa vĩ tuyến 30° và vĩ tuyến đi qua điểm ấy', 't1_hh_q189'), ('t1_hh_q189_a2', 'Số đo cung kinh tuyến chắn giữa vĩ tuyến 20° và vĩ tuyến đi qua điểm ấy', 't1_hh_q189'), ('t1_hh_q189_a3', 'Số đo cung kinh tuyến chắn giữa vĩ tuyến 10° và vĩ tuyến đi qua điểm ấy', 't1_hh_q189'), ('t1_hh_q189_a4', 'Số đo cung kinh tuyến chắn giữa vĩ tuyến 0° (xích đạo) và vĩ tuyến đi qua điểm ấy', 't1_hh_q189'),
+('t1_hh_q190_a1', 'Số đo cung vĩ tuyến chắn giữa kinh tuyến 00° (kinh tuyến gốc) và kinh tuyến đi qua điểm ấy', 't1_hh_q190'), ('t1_hh_q190_a2', 'Số đo cung vĩ tuyến chắn giữa kinh tuyến 60° và kinh tuyến đi qua điểm ấy', 't1_hh_q190'), ('t1_hh_q190_a3', 'Số đo cung vĩ tuyến chắn giữa kinh tuyến 120°và kinh tuyến đi qua điểm ấy', 't1_hh_q190'), ('t1_hh_q190_a4', 'Số đo cung vĩ tuyến chắn giữa kinh tuyến 180° và kinh tuyến đi qua điểm ấy', 't1_hh_q190'),
+('t1_hh_q191_a1', 'Góc hợp bởi đường bắc kinh tuyến trái đất đến đường phương vị mục tiêu ngược, tính thuận chiều kim đồng hồ từ 00° đến 360°', 't1_hh_q191'), ('t1_hh_q191_a2', 'Góc hợp bởi đường bắc kinh tuyến trái đất đến đường phương vị mục tiêu, tính thuận chiều kim đồng hồ từ 00° đến 360°', 't1_hh_q191'), ('t1_hh_q191_a3', 'Góc hợp bởi đường bắc kinh tuyến trái đất đến đường hướng đi của tàu, tính thuận chiều kim đồng hồ từ 00° đến 360°', 't1_hh_q191'), ('t1_hh_q191_a4', 'Góc hợp bởi đường mũi lái tàu và đường phương vị mục tiêu, tính thuận chiều kim đồng hồ từ 00° đến 360°', 't1_hh_q191'),
+('t1_hh_q192_a1', 'Góc hợp bởi đường bắc kinh tuyến trái đất đến đường phương vị mục tiêu ngược, tính thuận chiều kim đồng hồ từ 00° đến 360°', 't1_hh_q192'), ('t1_hh_q192_a2', 'Góc hợp bởi đường bắc kinh tuyến trái đất đến đường phương vị mục tiêu, tính thuận chiều kim đồng hồ từ 00° đến 360°', 't1_hh_q192'), ('t1_hh_q192_a3', 'Góc hợp bởi đường mũi lái tàu và đường phương vị mục tiêu, tính thuận chiều kim đồng hồ từ 00° đến 360°', 't1_hh_q192'), ('t1_hh_q192_a4', 'Góc hợp bởi đường bắc kinh tuyến trái đất đến đường hướng đi của tàu, tỉnh thuận chiều kim đồng hồ từ 00 đến 360°', 't1_hh_q192'),
+('t1_hh_q193_a1', 'Góc hợp bởi đường bắc kinh tuyến la bàn từ đến đường phương vị mục tiêu ngược, tính thuận chiều kim đồng hồ từ 00° đến 360°', 't1_hh_q193'), ('t1_hh_q193_a2', 'Góc hợp bởi đường bắc kinh tuyến la bàn từ đến đường hướng đi của tàu, tính thuận chiều kim đồng hồ từ 00° đến 360°', 't1_hh_q193'), ('t1_hh_q193_a3', 'Góc hợp bởi đường bắc kinh tuyến la bàn từ đến đường phương vị mục tiêu, tính thuận chiều kim đồng hồ từ 00° đến 360°', 't1_hh_q193'), ('t1_hh_q193_a4', 'Góc hợp bởi đường mũi lái tàu và đường phương vị mục tiêu, tính thuận chiều kim đồng hồ từ 00° đến 360°', 't1_hh_q193'),
+('t1_hh_q194_a1', 'Góc hợp bởi đường bắc kinh tuyến từ đến đường phương vị mục tiêu ngược, tính thuận chiều kim đồng hồ từ 00° đến 360°', 't1_hh_q194'), ('t1_hh_q194_a2', 'Góc hợp bởi đường bắc kinh tuyến từ đến đường hướng đi của tàu, tính thuận chiều kim đồng hồ từ 00° đến 360°', 't1_hh_q194'), ('t1_hh_q194_a3', 'Góc hợp bởi đường bắc kinh tuyến từ đến đường phương vị mục tiêu, tính thuận chiều kim đồng hồ từ 00° đến 360°', 't1_hh_q194'), ('t1_hh_q194_a4', 'Góc hợp bởi đường mũi lái tàu và đường phương vị mục tiêu, tính thuận chiều kim đồng hồ từ 00° đến 360°', 't1_hh_q194'),
+('t1_hh_q195_a1', 'Góc hợp bởi đường bắc kinh tuyến trái đất đến đường phương vị mục tiêu ngược, tính thuận chiều kim đồng hồ từ 00° đến 180°', 't1_hh_q195'), ('t1_hh_q195_a2', 'Góc hợp bởi đường mũi lái tàu và đường phương vị mục tiêu, tính từ mũi tàu sang phải hoặc sang trái từ 00° đến 180°', 't1_hh_q195'), ('t1_hh_q195_a3', 'Góc hợp bởi đường bắc kinh tuyến trái đất đến đường hướng đi của tàu, tính thuận chiều kim đồng hồ từ 00° đến 180°', 't1_hh_q195'), ('t1_hh_q195_a4', 'Góc hợp bởi đường bắc kinh tuyến trái đất đến đường phương vị mục tiêu, tính thuận chiều kim đồng hồ từ 00° đến 180°', 't1_hh_q195'),
+('t1_hh_q196_a1', 'Góc hợp bởi đường bắc kinh tuyến la bàn từ đến đường phương vị mục tiêu, tỉnh thuận chiều kim đồng hồ từ 00° đến 360°', 't1_hh_q196'), ('t1_hh_q196_a2', 'Góc hợp bởi đường bắc kinh tuyến la bàn từ đến đường phương vị mục tiêu ngược, tính thuận chiều kim đồng hồ từ 00° đến 360°', 't1_hh_q196'), ('t1_hh_q196_a3', 'Góc hợp bởi đường bắc kinh tuyến la bàn từ đến đường hướng đi của tàu, tính thuận chiều kim đồng hồ từ 00° đến 360°', 't1_hh_q196'), ('t1_hh_q196_a4', 'Góc hợp bởi đường mũi lái tàu và đường phương vị mục tiêu, tính thuận chiều kim đồng hồ từ 00° đến 360°', 't1_hh_q196'),
+('t1_hh_q197_a1', 'Góc hợp bởi bắc kinh tuyến trái đất với đường bắc kinh tuyến từ tại một điểm', 't1_hh_q197'), ('t1_hh_q197_a2', 'Góc hợp bởi bắc kinh tuyến trái đất với đường hướng đi của tàu tại một điểm', 't1_hh_q197'), ('t1_hh_q197_a3', 'Góc hợp bởi bắc kinh tuyến trái đất với đường phương vị mục tiêu tại một điểm', 't1_hh_q197'), ('t1_hh_q197_a4', 'Góc hợp bởi đường kinh tuyến trái đất đường phương vị mục tiêu ngược tại một điểm', 't1_hh_q197'),
+('t1_hh_q198_a1', 'Góc hợp bởi bắc kinh tuyến từ với đường bắc kinh tuyến la bàn tại một điểm', 't1_hh_q198'), ('t1_hh_q198_a2', 'Góc hợp bởi bắc kinh tuyến từ với đường hướng đi của tàu tại một điểm', 't1_hh_q198'), ('t1_hh_q198_a3', 'Góc hợp bởi bắc kinh tuyến từ với đường phương vị mục tiêu tại một điểm', 't1_hh_q198'), ('t1_hh_q198_a4', 'Góc hợp bởi đường kinh từ đất đường phương vị mục tiêu ngược tại một điểm', 't1_hh_q198'),
+('t1_hh_q199_a1', 'Cách chia điểm ca', 't1_hh_q199'), ('t1_hh_q199_a2', 'Cách chia ¼ vòng', 't1_hh_q199'), ('t1_hh_q199_a3', 'Cách chia bán vòng', 't1_hh_q199'), ('t1_hh_q199_a4', 'Cách chia nguyên vòng', 't1_hh_q199'),
+('t1_hh_q200_a1', 'Khoảng thời gian tiếp cận gần nhất giữa 2 tàu', 't1_hh_q200'), ('t1_hh_q200_a2', 'Phương vị từ tàu ta tới tàu mục tiêu', 't1_hh_q200'), ('t1_hh_q200_a3', 'Điểm tiếp cận gần nhất giữa 2 tàu', 't1_hh_q200'), ('t1_hh_q200_a4', 'Khoảng cách từ tàu ta tới tàu mục tiêu', 't1_hh_q200'),
+('t1_hh_q201_a1', 'Tầm xa cực đại càng lớn', 't1_hh_q201'), ('t1_hh_q201_a2', 'Tầm xa cực đại càng nhỏ', 't1_hh_q201'), ('t1_hh_q201_a3', 'Không ảnh hưởng gì tới tầm xa', 't1_hh_q201'), ('t1_hh_q201_a4', 'Tất cả các trường hợp trên', 't1_hh_q201'),
+('t1_hh_q202_a1', 'Khoảng cách tiếp cận gần nhất giữa 2 tàu', 't1_hh_q202'), ('t1_hh_q202_a2', 'Khoảng thời gian tiếp cận gần nhất giữa 2 tàu', 't1_hh_q202'), ('t1_hh_q202_a3', 'Phương vị từ tàu ta tới tàu mục tiêu', 't1_hh_q202'), ('t1_hh_q202_a4', 'Khoảng cách từ tàu ta tới tàu mục tiêu', 't1_hh_q202'),
+('t1_hh_q203_a1', 'Nhiễu mưa', 't1_hh_q203'), ('t1_hh_q203_a2', 'Nhiễu biển', 't1_hh_q203'), ('t1_hh_q203_a3', 'Nhiễu giao thoa radar', 't1_hh_q203'), ('t1_hh_q203_a4', 'Tất cả các ý trên', 't1_hh_q203'),
+('t1_hh_q204_a1', 'Anten và tia quét đồng bộ với nhau', 't1_hh_q204'), ('t1_hh_q204_a2', 'Anten và tia quét lệch nhau 90°', 't1_hh_q204'), ('t1_hh_q204_a3', 'Anten và tia quét lệch nhau 180°', 't1_hh_q204'), ('t1_hh_q204_a4', 'Anten và tia quét lệch nhau 270°', 't1_hh_q204'),
+('t1_hh_q205_a1', 'SELECT/CANCL', 't1_hh_q205'), ('t1_hh_q205_a2', 'VRM1/VRM2', 't1_hh_q205'), ('t1_hh_q205_a3', 'EBL1/EBL2', 't1_hh_q205'), ('t1_hh_q205_a4', 'POWER', 't1_hh_q205'),
+('t1_hh_q206_a1', 'EBL1/EBL2', 't1_hh_q206'), ('t1_hh_q206_a2', 'SELECT/CANCL', 't1_hh_q206'), ('t1_hh_q206_a3', 'VRM1/VRM2', 't1_hh_q206'), ('t1_hh_q206_a4', 'POWER', 't1_hh_q206'),
+('t1_hh_q207_a1', 'NAVTEX', 't1_hh_q207'), ('t1_hh_q207_a2', 'SART', 't1_hh_q207'), ('t1_hh_q207_a3', 'EPIRB', 't1_hh_q207'), ('t1_hh_q207_a4', 'VHF', 't1_hh_q207'),
+('t1_hh_q208_a1', 'Khử nhiễu mưa', 't1_hh_q208'), ('t1_hh_q208_a2', 'Khử nhiễu biển', 't1_hh_q208'), ('t1_hh_q208_a3', 'Khử nhiễu giao thoa', 't1_hh_q208'), ('t1_hh_q208_a4', 'Điều chỉnh độ sáng màn hình', 't1_hh_q208'),
+('t1_hh_q209_a1', 'Khử nhiễu mưa', 't1_hh_q209'), ('t1_hh_q209_a2', 'Khử nhiễu biển', 't1_hh_q209'), ('t1_hh_q209_a3', 'Khử nhiễu giao thoa', 't1_hh_q209'), ('t1_hh_q209_a4', 'Điều chỉnh độ sang màn hình', 't1_hh_q209'),
+('t1_hh_q210_a1', 'Mực nước thuỷ triều cao nhất', 't1_hh_q210'), ('t1_hh_q210_a2', 'Mực nước thuỷ triều thấp nhất', 't1_hh_q210'), ('t1_hh_q210_a3', 'Mực nước thuỷ triều trung bình', 't1_hh_q210'), ('t1_hh_q210_a4', 'Mực nước tại thời điểm tàu đang hành trình', 't1_hh_q210'),
+('t1_hh_q211_a1', 'Số 0 hải đồ tại vị trí đó = 15 m', 't1_hh_q211'), ('t1_hh_q211_a2', 'Số 0 hải đồ tại vị trí đó = 1,5m', 't1_hh_q211'), ('t1_hh_q211_a3', 'Độ sâu mực nước tại thời điểm tàu đang hành trình = 1,5m', 't1_hh_q211'), ('t1_hh_q211_a4', 'Độ sâu mực nước khi thuỷ triều lên cao nhất = 15m', 't1_hh_q211'),
+('t1_hh_q212_a1', 'Đường đẳng sâu 2 mét', 't1_hh_q212'), ('t1_hh_q212_a2', 'Đường đẳng sâu 5 mét', 't1_hh_q212'), ('t1_hh_q212_a3', 'Đường đẳng sâu 10 mét', 't1_hh_q212'), ('t1_hh_q212_a4', 'Đường đẳng sâu 20 mét', 't1_hh_q212'),
+('t1_hh_q213_a1', 'Đường đẳng sâu 2 mét', 't1_hh_q213'), ('t1_hh_q213_a2', 'Đường đẳng sâu 5 mét', 't1_hh_q213'), ('t1_hh_q213_a3', 'Đường đẳng sâu 10 mét', 't1_hh_q213'), ('t1_hh_q213_a4', 'Đường đẳng sâu 20 mét', 't1_hh_q213'),
+('t1_hh_q214_a1', 'Đường đẳng sâu 30 mét', 't1_hh_q214'), ('t1_hh_q214_a2', 'Đường đẳng sâu 10 mét', 't1_hh_q214'), ('t1_hh_q214_a3', 'Đường đẳng sâu 20 mét', 't1_hh_q214'), ('t1_hh_q214_a4', 'Đường đẳng sâu 2 mét', 't1_hh_q214'),
+('t1_hh_q215_a1', 'Vận tốc của tàu so với nước', 't1_hh_q215'), ('t1_hh_q215_a2', 'Vận tốc của tàu so với đáy biển', 't1_hh_q215'), ('t1_hh_q215_a3', 'Vận tốc của tàu so với tàu mục tiêu', 't1_hh_q215'), ('t1_hh_q215_a4', 'Vận tốc của tàu so với bờ', 't1_hh_q215'),
+('t1_hh_q216_a1', 'Độ sâu từ máy đo tới đáy biển', 't1_hh_q216'), ('t1_hh_q216_a2', 'Độ sâu từ ky tàu tới đáy biển', 't1_hh_q216'), ('t1_hh_q216_a3', 'Độ sâu từ mặt boong tới đáy biển', 't1_hh_q216'), ('t1_hh_q216_a4', 'Từ mặt nước tới đáy biển', 't1_hh_q216'),
+('t1_hh_q217_a1', '24 vệ tinh (21 vệ tinh hoạt động và 3 vệ tinh dự trữ)', 't1_hh_q217'), ('t1_hh_q217_a2', '29 vệ tinh (20 vệ tinh hoạt động và 9 vệ tinh dự trữ)', 't1_hh_q217'), ('t1_hh_q217_a3', '35 vệ tinh (21 vệ tinh hoạt động và 14 vệ tinh dự trữ)', 't1_hh_q217'), ('t1_hh_q217_a4', '27 vệ tinh (22 vệ tinh hoạt động và 5 vệ tinh dự trữ)', 't1_hh_q217'),
+('t1_hh_q218_a1', '4', 't1_hh_q218'), ('t1_hh_q218_a2', '6', 't1_hh_q218'), ('t1_hh_q218_a3', '7', 't1_hh_q218'), ('t1_hh_q218_a4', '9', 't1_hh_q218'),
+('t1_hh_q219_a1', 'Chọn thao tác', 't1_hh_q219'), ('t1_hh_q219_a2', 'Lưu vị trí hiện tại', 't1_hh_q219'), ('t1_hh_q219_a3', 'Tắt máy', 't1_hh_q219'), ('t1_hh_q219_a4', 'Bật máy', 't1_hh_q219'),
+('t1_hh_q220_a1', 'Hệ thống định vị toàn cầu', 't1_hh_q220'), ('t1_hh_q220_a2', 'Hệ thống dẫn đường', 't1_hh_q220'), ('t1_hh_q220_a3', 'Phao vô tuyến chỉ báo vị trí khẩn cấp', 't1_hh_q220'), ('t1_hh_q220_a4', 'Hệ thống tránh va', 't1_hh_q220'),
+('t1_hh_q221_a1', 'Kích hoạt bằng điện', 't1_hh_q221'), ('t1_hh_q221_a2', 'Kích hoạt tự động', 't1_hh_q221'), ('t1_hh_q221_a3', 'Kích hoạt bằng tay', 't1_hh_q221'), ('t1_hh_q221_a4', 'Kích hoạt tự động và kích hoạt bằng tay', 't1_hh_q221'),
+('t1_hh_q222_a1', 'Tín hiệu vô tuyến truyền lên vệ tinh rồi mới về bờ', 't1_hh_q222'), ('t1_hh_q222_a2', 'Thông tin từ tàu đến tàu', 't1_hh_q222'), ('t1_hh_q222_a3', 'Thông tin từ bờ đến tàu', 't1_hh_q222'), ('t1_hh_q222_a4', 'Tất cả các đáp án trên', 't1_hh_q222'),
+('t1_hh_q223_a1', 'Tốc độ ô tô', 't1_hh_q223'), ('t1_hh_q223_a2', 'Tốc độ máy bay', 't1_hh_q223'), ('t1_hh_q223_a3', 'Tốc độ tàu hỏa', 't1_hh_q223'), ('t1_hh_q223_a4', 'Tốc độ tàu thủy', 't1_hh_q223'),
+('t1_hh_q224_a1', '1862.3 mét', 't1_hh_q224'), ('t1_hh_q224_a2', '1852,3 mét', 't1_hh_q224'), ('t1_hh_q224_a3', '1842,3 mét', 't1_hh_q224'), ('t1_hh_q224_a4', '1832,3 mét', 't1_hh_q224'),
+('t1_hh_q225_a1', '6 liên', 't1_hh_q225'), ('t1_hh_q225_a2', '8 liên', 't1_hh_q225'), ('t1_hh_q225_a3', '10 liên', 't1_hh_q225'), ('t1_hh_q225_a4', '12 liên', 't1_hh_q225')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+
+-- === MÔN: NGHIỆP VỤ THUYỀN TRƯỞNG (25 câu) ===
+
+INSERT INTO questions (id, text, subject_id) VALUES
+('t1_nvtt_q226', 'Khi hai thuyền trưởng bàn giao xong việc thì', 't1_nvtt'),
+('t1_nvtt_q227', 'Quản lý sổ nhật ký hành trình, danh bạ thuyền viên và các sổ sách giấy tờ cần thiết khác của phương tiện là trách nhiệm của', 't1_nvtt'),
+('t1_nvtt_q228', 'Người chịu trách nhiệm chính về nội dung ghi trong nhật ký là', 't1_nvtt'),
+('t1_nvtt_q229', 'Quản lý, bảo đảm an toàn về người, phương tiện và tài sản trên phương tiện là trách nhiệm của', 't1_nvtt'),
+('t1_nvtt_q230', 'Trực tiếp điều khiển phương tiện khi được phân công là trách nhiệm và quyền hạn của', 't1_nvtt'),
+('t1_nvtt_q231', 'Trường hợp nhật ký ghi bị sai thì thuyền trưởng có thể', 't1_nvtt'),
+('t1_nvtt_q232', 'Trực tiếp phụ trách các công việc thuộc bộ phận boong là trách nhiệm và quyền hạn của', 't1_nvtt'),
+('t1_nvtt_q233', 'Ngoài giờ đi ca, nếu thuyền phó hoặc máy trưởng đề nghị, thuyền trưởng phải', 't1_nvtt'),
+('t1_nvtt_q234', 'Thuyền trưởng phải kiểm tra đèn hiệu vào lúc', 't1_nvtt'),
+('t1_nvtt_q235', 'Trường hợp phương tiện bị đắm, sau khi đã thi hành các biện pháp cứu người, tài sản, hàng hoá và các giấy tờ cần thiết của phương tiện thì', 't1_nvtt'),
+('t1_nvtt_q236', 'Lập kế hoạch chuyến đi, phân công trực ca là trách nhiệm của', 't1_nvtt'),
+('t1_nvtt_q237', 'Tổ chức thực hiện việc sơ cứu, đưa đi bệnh viện đối với người bị ốm đau, tai nạn là trách nhiệm của', 't1_nvtt'),
+('t1_nvtt_q238', 'Giấy chứng nhận an toàn kỹ thuật và bảo vệ môi trường do cơ quan nào cấp?', 't1_nvtt'),
+('t1_nvtt_q239', 'Giấy chứng nhận đăng ký tàu do cơ quan nào cấp ?', 't1_nvtt'),
+('t1_nvtt_q240', 'Giấy chứng nhận bảo hiểm cơ quan nào cấp ?', 't1_nvtt'),
+('t1_nvtt_q241', 'Danh bạ thuyền viên mới do', 't1_nvtt'),
+('t1_nvtt_q242', 'Nhật ký tàu phải được ghi chép rõ ràng bằng', 't1_nvtt'),
+('t1_nvtt_q243', 'Nhật ký hành trình khi bị mất, hư hỏng phải được báo ngay cho', 't1_nvtt'),
+('t1_nvtt_q244', 'Nhiệm vụ của bộ phận boong là', 't1_nvtt'),
+('t1_nvtt_q245', 'Bộ phận boong có nhiệm vụ', 't1_nvtt'),
+('t1_nvtt_q246', 'Khi có báo động trên tàu thì thuyền viên phải', 't1_nvtt'),
+('t1_nvtt_q247', 'Khi phương tiện chở vượt số hành khách, vượt quá số lượng hàng hóa, chở quá vạch dấu mớn nước an toàn của phương tiện thì biện pháp khắc phục sau khi xử phạt hành chính là', 't1_nvtt'),
+('t1_nvtt_q248', 'Khi phương tiện neo đậu hay ở những vùng xét thấy không an toàn, danh sách thuyền viên phải có mặt trên phương tiện là', 't1_nvtt'),
+('t1_nvtt_q249', 'Khi đỗ tại cảng, bắt buộc danh sách thuyền viên phải có mặt trên phương tiện là', 't1_nvtt'),
+('t1_nvtt_q250', 'Quy định phân nhóm phương tiện để định biên thuyền viên thì phương tiện chở hàng có trọng tải toàn phần trên 1000 tấn hoặc đoàn lai có trọng tải toàn phần trên 1500 tấn thuộc nhóm', 't1_nvtt')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id;
+
+UPDATE questions SET correct_answer_id = 't1_nvtt_q226_a3' WHERE id = 't1_nvtt_q226';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q227_a1' WHERE id = 't1_nvtt_q227';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q228_a1' WHERE id = 't1_nvtt_q228';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q229_a1' WHERE id = 't1_nvtt_q229';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q230_a2' WHERE id = 't1_nvtt_q230';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q231_a4' WHERE id = 't1_nvtt_q231';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q232_a2' WHERE id = 't1_nvtt_q232';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q233_a2' WHERE id = 't1_nvtt_q233';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q234_a3' WHERE id = 't1_nvtt_q234';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q235_a1' WHERE id = 't1_nvtt_q235';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q236_a1' WHERE id = 't1_nvtt_q236';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q237_a1' WHERE id = 't1_nvtt_q237';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q238_a2' WHERE id = 't1_nvtt_q238';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q239_a2' WHERE id = 't1_nvtt_q239';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q240_a2' WHERE id = 't1_nvtt_q240';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q241_a2' WHERE id = 't1_nvtt_q241';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q242_a3' WHERE id = 't1_nvtt_q242';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q243_a4' WHERE id = 't1_nvtt_q243';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q244_a1' WHERE id = 't1_nvtt_q244';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q245_a2' WHERE id = 't1_nvtt_q245';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q246_a1' WHERE id = 't1_nvtt_q246';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q247_a1' WHERE id = 't1_nvtt_q247';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q248_a2' WHERE id = 't1_nvtt_q248';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q249_a2' WHERE id = 't1_nvtt_q249';
+UPDATE questions SET correct_answer_id = 't1_nvtt_q250_a1' WHERE id = 't1_nvtt_q250';
+
+INSERT INTO answers (id, text, question_id) VALUES
+('t1_nvtt_q226_a1', 'Cả 2 ghi và ký tên vào số tay', 't1_nvtt_q226'), ('t1_nvtt_q226_a2', 'Cả 2 ghi và ký tên vào hợp đồng', 't1_nvtt_q226'), ('t1_nvtt_q226_a3', 'Cả 2 ghi và ký tên vào nhật ký', 't1_nvtt_q226'), ('t1_nvtt_q226_a4', 'Một bên ký vào sổ nhật ký', 't1_nvtt_q226'),
+('t1_nvtt_q227_a1', 'Thuyền trưởng', 't1_nvtt_q227'), ('t1_nvtt_q227_a2', 'Thuyền phó', 't1_nvtt_q227'), ('t1_nvtt_q227_a3', 'Thủy thủ', 't1_nvtt_q227'), ('t1_nvtt_q227_a4', 'Ai cũng được', 't1_nvtt_q227'),
+('t1_nvtt_q228_a1', 'Thuyền trưởng', 't1_nvtt_q228'), ('t1_nvtt_q228_a2', 'Thuyền phó', 't1_nvtt_q228'), ('t1_nvtt_q228_a3', 'Thủy thủ', 't1_nvtt_q228'), ('t1_nvtt_q228_a4', 'Ai cũng được', 't1_nvtt_q228'),
+('t1_nvtt_q229_a1', 'Thuyền trưởng', 't1_nvtt_q229'), ('t1_nvtt_q229_a2', 'Thuyền phó', 't1_nvtt_q229'), ('t1_nvtt_q229_a3', 'Thủy thủ', 't1_nvtt_q229'), ('t1_nvtt_q229_a4', 'Ai cũng được', 't1_nvtt_q229'),
+('t1_nvtt_q230_a1', 'Thuyền trưởng', 't1_nvtt_q230'), ('t1_nvtt_q230_a2', 'Thuyền phó', 't1_nvtt_q230'), ('t1_nvtt_q230_a3', 'Thủy thủ', 't1_nvtt_q230'), ('t1_nvtt_q230_a4', 'Ai cũng được', 't1_nvtt_q230'),
+('t1_nvtt_q231_a1', 'Xé bỏ các trang ghi sai', 't1_nvtt_q231'), ('t1_nvtt_q231_a2', 'Xóa trang ghi sai và có chữ ký xác nhận của sỹ quan đi ca', 't1_nvtt_q231'), ('t1_nvtt_q231_a3', 'Gạch một đường mảnh trên hàng chữ cần xóa', 't1_nvtt_q231'), ('t1_nvtt_q231_a4', 'Gạch đường mảnh trên hàng chỗ viết sai, sỹ quan đi ca và thuyền trưởng ký xác nhận', 't1_nvtt_q231'),
+('t1_nvtt_q232_a1', 'Thuyền trưởng', 't1_nvtt_q232'), ('t1_nvtt_q232_a2', 'Thuyền phó', 't1_nvtt_q232'), ('t1_nvtt_q232_a3', 'Máy trưởng', 't1_nvtt_q232'), ('t1_nvtt_q232_a4', 'Chủ tàu', 't1_nvtt_q232'),
+('t1_nvtt_q233_a1', 'Có mặt kịp thời giải quyết công việc', 't1_nvtt_q233'), ('t1_nvtt_q233_a2', 'Có mặt ở vị trí chỉ huy để kịp thời giải quyết công việc', 't1_nvtt_q233'), ('t1_nvtt_q233_a3', 'Có mặt ở trên tàu để kịp thời giải quyết công việc', 't1_nvtt_q233'), ('t1_nvtt_q233_a4', 'Tùy theo từng tình huống cụ thể', 't1_nvtt_q233'),
+('t1_nvtt_q234_a1', 'Ban đêm', 't1_nvtt_q234'), ('t1_nvtt_q234_a2', 'Ban ngày', 't1_nvtt_q234'), ('t1_nvtt_q234_a3', 'Khoảng 16 giờ hàng ngày', 't1_nvtt_q234'), ('t1_nvtt_q234_a4', 'Khi gặp tàu lớn hơn', 't1_nvtt_q234'),
+('t1_nvtt_q235_a1', 'Thuyền trưởng là người cuối cùng rời phương tiện', 't1_nvtt_q235'), ('t1_nvtt_q235_a2', 'Thuyền phó là người cuối cùng rời phương tiện', 't1_nvtt_q235'), ('t1_nvtt_q235_a3', 'Máy trưởng là người cuối cùng rời phương tiện', 't1_nvtt_q235'), ('t1_nvtt_q235_a4', 'Thủy thủ là người cuối cùng rời phương tiện', 't1_nvtt_q235'),
+('t1_nvtt_q236_a1', 'Thuyền trưởng', 't1_nvtt_q236'), ('t1_nvtt_q236_a2', 'Thuyền phó', 't1_nvtt_q236'), ('t1_nvtt_q236_a3', 'Thủy thủ', 't1_nvtt_q236'), ('t1_nvtt_q236_a4', 'Ai cũng được', 't1_nvtt_q236'),
+('t1_nvtt_q237_a1', 'Thuyền trưởng', 't1_nvtt_q237'), ('t1_nvtt_q237_a2', 'Thuyền phó', 't1_nvtt_q237'), ('t1_nvtt_q237_a3', 'Máy phó', 't1_nvtt_q237'), ('t1_nvtt_q237_a4', 'Thủy thủ', 't1_nvtt_q237'),
+('t1_nvtt_q238_a1', 'Sở Xây dựng', 't1_nvtt_q238'), ('t1_nvtt_q238_a2', 'Đăng kiểm', 't1_nvtt_q238'), ('t1_nvtt_q238_a3', 'Chính quyền địa phương', 't1_nvtt_q238'), ('t1_nvtt_q238_a4', 'Cục Hàng hải và Đường thủy', 't1_nvtt_q238'),
+('t1_nvtt_q239_a1', 'Đăng kiểm', 't1_nvtt_q239'), ('t1_nvtt_q239_a2', 'Sở Xây dựng', 't1_nvtt_q239'), ('t1_nvtt_q239_a3', 'Chính quyền địa phương', 't1_nvtt_q239'), ('t1_nvtt_q239_a4', 'Cục Hàng hải và Đường thủy', 't1_nvtt_q239'),
+('t1_nvtt_q240_a1', 'Đăng kiểm', 't1_nvtt_q240'), ('t1_nvtt_q240_a2', 'Đơn vị có chức năng bảo hiểm tàu thuyền nơi chủ tàu mua bảo hiểm cấp', 't1_nvtt_q240'), ('t1_nvtt_q240_a3', 'Sở Xây dựng', 't1_nvtt_q240'), ('t1_nvtt_q240_a4', 'Cục Hàng hải và Đường thủy', 't1_nvtt_q240'),
+('t1_nvtt_q241_a1', 'Cơ quan công an xác nhận', 't1_nvtt_q241'), ('t1_nvtt_q241_a2', 'Chủ tàu xác nhận', 't1_nvtt_q241'), ('t1_nvtt_q241_a3', 'Sở Xây dựng xác nhận', 't1_nvtt_q241'), ('t1_nvtt_q241_a4', 'Cục Hàng hải và Đường thủy', 't1_nvtt_q241'),
+('t1_nvtt_q242_a1', 'Bút chì', 't1_nvtt_q242'), ('t1_nvtt_q242_a2', 'Bút mực', 't1_nvtt_q242'), ('t1_nvtt_q242_a3', 'Bút mực màu đen hoặc xanh', 't1_nvtt_q242'), ('t1_nvtt_q242_a4', 'Bút dạ quang', 't1_nvtt_q242'),
+('t1_nvtt_q243_a1', 'Công an nơi gần nhất', 't1_nvtt_q243'), ('t1_nvtt_q243_a2', 'Chủ tàu', 't1_nvtt_q243'), ('t1_nvtt_q243_a3', 'Đăng kiểm', 't1_nvtt_q243'), ('t1_nvtt_q243_a4', 'Đại diện cảng vụ nơi gần nhất', 't1_nvtt_q243'),
+('t1_nvtt_q244_a1', 'Bảo quản bảo dưỡng boong, vỏ tàu, hầm hàng và các cấu trúc khác từ mớn nước không tải trở lên', 't1_nvtt_q244'), ('t1_nvtt_q244_a2', 'Vận hành máy đèn các công tắc và bảng phân phối điện', 't1_nvtt_q244'), ('t1_nvtt_q244_a3', 'Lập kế hoạch làm việc, nghỉ ngơi cho thuyền viên bộ phận phục vụ', 't1_nvtt_q244'), ('t1_nvtt_q244_a4', 'Tổ chức quản lý và điều hành hoạt động của bộ phận phục vụ trên tàu', 't1_nvtt_q244'),
+('t1_nvtt_q245_a1', 'Vận hành thiết bị lạnh, tất cả các máy móc khác có liên quan', 't1_nvtt_q245'), ('t1_nvtt_q245_a2', 'Thực hiện nhiệm vụ đi ca theo phân công của thuyền trưởng', 't1_nvtt_q245'), ('t1_nvtt_q245_a3', 'Giúp thuyền trưởng trong việc giao dịch, tổ chức các buổi tiếp khách, chiêu đãi trên tàu', 't1_nvtt_q245'), ('t1_nvtt_q245_a4', 'Theo dõi chế độ lao động, nhận và phát lương cho thuyền viên', 't1_nvtt_q245'),
+('t1_nvtt_q246_a1', 'Đứng đúng vị trí và vận hành các thiết bị theo sự phân công của thuyền trưởng', 't1_nvtt_q246'), ('t1_nvtt_q246_a2', 'Đứng đúng vị trí và vận hành các thiết bị theo sự phân công của thuyền phó', 't1_nvtt_q246'), ('t1_nvtt_q246_a3', 'Đứng đúng vị trí và vận hành các thiết bị theo sự phân công của Máy trưởng', 't1_nvtt_q246'), ('t1_nvtt_q246_a4', 'Đứng đúng vị trí và vận hành các thiết bị theo sự phân công của chủ tàu', 't1_nvtt_q246'),
+('t1_nvtt_q247_a1', 'Buộc đưa lên khỏi phương tiện số hành khách, số lượng hàng hóa vượt quá đó', 't1_nvtt_q247'), ('t1_nvtt_q247_a2', 'Tạm giữ giấy tờ tàu', 't1_nvtt_q247'), ('t1_nvtt_q247_a3', 'Tạm giữ bằng thuyền trưởng', 't1_nvtt_q247'), ('t1_nvtt_q247_a4', 'Buộc dừng tàu', 't1_nvtt_q247'),
+('t1_nvtt_q248_a1', '1/2 tổng số thuyền viên', 't1_nvtt_q248'), ('t1_nvtt_q248_a2', '1/3 tổng số thuyền viên', 't1_nvtt_q248'), ('t1_nvtt_q248_a3', '1/4 tổng số thuyền viên', 't1_nvtt_q248'), ('t1_nvtt_q248_a4', '2/3 tổng số thuyền viên', 't1_nvtt_q248'),
+('t1_nvtt_q249_a1', '1/2 tổng số thuyền viên', 't1_nvtt_q249'), ('t1_nvtt_q249_a2', '1/3 tổng số thuyền viên', 't1_nvtt_q249'), ('t1_nvtt_q249_a3', '1/4 tổng số thuyền viên', 't1_nvtt_q249'), ('t1_nvtt_q249_a4', '2/3 tổng số thuyền viên', 't1_nvtt_q249'),
+('t1_nvtt_q250_a1', 'I', 't1_nvtt_q250'), ('t1_nvtt_q250_a2', 'II', 't1_nvtt_q250'), ('t1_nvtt_q250_a3', 'III', 't1_nvtt_q250'), ('t1_nvtt_q250_a4', 'IV', 't1_nvtt_q250')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === KẾT THÚC SCRIPT ===

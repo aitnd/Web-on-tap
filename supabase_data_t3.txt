@@ -1,0 +1,376 @@
+-- Hướng dẫn:
+-- 1. Vào project Supabase của anh.
+-- 2. Mở SQL Editor (biểu tượng </> ở menu bên trái).
+-- 3. Tạo một query mới ("+ New query").
+-- 4. Xóa hết nội dung cũ (nếu có) và dán TOÀN BỘ nội dung file này vào.
+-- 5. Nhấn "RUN".
+--
+-- Lưu ý: Script này được thiết kế để thêm bộ đề thi mới "Thuyền trưởng hạng ba - T3".
+-- Anh chỉ cần chạy file này MỘT LẦN để thêm dữ liệu mới.
+
+-- === BƯỚC 1: TẠO VÀ CẬP NHẬT CẤU TRÚC BẢNG (NẾU CẦN) ===
+-- Các lệnh này đảm bảo các bảng và các cột cần thiết đều tồn tại.
+
+CREATE TABLE IF NOT EXISTS licenses (id TEXT PRIMARY KEY, name TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS subjects (id TEXT PRIMARY KEY, name TEXT NOT NULL, license_id TEXT REFERENCES licenses(id) ON DELETE CASCADE);
+CREATE TABLE IF NOT EXISTS questions (id TEXT PRIMARY KEY, text TEXT NOT NULL, image TEXT, subject_id TEXT REFERENCES subjects(id) ON DELETE CASCADE, correct_answer_id TEXT);
+CREATE TABLE IF NOT EXISTS answers (id TEXT PRIMARY KEY, text TEXT NOT NULL, question_id TEXT REFERENCES questions(id) ON DELETE CASCADE);
+
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'licenses' AND column_name = 'display_order') THEN ALTER TABLE licenses ADD COLUMN display_order INT; END IF; END$$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'subjects' AND column_name = 'display_order') THEN ALTER TABLE subjects ADD COLUMN display_order INT; END IF; END$$;
+
+-- === BƯỚC 2: CHÈN DỮ LIỆU BỘ ĐỀ MỚI ===
+
+-- === HẠNG BẰNG MỚI: THUYỀN TRƯỞNG HẠNG BA - T3 ===
+
+INSERT INTO licenses (id, name, display_order) VALUES
+('thuyentruong-h3', 'Thuyền trưởng hạng ba - T3', 6)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, display_order = EXCLUDED.display_order;
+
+-- Thêm các môn học cho hạng bằng trên
+INSERT INTO subjects (id, name, license_id, display_order) VALUES
+('t3_luat', 'Luật Giao thông đường thủy nội địa', 'thuyentruong-h3', 1),
+('t3_luong', 'Luồng chạy tàu thuyền', 'thuyentruong-h3', 2),
+('t3_nvtt', 'Nghiệp vụ thuyền trưởng', 'thuyentruong-h3', 3),
+('t3_ktvt', 'Kinh tế vận tải', 'thuyentruong-h3', 4),
+('t3_cautruc', 'Cấu trúc phương tiện', 'thuyentruong-h3', 5)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, license_id = EXCLUDED.license_id, display_order = EXCLUDED.display_order;
+
+
+-- === MÔN: LUẬT GIAO THÔNG ĐƯỜNG THỦY NỘI ĐỊA (90 câu) ===
+
+INSERT INTO questions (id, text, subject_id, correct_answer_id, image) VALUES
+('t3_luat_q1', 'Phương tiện loại A khi đẩy đoàn, ban ngày treo', 't3_luat', 't3_luat_q1_a3', NULL),
+('t3_luat_q2', 'Khi điều khiển phương tiện đi qua khoang thông thuyền, thuyền trưởng, người lái phương tiện phải thực hiện quy định đi như thế nào?', 't3_luat', 't3_luat_q2_a1', NULL),
+('t3_luat_q3', 'Phương tiện chở hàng nguy hiểm khi hành trình, ngoài đèn quy định, ban đêm phải thắp thêm', 't3_luat', 't3_luat_q3_a2', NULL),
+('t3_luat_q4', 'Phương tiện chở hàng nguy hiểm, ban ngày phải treo', 't3_luat', 't3_luat_q4_a1', NULL),
+('t3_luat_q5', 'Phương tiện có động cơ chở khách khi hành trình, ngoài đèn quy định, ban đêm phải thắp thêm', 't3_luat', 't3_luat_q5_a2', NULL),
+('t3_luat_q6', 'Phương tiện có động cơ chở khách khi hành trình, ban ngày treo', 't3_luat', 't3_luat_q6_a4', NULL),
+('t3_luat_q7', 'Phương tiện có chiều dài lớn nhất từ 45 mét trở xuống, ban đêm khi neo phải thắp', 't3_luat', 't3_luat_q7_a1', NULL),
+('t3_luat_q8', 'Phương tiện có chiều dài lớn nhất từ 45 mét trở xuống, ban ngày khi neo phải treo', 't3_luat', 't3_luat_q8_a1', NULL),
+('t3_luat_q9', 'Phương tiện có chiều dài lớn nhất trên 45 mét, ban đêm khi neo phải thắp', 't3_luat', 't3_luat_q9_a2', NULL),
+('t3_luat_q10', 'Phương tiện có chiều dài lớn nhất trên 45 mét, ban ngày khi neo phải treo', 't3_luat', 't3_luat_q10_a4', NULL),
+('t3_luat_q11', 'Phương tiện bị mắc cạn trên luồng mà một bên luồng còn lưu thông được ban đêm ở vị trí cao nhất trên cột đèn phải thắp', 't3_luat', 't3_luat_q11_a3', NULL),
+('t3_luat_q12', 'Phương tiện bị mắc cạn trên luồng mà một bên luồng còn lưu thông được ban ngày ở vị trí cao nhất trên cột đèn phải treo', 't3_luat', 't3_luat_q12_a2', NULL),
+('t3_luat_q13', 'Phương tiện đang thực hiện nghiệp vụ trên luồng mà một bên luồng còn lưu thông được ban đêm ở vị trí cao nhất trên cột đèn phải thắp', 't3_luat', 't3_luat_q13_a2', NULL),
+('t3_luat_q14', 'Phương tiện đang thực hiện nghiệp vụ trên luồng mà một bên luồng còn lưu thông được ban ngày ở vị trí cao nhất trên cột đèn phải treo', 't3_luat', 't3_luat_q14_a1', NULL),
+('t3_luat_q15', 'Phương tiện đang thực hiện nghiệp vụ trên luồng hoặc phương tiện bị mắc cạn chặn hết luồng ban ngày ở vị trí cao nhất phải treo', 't3_luat', 't3_luat_q15_a1', NULL),
+('t3_luat_q16', 'Phương tiện đang thực hiện nghiệp vụ trên luồng hoặc phương tiện bị mắc cạn chặn hết luồng ban đêm ở vị trí cao nhất trên cột đèn phải thắp', 't3_luat', 't3_luat_q16_a2', NULL),
+('t3_luat_q17', 'Phương tiện có người ngã xuống nước, ban đêm ở vị trí cao nhất trên cột đèn phải thắp', 't3_luat', 't3_luat_q17_a1', NULL),
+('t3_luat_q18', 'Phương tiện cứu nạn khi làm nhiệm vụ khẩn cấp ban ngày phải treo', 't3_luat', 't3_luat_q18_a1', NULL),
+('t3_luat_q19', 'Phương tiện chữa cháy khi làm nhiệm vụ ngoài đèn qui định, ban đêm thắp thêm', 't3_luat', 't3_luat_q19_a2', NULL),
+('t3_luat_q20', 'Phương tiện của quân đội khi làm nhiệm vụ khẩn cấp ngoài đèn qui định, ban đêm thắp thêm', 't3_luat', 't3_luat_q20_a3', NULL),
+('t3_luat_q21', 'Phương tiện của công an khi làm nhiệm vụ khẩn cấp ban ngày phải treo', 't3_luat', 't3_luat_q21_a4', NULL),
+('t3_luat_q22', 'Phương tiện làm nhiệm vụ đặc biệt nào được ưu tiên đi trước?', 't3_luat', 't3_luat_q22_a2', NULL),
+('t3_luat_q23', 'Phương tiện làm nhiệm vụ đặc biệt nào được ưu tiên đi trước?', 't3_luat', 't3_luat_q23_a1', NULL),
+('t3_luat_q24', 'Hai phương tiện đi đối hướng nhau có nguy cơ va chạm, thuyền trưởng, người lái phương tiện tránh và nhường đường theo nguyên tắc nào?', 't3_luat', 't3_luat_q24_a4', NULL),
+('t3_luat_q25', 'Thuyền trưởng, người lái phương tiện khi hành trình phải giảm tốc độ của phương tiện trong trường hợp đi gần phương tiện nào?', 't3_luat', 't3_luat_q25_a4', NULL),
+('t3_luat_q26', 'Thuyền trưởng, người lái phương tiện khi hành trình phải giảm tốc độ trong trường hợp nào?', 't3_luat', 't3_luat_q26_a1', NULL),
+('t3_luat_q27', 'Thuyền trưởng, người lái phương tiện khi hành trình không được bám, buộc vào', 't3_luat', 't3_luat_q27_a2', NULL),
+('t3_luat_q28', 'Khi phương tiện đi vào nơi luồng giao nhau, luồng cong gấp, thuyền trưởng, người lái phương tiện phải tuân theo quy định nào?', 't3_luat', 't3_luat_q28_a4', NULL),
+('t3_luat_q29', 'Trong trường hợp nước đứng, hai phương tiện đi đối hướng gặp nhau có nguy cơ va chạm, phải tránh và nhường đường theo nguyên tắc nào?', 't3_luat', 't3_luat_q29_a1', NULL),
+('t3_luat_q30', 'Góc chiếu sáng của đèn mạn là bao nhiêu độ?', 't3_luat', 't3_luat_q30_a1', NULL),
+('t3_luat_q31', 'Thuyền trưởng, người lái phương tiện đang hành trình gặp phương tiện nhiệm vụ đặc biệt phải', 't3_luat', 't3_luat_q31_a3', NULL),
+('t3_luat_q32', 'Ba tiếng còi dài có ý nghĩa', 't3_luat', 't3_luat_q32_a1', NULL),
+('t3_luat_q33', 'Bốn tiếng còi dài có ý nghĩa', 't3_luat', 't3_luat_q33_a1', NULL),
+('t3_luat_q34', 'Phương tiện đang hành trình trên sông muốn vượt một phương tiện khác phải', 't3_luat', 't3_luat_q34_a3', NULL),
+('t3_luat_q35', 'Góc chiếu sáng của đèn trắng mũi là bao nhiêu độ?', 't3_luat', 't3_luat_q35_a3', NULL),
+('t3_luat_q36', 'Phương tiện loại A kéo đoàn dài dưới 100 mét, ban ngày treo', 't3_luat', 't3_luat_q36_a1', NULL),
+('t3_luat_q37', 'Phương tiện loại A kéo đoàn dài từ 100 mét trở lên, ban đêm thắp', 't3_luat', 't3_luat_q37_a3', NULL),
+('t3_luat_q38', 'Phương tiện loại A kéo đoàn dài từ 100 mét trở lên, ban ngày treo', 't3_luat', 't3_luat_q38_a3', NULL),
+('t3_luat_q39', 'Phương tiện loại A lai áp mạn, ban đêm thắp', 't3_luat', 't3_luat_q39_a2', NULL),
+('t3_luat_q40', 'Phương tiện Loại A áp mạn, ban ngày treo', 't3_luat', 't3_luat_q40_a2', NULL),
+('t3_luat_q41', 'Tín hiệu trên phương tiện làm nhiệm vụ đặc biệt ngoài đèn hiệu quy định, phương tiện khi làm nhiệm vụ phải sử dụng tín hiệu nào?', 't3_luat', 't3_luat_q41_a4', NULL),
+('t3_luat_q42', 'Phương tiện bị mất chủ động, ban ngày ở vị trí cao nhất trên cột đèn phải treo', 't3_luat', 't3_luat_q42_a3', NULL),
+('t3_luat_q43', 'Phương tiện bị mất chủ động còn trớn đối với phương tiện loại A ban đêm phải thắp', 't3_luat', 't3_luat_q43_a2', NULL),
+('t3_luat_q44', 'Phương tiện đưa đón hoa tiêu, ban đêm ngoài các đèn hiệu theo quy định trên cột đèn phải thắp thêm', 't3_luat', 't3_luat_q44_a1', NULL),
+('t3_luat_q45', 'Phương tiện yêu cầu cảnh sát, thanh tra giao thông đường thủy hỗ trợ, ban ngày ở trên cột đèn phải treo', 't3_luat', 't3_luat_q45_a2', NULL),
+('t3_luat_q46', 'Phương tiện yêu cầu cảnh sát, thanh tra giao thông đường thủy hỗ trợ, ban đêm ở trên cột đèn phải thắp thêm', 't3_luat', 't3_luat_q46_a1', NULL),
+('t3_luat_q47', 'Phương tiện đang thử máy, thử tốc độ, ban ngày ở vị trí cao nhất trên cột đèn phải treo', 't3_luat', 't3_luat_q47_a1', NULL),
+('t3_luat_q48', 'Cờ chữ B có màu gì?', 't3_luat', 't3_luat_q48_a1', NULL),
+('t3_luat_q49', 'Cảnh sát giao thông đường thủy khi gọi phương tiện để kiểm soát, phải phất', 't3_luat', 't3_luat_q49_a1', NULL),
+('t3_luat_q50', 'Phương tiện có người, súc vật bị dịch bệnh, ban ngày ở vị trí cao nhất trên cột đèn phải treo', 't3_luat', 't3_luat_q50_a2', NULL),
+('t3_luat_q51', 'Phương tiện không có động cơ có trọng tải toàn phần trên 15 tấn, phương tiện có động cơ tổng công suất máy chính trên 15 sức ngựa, phương tiện có sức chở trên 12 người khi hoạt động trên đường thủy nội địa phải đảm bảo các điều kiện nào?', 't3_luat', 't3_luat_q51_a4', NULL),
+('t3_luat_q52', 'Cảng vụ có nhiệm vụ gì?', 't3_luat', 't3_luat_q52_a4', NULL),
+('t3_luat_q53', 'Cảng vụ có quyền hạn gì?', 't3_luat', 't3_luat_q53_a4', NULL),
+('t3_luat_q54', 'Đối với hành vi lạm dụng quyền được nhường đường, quyền ưu tiên gây nguy hiểm hoặc trở ngại cho các phương tiện khác thì bị phạt', 't3_luat', 't3_luat_q54_a4', NULL),
+('t3_luat_q55', 'Đối với hành vi điều khiển phương tiện lạng lách gây mất an toàn giao thông đường thủy nội địa thì bị phạt', 't3_luat', 't3_luat_q55_a3', NULL),
+('t3_luat_q56', 'Đối với hành vi hành vi tham gia đua trái phép phương tiện trên đường thủy nội địa thì bị phạt', 't3_luat', 't3_luat_q56_a3', NULL),
+('t3_luat_q57', 'Đối với hành vi chở vượt quá số người được phép chở từ 30% đến 50% sức chở số người của phương tiện chở người, hành khách, phương tiện có công dụng tàu thủy lưu trú du lịch ngủ đêm, nhà hàng nổi, khách sạn nổi thì bị phạt', 't3_luat', 't3_luat_q57_a2', NULL),
+('t3_luat_q58', 'Đối với hành vi thuyền viên, người lái phương tiện vận tải hàng hóa nguy hiểm mà không có chứng chỉ chuyên môn đặc biệt thì bị phạt', 't3_luat', 't3_luat_q58_a4', NULL),
+('t3_luat_q59', 'Đối với hành vi không chấp hành các quy định về vận tải hàng hóa nguy hiểm ghi trong giấy phép vận chuyển thì bị phạt', 't3_luat', 't3_luat_q59_a1', NULL),
+('t3_luat_q60', 'Đối với hành vi phương tiện không có động cơ có trọng tải toàn phần đến 15 tấn hoặc có sức chở đến 12 người; phương tiện có động cơ công suất máy chính đến 15 sức ngựa hoặc có sức chở đến 12 người thì bị phạt', 't3_luat', 't3_luat_q60_a4', NULL),
+('t3_luat_q61', 'Dấu hiệu hai hình tròn màu trắng ghép theo kiểu múi khế treo ở trên tàu cá có chiều dài lớn nhất 20 mét có đường kính là', 't3_luat', 't3_luat_q61_a3', NULL),
+('t3_luat_q62', 'Phương tiện đưa đón hoa tiêu ban ngày ở vị trí cao nhất trên cột đèn treo', 't3_luat', 't3_luat_q62_a2', NULL),
+('t3_luat_q63', 'Phương tiện có người ngã xuống nước ban ngày ở vị trí cao nhất trên cột đèn treo', 't3_luat', 't3_luat_q63_a2', NULL),
+('t3_luat_q64', 'Phương tiện bị nạn yêu cầu cấp cứu ban ngày ở vị trí cao nhất trên cột đèn treo', 't3_luat', 't3_luat_q64_a4', NULL),
+('t3_luat_q65', 'Phương tiện có động cơ chở khách ban ngày ở vị trí cao nhất trên cột đèn treo', 't3_luat', 't3_luat_q65_a4', NULL),
+('t3_luat_q66', 'Phương tiện chở hàng nguy hiểm ban ngày ở vị trí cao nhất trên cột cờ treo cờ gì?', 't3_luat', 't3_luat_q66_a3', NULL),
+('t3_luat_q67', 'Hệ thống báo hiệu đường thủy nội địa gồm báo hiệu nào?', 't3_luat', 't3_luat_q67_a4', NULL),
+('t3_luat_q68', 'Các điều quy định về đèn phải được áp dụng vào thời gian nào?', 't3_luat', 't3_luat_q68_a4', NULL),
+('t3_luat_q69', 'Báo hiệu chỉ vị trí giới hạn bên bờ phải của luồng tàu chạy, ban đêm ánh sáng màu gì?', 't3_luat', 't3_luat_q69_a1', NULL),
+('t3_luat_q70', 'Phao tim luồng, ban đêm ánh sáng màu gì?', 't3_luat', 't3_luat_q70_a4', NULL),
+('t3_luat_q71', 'Báo hiệu ngã ba sông, ban đêm ánh sáng màu gì?', 't3_luat', 't3_luat_q71_a3', NULL),
+('t3_luat_q72', 'Báo hiệu thông báo được phép đi qua, ban đêm treo', 't3_luat', 't3_luat_q72_a2', NULL),
+('t3_luat_q73', 'Báo hiệu chuyển hướng luồng đặt bên bờ phải, ban đêm ánh sáng màu gì?', 't3_luat', 't3_luat_q73_a1', NULL),
+('t3_luat_q74', 'Báo hiệu chỉ vị trí giới hạn bên trái của luồng tàu chạy là', 't3_luat', 't3_luat_q74_a1', 'https://i.imgur.com/K3L5z1j.png'),
+('t3_luat_q75', 'Báo hiệu chỉ vị trí giới hạn bên phải của luồng tàu sông đi cạnh luồng tàu biển là', 't3_luat', 't3_luat_q75_a3', 'https://i.imgur.com/gY9c8hU.png'),
+('t3_luat_q76', 'Báo hiệu chỉ vị trí giới hạn bên trái của luồng tàu sông đi cạnh luồng tàu biển là', 't3_luat', 't3_luat_q76_a2', 'https://i.imgur.com/K3L5z1j.png'),
+('t3_luat_q77', 'Báo hiệu chỉ vật chướng ngại đơn lẻ trên đường thủy rộng là', 't3_luat', 't3_luat_q77_a2', 'https://i.imgur.com/9C0n9s7.png'),
+('t3_luat_q78', 'Báo hiệu chỉ vị trí giới hạn vùng nước riêng phía bên bờ phải của luồng tàu chạy là', 't3_luat', 't3_luat_q78_a2', 'https://i.imgur.com/rN5gXgJ.png'),
+('t3_luat_q79', 'Báo hiệu chỉ cửa luồng ra vào cảng, bến đặt ở phía bên trái là', 't3_luat', 't3_luat_q79_a3', 'https://i.imgur.com/eBw0f4T.png'),
+('t3_luat_q80', 'Báo hiệu chỉ vị trí tim luồng là', 't3_luat', 't3_luat_q80_a2', 'https://i.imgur.com/Y1Z2f4n.png'),
+('t3_luat_q81', 'Báo hiệu vị trí nguy hiểm bên trái luồng chạy tàu là', 't3_luat', 't3_luat_q81_a2', 'https://i.imgur.com/c6x8g1o.png'),
+('t3_luat_q82', 'Báo hiệu vị trí nguy hiểm bên phải luồng chạy tàu là', 't3_luat', 't3_luat_q82_a4', 'https://i.imgur.com/f0uJ9yU.png'),
+('t3_luat_q83', 'Báo hiệu định hướng phía bên phải của luồng là', 't3_luat', 't3_luat_q83_a4', 'https://i.imgur.com/O6L5XlW.png'),
+('t3_luat_q84', 'Báo hiệu thông báo cấm đỗ là', 't3_luat', 't3_luat_q84_a2', 'https://i.imgur.com/w4m0t2c.png'),
+('t3_luat_q85', 'Báo hiệu thông báo cấm vượt là', 't3_luat', 't3_luat_q85_a4', 'https://i.imgur.com/jB8S0r3.png'),
+('t3_luat_q86', 'Báo hiệu thông báo cấm đi lại với tốc độ cao là', 't3_luat', 't3_luat_q86_a2', 'https://i.imgur.com/jB8S0r3.png'),
+('t3_luat_q87', 'Báo hiệu thông báo cấm buộc tàu thuyền là', 't3_luat', 't3_luat_q87_a1', 'https://i.imgur.com/5J3I7yX.png'),
+('t3_luat_q88', 'Báo hiệu thông báo chiều rộng vùng nước được phép neo đậu là', 't3_luat', 't3_luat_q88_a4', 'https://i.imgur.com/Q9R4W8l.png'),
+('t3_luat_q89', 'Báo hiệu thông báo mốc cây số đường thủy nội địa là', 't3_luat', 't3_luat_q89_a1', 'https://i.imgur.com/6X2Z7kU.png'),
+('t3_luat_q90', 'Báo hiệu thông báo có công trình ngầm vượt sông là', 't3_luat', 't3_luat_q90_a2', 'https://i.imgur.com/i8h0E1R.png')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id, image = EXCLUDED.image;
+
+INSERT INTO answers (id, text, question_id) VALUES
+('t3_luat_q1_a1', '2 hình tròn màu đen ghép theo kiểu múi khế', 't3_luat_q1'), ('t3_luat_q1_a2', '3 hình vuông màu đen ghép theo kiểu múi khế', 't3_luat_q1'), ('t3_luat_q1_a3', '1 dấu hiệu gồm 2 hình tam giác đều màu đen ghép theo kiểu múi khế', 't3_luat_q1'), ('t3_luat_q1_a4', '2 hình thoi màu đen ghép theo kiểu múi khế', 't3_luat_q1'),
+('t3_luat_q2_a1', 'Đi đúng khoang có báo hiệu thông thuyền', 't3_luat_q2'), ('t3_luat_q2_a2', 'Đi vào khoang có chiều rộng nhất', 't3_luat_q2'), ('t3_luat_q2_a3', 'Đi vào khoang có chiều cao nhất', 't3_luat_q2'), ('t3_luat_q2_a4', 'Cả ba quy định trên', 't3_luat_q2'),
+('t3_luat_q3_a1', 'Đèn đỏ nhấp nháy liên tục', 't3_luat_q3'), ('t3_luat_q3_a2', 'Đèn đỏ sáng liên tục', 't3_luat_q3'), ('t3_luat_q3_a3', 'Đèn vàng nhấp nháy liên tục', 't3_luat_q3'), ('t3_luat_q3_a4', 'Đèn xanh nhấp nháy liên tục', 't3_luat_q3'),
+('t3_luat_q4_a1', 'Cờ chữ B', 't3_luat_q4'), ('t3_luat_q4_a2', 'Cờ chữ C', 't3_luat_q4'), ('t3_luat_q4_a3', 'Cờ chữ N', 't3_luat_q4'), ('t3_luat_q4_a4', 'Cờ chữ O', 't3_luat_q4'),
+('t3_luat_q5_a1', 'Đèn đỏ nhấp nháy liên tục', 't3_luat_q5'), ('t3_luat_q5_a2', 'Đèn trắng nhấp nháy liên tục', 't3_luat_q5'), ('t3_luat_q5_a3', 'Đèn vàng nhấp nháy liên tục', 't3_luat_q5'), ('t3_luat_q5_a4', 'Đèn xanh nhấp nháy liên tục', 't3_luat_q5'),
+('t3_luat_q6_a1', 'Cờ đỏ đuôi nheo', 't3_luat_q6'), ('t3_luat_q6_a2', 'Cờ xanh đuôi nheo', 't3_luat_q6'), ('t3_luat_q6_a3', 'Cờ trắng trắng đuôi nheo', 't3_luat_q6'), ('t3_luat_q6_a4', 'Cờ vàng đuôi nheo', 't3_luat_q6'),
+('t3_luat_q7_a1', '1 đèn trắng sáng 360° ở phía mũi', 't3_luat_q7'), ('t3_luat_q7_a2', '1 đèn trắng sáng 360° ở phía lái', 't3_luat_q7'), ('t3_luat_q7_a3', '1 đèn đỏ sáng 360° ở phía mũi', 't3_luat_q7'), ('t3_luat_q7_a4', '1 đèn xanh sáng 360° ở phía lái', 't3_luat_q7'),
+('t3_luat_q8_a1', '1 dấu hiệu, gồm 2 hình tròn màu đen ghép theo kiểu múi khế', 't3_luat_q8'), ('t3_luat_q8_a2', '1 dấu hiệu, gồm 2 hình thoi màu đen ghép theo kiểu múi khế', 't3_luat_q8'), ('t3_luat_q8_a3', '1 dấu hiệu, gồm 2 hình tam giác màu đen ghép theo kiểu múi khế', 't3_luat_q8'), ('t3_luat_q8_a4', '1 dấu hiệu, gồm 2 hình vuông màu đen ghép theo kiểu múi khế', 't3_luat_q8'),
+('t3_luat_q9_a1', '2 đèn vàng sáng 360° : 1 đèn ở phía mũi, 1 đèn phía lái', 't3_luat_q9'), ('t3_luat_q9_a2', '2 đèn trắng sáng 360°: 1 đèn phía mũi, 1 đèn phía lái', 't3_luat_q9'), ('t3_luat_q9_a3', '2 đèn đỏ sáng 360° : 1 đèn ở phía mũi, 1 đèn phía lái', 't3_luat_q9'), ('t3_luat_q9_a4', '2 đèn xanh sáng 360° : 1 dèn ở phía mũi, 1 đèn phía lái', 't3_luat_q9'),
+('t3_luat_q10_a1', '1 dấu hiệu gồm hình thoi màu đen ghép theo kiểu múi khế', 't3_luat_q10'), ('t3_luat_q10_a2', '1 dấu hiệu gồm 2 hình tam giác màu đen ghép theo kiểu múi khế', 't3_luat_q10'), ('t3_luat_q10_a3', '1 dấu hiệu gồm 2 hình vuông màu đen ghép theo kiểu múi khế', 't3_luat_q10'), ('t3_luat_q10_a4', '1 dấu hiệu, gồm 2 hình tròn màu đen ghép theo kiểu múi khế', 't3_luat_q10'),
+('t3_luat_q11_a1', '1 đèn xanh trên một đèn đỏ, phía luồng lưu thông được thắp một đèn trắng', 't3_luat_q11'), ('t3_luat_q11_a2', '1 đèn đỏ trên một đèn vàng, phía luồng lưu thông được thắp một đèn trắng', 't3_luat_q11'), ('t3_luat_q11_a3', '1 đèn đỏ trên một đèn xanh, phía luồng lưu thông được thắp một đèn trắng', 't3_luat_q11'), ('t3_luat_q11_a4', '1 đèn đỏ trên một đèn trắng phía luồng lưu thông được thắp một đèn trắng', 't3_luat_q11'),
+('t3_luat_q12_a1', '1 dấu hiệu gồm hai hình chữ nhật màu đen ghép theo kiểu múi khế', 't3_luat_q12'), ('t3_luat_q12_a2', '1 dấu hiệu gồm hai hình vuông màu đen ghép theo kiểu múi khế', 't3_luat_q12'), ('t3_luat_q12_a3', '1 dấu hiệu gồm hai hình thoi màu đen ghép theo kiểu múi khế', 't3_luat_q12'), ('t3_luat_q12_a4', '1 dấu hiệu gồm hai hình tròn màu đen ghép theo kiểu múi khế', 't3_luat_q12'),
+('t3_luat_q13_a1', '1 đèn xanh trên một đèn đỏ, phía luồng lưu thông được thắp một đèn trắng', 't3_luat_q13'), ('t3_luat_q13_a2', '1 đèn đỏ trên một đèn xanh, phía luồng lưu thông được thắp một đèn trắng', 't3_luat_q13'), ('t3_luat_q13_a3', '1 đèn đỏ trên một đèn trắng phía luồng lưu thông được thắp một đèn trắng', 't3_luat_q13'), ('t3_luat_q13_a4', '1 đèn đỏ trên một đèn vàng, phía luồng lưu thông được thắp một đèn trắng', 't3_luat_q13'),
+('t3_luat_q14_a1', '1 dấu hiệu gồm hai hình vuông màu đen ghép theo kiểu múi khế', 't3_luat_q14'), ('t3_luat_q14_a2', '1 dấu hiệu gồm hai hình thoi màu đen ghép theo kiểu múi khế', 't3_luat_q14'), ('t3_luat_q14_a3', '1 dấu hiệu gồm hai hình tròn màu đen ghép theo kiểu múi khế', 't3_luat_q14'), ('t3_luat_q14_a4', '1 dấu hiệu gồm hai hình chữ nhật màu đen ghép theo kiểu múi khế', 't3_luat_q14'),
+('t3_luat_q15_a1', '2 dấu hiệu, mỗi dấu hiệu gồm hai hình vuông màu đen ghép theo kiểu múi khế', 't3_luat_q15'), ('t3_luat_q15_a2', '2 dấu hiệu, mỗi dấu hiệu gồm hai hình thoi màu đen ghép theo kiểu múi khế', 't3_luat_q15'), ('t3_luat_q15_a3', '2 dấu hiệu, mỗi dấu hiệu gồm hai hình tròn màu đen ghép theo kiểu múi khế', 't3_luat_q15'), ('t3_luat_q15_a4', '2 dấu hiệu, mỗi dấu hiệu gồm hai hình chữ nhật màu đen ghép theo kiểu múi khế', 't3_luat_q15'),
+('t3_luat_q16_a1', '2 đèn xanh, mỗi đèn cách nhau một mét', 't3_luat_q16'), ('t3_luat_q16_a2', '2 đèn đỏ, mỗi đèn cách nhau một mét', 't3_luat_q16'), ('t3_luat_q16_a3', '2 đèn vàng, mỗi đèn cách nhau một mét', 't3_luat_q16'), ('t3_luat_q16_a4', '2 đèn trắng, mỗi đèn cách nhau một mét', 't3_luat_q16'),
+('t3_luat_q17_a1', '1 đèn xanh giữa hai đèn đỏ', 't3_luat_q17'), ('t3_luat_q17_a2', '1 đèn xanh giữa hai đèn trắng', 't3_luat_q17'), ('t3_luat_q17_a3', '1 đèn đỏ giữa hai đèn trắng', 't3_luat_q17'), ('t3_luat_q17_a4', '1 đèn đỏ giữa hai đèn xanh', 't3_luat_q17'),
+('t3_luat_q18_a1', 'Cờ trắng chữ thập đỏ', 't3_luat_q18'), ('t3_luat_q18_a2', 'Cờ đỏ đuôi nheo', 't3_luat_q18'), ('t3_luat_q18_a3', 'Cờ đỏ đuôi nheo có quân hiệu', 't3_luat_q18'), ('t3_luat_q18_a4', 'Cờ xanh lá cây đuôi nheo', 't3_luat_q18'),
+('t3_luat_q19_a1', 'Đèn đỏ nhấp nháy liên tục', 't3_luat_q19'), ('t3_luat_q19_a2', 'Đèn xanh quay nhanh liên tục', 't3_luat_q19'), ('t3_luat_q19_a3', 'Đèn đỏ quay nhanh liên tục', 't3_luat_q19'), ('t3_luat_q19_a4', 'Đèn trắng quay nhanh liên tục', 't3_luat_q19'),
+('t3_luat_q20_a1', 'Đèn đỏ nhấp nháy liên tục', 't3_luat_q20'), ('t3_luat_q20_a2', 'Đèn xanh quay nhanh liên tục', 't3_luat_q20'), ('t3_luat_q20_a3', 'Đèn đỏ quay nhanh liên tục', 't3_luat_q20'), ('t3_luat_q20_a4', 'Đèn trắng quay nhanh liên tục', 't3_luat_q20'),
+('t3_luat_q21_a1', 'Cờ trắng chữ thập đỏ', 't3_luat_q21'), ('t3_luat_q21_a2', 'Cờ đỏ đuôi nheo', 't3_luat_q21'), ('t3_luat_q21_a3', 'Cờ đỏ đuôi nheo có quân hiệu', 't3_luat_q21'), ('t3_luat_q21_a4', 'Cờ xanh lá cây đuôi nheo có công an hiệu', 't3_luat_q21'),
+('t3_luat_q22_a1', 'Phương tiện, đoàn phương tiện có công an dẫn đường', 't3_luat_q22'), ('t3_luat_q22_a2', 'Phương tiện cứu nạn', 't3_luat_q22'), ('t3_luat_q22_a3', 'Phương tiện quân đội làm nhiệm vụ khẩn cấp', 't3_luat_q22'), ('t3_luat_q22_a4', 'Phương tiện, đoàn phương tiện có công an hộ tống', 't3_luat_q22'),
+('t3_luat_q23_a1', 'Phương tiện chữa cháy', 't3_luat_q23'), ('t3_luat_q23_a2', 'Phương tiện cứu nạn', 't3_luat_q23'), ('t3_luat_q23_a3', 'Phương tiện quân đội làm nhiệm vụ khẩn cấp', 't3_luat_q23'), ('t3_luat_q23_a4', 'Phương tiện, đoàn phương tiện có công an hộ tống', 't3_luat_q23'),
+('t3_luat_q24_a1', 'Phương tiện thô sơ phải tránh bè', 't3_luat_q24'), ('t3_luat_q24_a2', 'Bè phải tránh phương tiện có động cơ', 't3_luat_q24'), ('t3_luat_q24_a3', 'Bè phải tránh mọi phương tiện', 't3_luat_q24'), ('t3_luat_q24_a4', 'Mọi phương tiện phải tránh bè', 't3_luat_q24'),
+('t3_luat_q25_a1', 'Đi gần phương tiện đang thực hiện nghiệp vụ trên luồng', 't3_luat_q25'), ('t3_luat_q25_a2', 'Đi gần phương tiện bị nạn', 't3_luat_q25'), ('t3_luat_q25_a3', 'Đi gần phương tiện chở hàng nguy hiểm', 't3_luat_q25'), ('t3_luat_q25_a4', 'Cả ba trường hợp trên', 't3_luat_q25'),
+('t3_luat_q26_a1', 'Đi gần đê, kè khi có nước lớn', 't3_luat_q26'), ('t3_luat_q26_a2', 'Đi gần phương tiện chở hành khách', 't3_luat_q26'), ('t3_luat_q26_a3', 'Đi ngoài phạm vi cảng, bến thủy nội địa', 't3_luat_q26'), ('t3_luat_q26_a4', 'Tất cả các trường hợp trên', 't3_luat_q26'),
+('t3_luat_q27_a1', 'Phương tiện chở than', 't3_luat_q27'), ('t3_luat_q27_a2', 'Phương tiện chở hàng nguy hiểm', 't3_luat_q27'), ('t3_luat_q27_a3', 'Phương tiện chở xi măng', 't3_luat_q27'), ('t3_luat_q27_a4', 'Cả ba phương tiện trên', 't3_luat_q27'),
+('t3_luat_q28_a1', 'Giảm tốc độ của phương tiện', 't3_luat_q28'), ('t3_luat_q28_a2', 'Phát tín hiệu nhiều lần theo quy định', 't3_luat_q28'), ('t3_luat_q28_a3', 'Đi sát về phía luồng đã báo', 't3_luat_q28'), ('t3_luat_q28_a4', 'Cả ba quy định trên', 't3_luat_q28'),
+('t3_luat_q29_a1', 'Phương tiện phát tín hiệu xin đường trước được quyền ưu tiên', 't3_luat_q29'), ('t3_luat_q29_a2', 'Phương tiện phát tín hiệu xin đường sau được quyền ưu tiên', 't3_luat_q29'), ('t3_luat_q29_a3', 'Tránh nhau về phía mạn trái của mình', 't3_luat_q29'), ('t3_luat_q29_a4', 'Tránh nhau thế nào cũng được', 't3_luat_q29'),
+('t3_luat_q30_a1', '112,5 độ', 't3_luat_q30'), ('t3_luat_q30_a2', '135 độ', 't3_luat_q30'), ('t3_luat_q30_a3', '225 độ', 't3_luat_q30'), ('t3_luat_q30_a4', '360 độ', 't3_luat_q30'),
+('t3_luat_q31_a1', 'Tăng tốc độ, đi sát về một bên luồng để nhường đường', 't3_luat_q31'), ('t3_luat_q31_a2', 'Giảm tốc độ', 't3_luat_q31'), ('t3_luat_q31_a3', 'Giảm tốc độ, đi sát về một bên luồng để nhường đường', 't3_luat_q31'), ('t3_luat_q31_a4', 'Đi sát về một bên luồng để nhường đường', 't3_luat_q31'),
+('t3_luat_q32_a1', 'Sắp cập bến, rời bến, chào nhau', 't3_luat_q32'), ('t3_luat_q32_a2', 'Đang chạy lùi', 't3_luat_q32'), ('t3_luat_q32_a3', 'Không thể nhường đường', 't3_luat_q32'), ('t3_luat_q32_a4', 'Đổi hướng đi sang phải', 't3_luat_q32'),
+('t3_luat_q33_a1', 'Tín hiệu xin mở cầu, cống, âu tàu', 't3_luat_q33'), ('t3_luat_q33_a2', 'Đang chạy lùi', 't3_luat_q33'), ('t3_luat_q33_a3', 'Không thể nhường đường', 't3_luat_q33'), ('t3_luat_q33_a4', 'Gọi các phương tiện khác đến giúp đỡ', 't3_luat_q33'),
+('t3_luat_q34_a1', 'Phát âm hiệu là một tiếng còi ngắn, lặp lại nhiều lần', 't3_luat_q34'), ('t3_luat_q34_a2', 'Phát âm hiệu là hai tiếng còi ngắn, lặp lại nhiều lần', 't3_luat_q34'), ('t3_luat_q34_a3', 'Phát âm hiệu là một tiếng còi dài, lặp lại nhiều lần', 't3_luat_q34'), ('t3_luat_q34_a4', 'Phát âm hiệu là ba tiếng còi dài lặp lại nhiều lần', 't3_luat_q34'),
+('t3_luat_q35_a1', '112,5 độ', 't3_luat_q35'), ('t3_luat_q35_a2', '135 độ', 't3_luat_q35'), ('t3_luat_q35_a3', '225 độ', 't3_luat_q35'), ('t3_luat_q35_a4', '360 độ', 't3_luat_q35'),
+('t3_luat_q36_a1', '2 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 't3_luat_q36'), ('t3_luat_q36_a2', '1 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 't3_luat_q36'), ('t3_luat_q36_a3', '3 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 't3_luat_q36'), ('t3_luat_q36_a4', '4 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 't3_luat_q36'),
+('t3_luat_q37_a1', '1 đèn trắng cột mũi, 2 đèn mạn, 1 đèn trắng lái', 't3_luat_q37'), ('t3_luat_q37_a2', '2 đèn trắng cột mũi, 2 đèn mạn, 1 đèn trắng lái', 't3_luat_q37'), ('t3_luat_q37_a3', '3 đèn trắng cột mũi, 2 đèn mạn, 1 đèn trắng lái', 't3_luat_q37'), ('t3_luat_q37_a4', '4 đèn trắng cột mũi, 2 đèn mạn, 1 đèn trắng lái', 't3_luat_q37'),
+('t3_luat_q38_a1', '1 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 't3_luat_q38'), ('t3_luat_q38_a2', '2 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 't3_luat_q38'), ('t3_luat_q38_a3', '3 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 't3_luat_q38'), ('t3_luat_q38_a4', '4 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 't3_luat_q38'),
+('t3_luat_q39_a1', '1 đèn trắng cột mũi, 2 đèn mạn, 1 đèn trắng sau lái', 't3_luat_q39'), ('t3_luat_q39_a2', '2 đèn trắng cột mũi, 2 đèn mạn, 1 đèn trắng sau lái', 't3_luat_q39'), ('t3_luat_q39_a3', '3 đèn trắng cột mũi, 2 đèn mạn, 1 đèn trắng sau lái', 't3_luat_q39'), ('t3_luat_q39_a4', '4 đèn trắng cột mũi, 2 đèn mạn, 1 đèn trắng sau lái', 't3_luat_q39'),
+('t3_luat_q40_a1', '1 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 't3_luat_q40'), ('t3_luat_q40_a2', '2 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 't3_luat_q40'), ('t3_luat_q40_a3', '3 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 't3_luat_q40'), ('t3_luat_q40_a4', '4 dấu hiệu, mỗi dấu hiệu gồm 2 hình tròn màu đen ghép kiểu múi khế', 't3_luat_q40'),
+('t3_luat_q41_a1', 'Còi ưu tiên có âm hiệu đặc biệt', 't3_luat_q41'), ('t3_luat_q41_a2', 'Đèn hiệu quay nhanh liên tục đặt trên cột đèn', 't3_luat_q41'), ('t3_luat_q41_a3', 'Cờ hiệu', 't3_luat_q41'), ('t3_luat_q41_a4', 'Cả ba đáp án trên', 't3_luat_q41'),
+('t3_luat_q42_a1', '1 dấu hiệu gồm hai hình chữ nhật màu đen ghép theo kiểu múi khế', 't3_luat_q42'), ('t3_luat_q42_a2', '1 dấu hiệu gồm hai hình vuông màu đen ghép theo kiểu múi khế', 't3_luat_q42'), ('t3_luat_q42_a3', '1 dấu hiệu gồm hai hình thoi góc vuông màu đen ghép theo kiểu múi khế', 't3_luat_q42'), ('t3_luat_q42_a4', '1 dấu hiệu gồm hai hình tròn màu đen ghép theo kiểu múi khế', 't3_luat_q42'),
+('t3_luat_q43_a1', '2 đèn xanh cách nhau một mét, đèn mạn và đèn trắng lái', 't3_luat_q43'), ('t3_luat_q43_a2', '2 đèn đỏ cách nhau một mét, đèn mạn và đèn trắng lái', 't3_luat_q43'), ('t3_luat_q43_a3', '2 đèn vàng cách nhau một mét, đèn mạn và đèn trăng lái', 't3_luat_q43'), ('t3_luat_q43_a4', '2 đèn trắng cách nhau một mét, đèn mạn và đèn trắng lái', 't3_luat_q43'),
+('t3_luat_q44_a1', '1 đèn trắng trên một đèn đỏ', 't3_luat_q44'), ('t3_luat_q44_a2', '1 đèn xanh trên một đèn trắng', 't3_luat_q44'), ('t3_luat_q44_a3', '1 đèn đỏ trên một đèn trắng', 't3_luat_q44'), ('t3_luat_q44_a4', '1 đèn trắng trên một đèn xanh', 't3_luat_q44'),
+('t3_luat_q45_a1', 'Cờ chữ A', 't3_luat_q45'), ('t3_luat_q45_a2', 'Cờ xanh', 't3_luat_q45'), ('t3_luat_q45_a3', 'Cờ chữ B', 't3_luat_q45'), ('t3_luat_q45_a4', 'Cờ chữ K', 't3_luat_q45'),
+('t3_luat_q46_a1', '1 đèn xanh trên một đèn đỏ', 't3_luat_q46'), ('t3_luat_q46_a2', '1 đèn xanh trên một đèn trắng', 't3_luat_q46'), ('t3_luat_q46_a3', '1 đèn đỏ trên một đèn trắng', 't3_luat_q46'), ('t3_luat_q46_a4', '1 đèn đỏ trên một đèn vàng', 't3_luat_q46'),
+('t3_luat_q47_a1', 'Cờ chữ A', 't3_luat_q47'), ('t3_luat_q47_a2', 'Cờ chữ C', 't3_luat_q47'), ('t3_luat_q47_a3', 'Cờ chữ B', 't3_luat_q47'), ('t3_luat_q47_a4', 'Cờ chữ H', 't3_luat_q47'),
+('t3_luat_q48_a1', 'Đỏ', 't3_luat_q48'), ('t3_luat_q48_a2', 'Trắng', 't3_luat_q48'), ('t3_luat_q48_a3', 'Vàng', 't3_luat_q48'), ('t3_luat_q48_a4', 'Xanh', 't3_luat_q48'),
+('t3_luat_q49_a1', 'Cờ chữ K', 't3_luat_q49'), ('t3_luat_q49_a2', 'Cờ chữ O', 't3_luat_q49'), ('t3_luat_q49_a3', 'Cờ chữ C', 't3_luat_q49'), ('t3_luat_q49_a4', 'Cờ chữ B', 't3_luat_q49'),
+('t3_luat_q50_a1', 'Cờ chữ A/L', 't3_luat_q50'), ('t3_luat_q50_a2', 'Cờ chữ Q/L', 't3_luat_q50'), ('t3_luat_q50_a3', 'Cờ chữ B/L', 't3_luat_q50'), ('t3_luat_q50_a4', 'Cờ chữ K/L', 't3_luat_q50'),
+('t3_luat_q51_a1', 'Đạt tiêu chuẩn chất lượng, an toàn kỹ thuật và bảo vệ môi trường', 't3_luat_q51'), ('t3_luat_q51_a2', 'Có giấy chứng nhận đăng ký phương tiện, giấy chứng nhận an toàn kỹ thuật và bảo vệ môi trường', 't3_luat_q51'), ('t3_luat_q51_a3', 'Có đủ định biên thuyền viên và danh bạ thuyền viên theo quy định', 't3_luat_q51'), ('t3_luat_q51_a4', 'Cả ba đáp án trên', 't3_luat_q51'),
+('t3_luat_q52_a1', 'Kiểm tra việc thực hiện quy định của pháp luật về an toàn giao thông và bảo vệ môi trường của phương tiện', 't3_luat_q52'), ('t3_luat_q52_a2', 'Kiểm tra giấy chứng nhận khả năng chuyên môn, chứng chỉ chuyên môn của thuyền viên và người lái phương tiện', 't3_luat_q52'), ('t3_luat_q52_a3', 'Cấp phép cho phương tiện, tàu biển ra, vào cảng, bến thuỷ nội địa', 't3_luat_q52'), ('t3_luat_q52_a4', 'Cả ba đáp án trên', 't3_luat_q52'),
+('t3_luat_q53_a1', 'Xử phạt vi phạm hành chính', 't3_luat_q53'), ('t3_luat_q53_a2', 'Lưu giữ phương tiện', 't3_luat_q53'), ('t3_luat_q53_a3', 'Thu phí, lệ phí theo quy định của pháp luật', 't3_luat_q53'), ('t3_luat_q53_a4', 'Cả ba đáp án trên', 't3_luat_q53'),
+('t3_luat_q54_a1', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn của thuyền trưởng từ 1 ÷ 3 tháng', 't3_luat_q54'), ('t3_luat_q54_a2', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn của thuyền trưởng từ 2 – 3 tháng', 't3_luat_q54'), ('t3_luat_q54_a3', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn của thuyền trưởng từ 3 ÷ 4 tháng', 't3_luat_q54'), ('t3_luat_q54_a4', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn của thuyền trưởng từ 3 ÷ 6 tháng', 't3_luat_q54'),
+('t3_luat_q55_a1', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn, chứng chỉ chuyên môn từ 2 ÷ 3 tháng', 't3_luat_q55'), ('t3_luat_q55_a2', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn, chứng chỉ chuyên môn từ 6 ÷ 9 tháng', 't3_luat_q55'), ('t3_luat_q55_a3', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn, chứng chỉ chuyên môn từ 6 ÷ 12 tháng', 't3_luat_q55'), ('t3_luat_q55_a4', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn, chứng chỉ chuyên môn từ 12 ÷ 15 tháng', 't3_luat_q55'),
+('t3_luat_q56_a1', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn của thuyền trưởng từ 1 - 3 tháng', 't3_luat_q56'), ('t3_luat_q56_a2', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn của thuyền trưởng từ 2 - 3 tháng', 't3_luat_q56'), ('t3_luat_q56_a3', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn của thuyền trưởng từ 3 - 6 tháng', 't3_luat_q56'), ('t3_luat_q56_a4', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn của thuyền trưởng từ 4 - 6 tháng', 't3_luat_q56'),
+('t3_luat_q57_a1', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn của thuyền trưởng từ 2 - 3 tháng', 't3_luat_q57'), ('t3_luat_q57_a2', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn của thuyền trưởng từ 2 ÷ 4 tháng', 't3_luat_q57'), ('t3_luat_q57_a3', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn của thuyền trưởng từ 3 ÷ 5 tháng', 't3_luat_q57'), ('t3_luat_q57_a4', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn của thuyền trưởng từ 3 - 6 tháng', 't3_luat_q57'),
+('t3_luat_q58_a1', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn của thuyền trưởng từ 1 ÷ 3 tháng', 't3_luat_q58'), ('t3_luat_q58_a2', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn của thuyền trưởng từ 2 – 3 tháng', 't3_luat_q58'), ('t3_luat_q58_a3', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn của thuyền trưởng từ 3 – 5 tháng', 't3_luat_q58'), ('t3_luat_q58_a4', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn của thuyền trưởng từ 3 ÷ 6 tháng', 't3_luat_q58'),
+('t3_luat_q59_a1', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn, chứng chỉ chuyên môn từ 3 ÷ 6 tháng', 't3_luat_q59'), ('t3_luat_q59_a2', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn, chứng chỉ chuyên môn từ 3 ÷ 9 tháng', 't3_luat_q59'), ('t3_luat_q59_a3', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn, chứng chỉ chuyên môn từ 6 ÷ 9 tháng', 't3_luat_q59'), ('t3_luat_q59_a4', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn, chứng chỉ chuyên môn từ 9 ÷ 12 tháng', 't3_luat_q59'),
+('t3_luat_q60_a1', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn của thuyền trưởng từ 6 ÷ 8 tháng', 't3_luat_q60'), ('t3_luat_q60_a2', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn của thuyền trưởng từ 6 – 9 tháng', 't3_luat_q60'), ('t3_luat_q60_a3', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn của thuyền trưởng từ 9 ÷ 12 tháng', 't3_luat_q60'), ('t3_luat_q60_a4', 'Tiền và tước quyền sử dụng giấy chứng nhận khả năng chuyên môn của thuyền trưởng từ 6 ÷ 12 tháng', 't3_luat_q60'),
+('t3_luat_q61_a1', '0,5 mét', 't3_luat_q61'), ('t3_luat_q61_a2', '0,4 mét', 't3_luat_q61'), ('t3_luat_q61_a3', '0,3 mét', 't3_luat_q61'), ('t3_luat_q61_a4', '0,2 mét', 't3_luat_q61'),
+('t3_luat_q62_a1', 'Cờ chữ A', 't3_luat_q62'), ('t3_luat_q62_a2', 'Cờ chữ H', 't3_luat_q62'), ('t3_luat_q62_a3', 'Cờ chữ B', 't3_luat_q62'), ('t3_luat_q62_a4', 'Cờ chữ K', 't3_luat_q62'),
+('t3_luat_q63_a1', 'Cờ chữ A', 't3_luat_q63'), ('t3_luat_q63_a2', 'Cờ chữ O', 't3_luat_q63'), ('t3_luat_q63_a3', 'Cờ chữ B', 't3_luat_q63'), ('t3_luat_q63_a4', 'Cờ chữ K', 't3_luat_q63'),
+('t3_luat_q64_a1', 'Cờ chữ A', 't3_luat_q64'), ('t3_luat_q64_a2', 'Cờ chữ O', 't3_luat_q64'), ('t3_luat_q64_a3', 'Cờ chữ B', 't3_luat_q64'), ('t3_luat_q64_a4', 'Cờ chữ N/C', 't3_luat_q64'),
+('t3_luat_q65_a1', 'Cờ chữ A', 't3_luat_q65'), ('t3_luat_q65_a2', 'Cờ chữ O', 't3_luat_q65'), ('t3_luat_q65_a3', 'Cờ chữ B', 't3_luat_q65'), ('t3_luat_q65_a4', 'Cờ vàng đuôi nheo', 't3_luat_q65'),
+('t3_luat_q66_a1', 'Cờ chữ A', 't3_luat_q66'), ('t3_luat_q66_a2', 'Cờ chữ O', 't3_luat_q66'), ('t3_luat_q66_a3', 'Cờ chữ B', 't3_luat_q66'), ('t3_luat_q66_a4', 'Cờ vàng đuôi nheo', 't3_luat_q66'),
+('t3_luat_q67_a1', 'Báo hiệu dẫn luồng', 't3_luat_q67'), ('t3_luat_q67_a2', 'Báo hiệu chỉ vị trí nguy hiểm', 't3_luat_q67'), ('t3_luat_q67_a3', 'Báo hiệu thông báo chỉ dẫn', 't3_luat_q67'), ('t3_luat_q67_a4', 'Cả ba đáp án trên', 't3_luat_q67'),
+('t3_luat_q68_a1', 'Vào ban ngày, trời mát', 't3_luat_q68'), ('t3_luat_q68_a2', 'Mọi điều kiện thời tiết', 't3_luat_q68'), ('t3_luat_q68_a3', 'Vào ban đêm, trời quang', 't3_luat_q68'), ('t3_luat_q68_a4', 'Từ khi mặt trời lặn đến khi mặt trời mọc, khi tầm nhìn xa bị hạn chế', 't3_luat_q68'),
+('t3_luat_q69_a1', 'Đỏ', 't3_luat_q69'), ('t3_luat_q69_a2', 'Xanh lục', 't3_luat_q69'), ('t3_luat_q69_a3', 'Trắng', 't3_luat_q69'), ('t3_luat_q69_a4', 'Vàng', 't3_luat_q69'),
+('t3_luat_q70_a1', 'Xanh lục', 't3_luat_q70'), ('t3_luat_q70_a2', 'Đỏ', 't3_luat_q70'), ('t3_luat_q70_a3', 'Vàng', 't3_luat_q70'), ('t3_luat_q70_a4', 'Trắng', 't3_luat_q70'),
+('t3_luat_q71_a1', 'Xanh lục', 't3_luat_q71'), ('t3_luat_q71_a2', 'Vàng', 't3_luat_q71'), ('t3_luat_q71_a3', 'Trắng', 't3_luat_q71'), ('t3_luat_q71_a4', 'Đỏ', 't3_luat_q71'),
+('t3_luat_q72_a1', '2 đèn đỏ theo chiều thẳng đứng', 't3_luat_q72'), ('t3_luat_q72_a2', '2 đèn xanh lục theo chiều thẳng đứng', 't3_luat_q72'), ('t3_luat_q72_a3', '1 đèn đỏ trên đèn xanh lục', 't3_luat_q72'), ('t3_luat_q72_a4', '2 đèn vàng theo chiều thẳng đứng', 't3_luat_q72'),
+('t3_luat_q73_a1', 'Vàng', 't3_luat_q73'), ('t3_luat_q73_a2', 'Xanh lục', 't3_luat_q73'), ('t3_luat_q73_a3', 'Trắng', 't3_luat_q73'), ('t3_luat_q73_a4', 'Đỏ', 't3_luat_q73'),
+('t3_luat_q74_a1', 'Phao 1', 't3_luat_q74'), ('t3_luat_q74_a2', 'Phao 2', 't3_luat_q74'), ('t3_luat_q74_a3', 'Phao 3', 't3_luat_q74'), ('t3_luat_q74_a4', 'Phao 4', 't3_luat_q74'),
+('t3_luat_q75_a1', 'Phao 1', 't3_luat_q75'), ('t3_luat_q75_a2', 'Phao 2', 't3_luat_q75'), ('t3_luat_q75_a3', 'Phao 3', 't3_luat_q75'), ('t3_luat_q75_a4', 'Phao 4', 't3_luat_q75'),
+('t3_luat_q76_a1', 'Phao 1', 't3_luat_q76'), ('t3_luat_q76_a2', 'Phao 2', 't3_luat_q76'), ('t3_luat_q76_a3', 'Phao 3', 't3_luat_q76'), ('t3_luat_q76_a4', 'Phao 4', 't3_luat_q76'),
+('t3_luat_q77_a1', 'Biển 1', 't3_luat_q77'), ('t3_luat_q77_a2', 'Biển 2', 't3_luat_q77'), ('t3_luat_q77_a3', 'Biển 3', 't3_luat_q77'), ('t3_luat_q77_a4', 'Biển 4', 't3_luat_q77'),
+('t3_luat_q78_a1', 'Phao 1', 't3_luat_q78'), ('t3_luat_q78_a2', 'Phao 2', 't3_luat_q78'), ('t3_luat_q78_a3', 'Phao 3', 't3_luat_q78'), ('t3_luat_q78_a4', 'Phao 4', 't3_luat_q78'),
+('t3_luat_q79_a1', 'Biển 1', 't3_luat_q79'), ('t3_luat_q79_a2', 'Biển 2', 't3_luat_q79'), ('t3_luat_q79_a3', 'Biển 3', 't3_luat_q79'), ('t3_luat_q79_a4', 'Biển 4', 't3_luat_q79'),
+('t3_luat_q80_a1', 'Phao 1', 't3_luat_q80'), ('t3_luat_q80_a2', 'Phao 2', 't3_luat_q80'), ('t3_luat_q80_a3', 'Phao 3', 't3_luat_q80'), ('t3_luat_q80_a4', 'Phao 4', 't3_luat_q80'),
+('t3_luat_q81_a1', 'Biển 1', 't3_luat_q81'), ('t3_luat_q81_a2', 'Biển 2', 't3_luat_q81'), ('t3_luat_q81_a3', 'Biển 3', 't3_luat_q81'), ('t3_luat_q81_a4', 'Biển 4', 't3_luat_q81'),
+('t3_luat_q82_a1', 'Biển 1', 't3_luat_q82'), ('t3_luat_q82_a2', 'Biển 2', 't3_luat_q82'), ('t3_luat_q82_a3', 'Biển 3', 't3_luat_q82'), ('t3_luat_q82_a4', 'Biển 4', 't3_luat_q82'),
+('t3_luat_q83_a1', 'Biển 1', 't3_luat_q83'), ('t3_luat_q83_a2', 'Biển 2', 't3_luat_q83'), ('t3_luat_q83_a3', 'Biển 3', 't3_luat_q83'), ('t3_luat_q83_a4', 'Biển 4', 't3_luat_q83'),
+('t3_luat_q84_a1', 'Biển 1', 't3_luat_q84'), ('t3_luat_q84_a2', 'Biển 2', 't3_luat_q84'), ('t3_luat_q84_a3', 'Biển 3', 't3_luat_q84'), ('t3_luat_q84_a4', 'Biển 4', 't3_luat_q84'),
+('t3_luat_q85_a1', 'Biển 1', 't3_luat_q85'), ('t3_luat_q85_a2', 'Biển 2', 't3_luat_q85'), ('t3_luat_q85_a3', 'Biển 3', 't3_luat_q85'), ('t3_luat_q85_a4', 'Biển 4', 't3_luat_q85'),
+('t3_luat_q86_a1', 'Biển 1', 't3_luat_q86'), ('t3_luat_q86_a2', 'Biển 2', 't3_luat_q86'), ('t3_luat_q86_a3', 'Biển 3', 't3_luat_q86'), ('t3_luat_q86_a4', 'Biển 4', 't3_luat_q86'),
+('t3_luat_q87_a1', 'Biển 1', 't3_luat_q87'), ('t3_luat_q87_a2', 'Biển 2', 't3_luat_q87'), ('t3_luat_q87_a3', 'Biển 3', 't3_luat_q87'), ('t3_luat_q87_a4', 'Biển 4', 't3_luat_q87'),
+('t3_luat_q88_a1', 'Biển 1', 't3_luat_q88'), ('t3_luat_q88_a2', 'Biển 2', 't3_luat_q88'), ('t3_luat_q88_a3', 'Biển 3', 't3_luat_q88'), ('t3_luat_q88_a4', 'Biển 4', 't3_luat_q88'),
+('t3_luat_q89_a1', 'Biển 1', 't3_luat_q89'), ('t3_luat_q89_a2', 'Biển 2', 't3_luat_q89'), ('t3_luat_q89_a3', 'Biển 3', 't3_luat_q89'), ('t3_luat_q89_a4', 'Biển 4', 't3_luat_q89'),
+('t3_luat_q90_a1', 'Biển 1', 't3_luat_q90'), ('t3_luat_q90_a2', 'Biển 2', 't3_luat_q90'), ('t3_luat_q90_a3', 'Biển 3', 't3_luat_q90'), ('t3_luat_q90_a4', 'Biển 4', 't3_luat_q90')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === MÔN: LUỒNG CHẠY TÀU THUYỀN (25 câu) ===
+INSERT INTO questions (id, text, subject_id, correct_answer_id) VALUES
+('t3_luong_q91', 'Hướng chính của các con sông ở Việt Nam thường chảy theo hướng nào?', 't3_luong', 't3_luong_q91_a2'),
+('t3_luong_q92', 'Sông ngòi ở khu vực thượng lưu thường có đặc điểm gì?', 't3_luong', 't3_luong_q92_a3'),
+('t3_luong_q93', 'Khi có dòng nước chảy qua cầu từ thượng lưu xuống hạ lưu thì lưu tốc dòng chảy tăng nhanh ở khu vực nào?', 't3_luong', 't3_luong_q93_a2'),
+('t3_luong_q94', 'Dòng chảy an toàn là dòng chảy', 't3_luong', 't3_luong_q94_a3'),
+('t3_luong_q95', 'Dạng đoạn sông cong thường có đặc điểm gì?', 't3_luong', 't3_luong_q95_a2'),
+('t3_luong_q96', 'Dòng chảy vòng thường xuất hiện khi dòng chảy gặp phải', 't3_luong', 't3_luong_q96_a1'),
+('t3_luong_q97', 'Dòng nước chảy xoáy thường xuất hiện ở nơi nào?', 't3_luong', 't3_luong_q97_a1'),
+('t3_luong_q98', 'Dòng chảy phủ luồng thường xuất hiện khi', 't3_luong', 't3_luong_q98_a2'),
+('t3_luong_q99', 'Dòng chảy phân luồng thường xuất hiện khi nào?', 't3_luong', 't3_luong_q99_a1'),
+('t3_luong_q100', 'Dòng chảy vặn thường xuất hiện khi dòng chảy gặp phải đoạn sông nào?', 't3_luong', 't3_luong_q100_a1'),
+('t3_luong_q101', 'Thông thường đối với tất cả các sông và kênh có dạng thẳng thì thường', 't3_luong', 't3_luong_q101_a2'),
+('t3_luong_q102', 'Độ dốc của các con sông của nước ta ở khu vực nào lớn nhất?', 't3_luong', 't3_luong_q102_a2'),
+('t3_luong_q103', 'Độ dốc của các con sông của nước ta ở khu vực nào nhỏ nhất?', 't3_luong', 't3_luong_q103_a4'),
+('t3_luong_q104', 'Lượng nước của hệ thống sông nào là nhiều nhất?', 't3_luong', 't3_luong_q104_a4'),
+('t3_luong_q105', 'Lượng nước của hệ thống sông nào là ít nhất?', 't3_luong', 't3_luong_q105_a2'),
+('t3_luong_q106', 'Lưu tốc dòng chảy của các con sông của nước ta ở khu vực nào lớn nhất?', 't3_luong', 't3_luong_q106_a2'),
+('t3_luong_q107', 'Lưu tốc dòng chảy của các con sông của nước ta ở khu vực nào nhỏ nhất?', 't3_luong', 't3_luong_q107_a4'),
+('t3_luong_q108', 'Lưu tốc dòng chảy nhỏ nhất thường xuất hiện ở giai đoạn nào?', 't3_luong', 't3_luong_q108_a1'),
+('t3_luong_q109', 'Lưu tốc dòng chảy trên thượng lưu đổ về giảm là bởi', 't3_luong', 't3_luong_q109_a3'),
+('t3_luong_q110', 'Mùa nước đổ (hầu như nước chảy một chiều) thường xuất hiện vào mùa nào?', 't3_luong', 't3_luong_q110_a1'),
+('t3_luong_q111', 'Mật độ sông kênh ở khu vực nào của nước ta nhiều nhất?', 't3_luong', 't3_luong_q111_a4'),
+('t3_luong_q112', 'Giai đoạn bắt nguồn của một con sông ở khu vực nào?', 't3_luong', 't3_luong_q112_a2'),
+('t3_luong_q113', 'Khu vực thượng lưu thường có đặc điểm gì?', 't3_luong', 't3_luong_q113_a3'),
+('t3_luong_q114', 'Sông Bến Hải thuộc hệ thống sông nào?', 't3_luong', 't3_luong_q114_a1'),
+('t3_luong_q115', 'Sông nào chảy trong địa phận nước ta dài nhất?', 't3_luong', 't3_luong_q115_a3')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id;
+
+INSERT INTO answers (id, text, question_id) VALUES
+('t3_luong_q91_a1', 'Đông Bắc - Tây Nam', 't3_luong_q91'), ('t3_luong_q91_a2', 'Tây Bắc - Đông Nam', 't3_luong_q91'), ('t3_luong_q91_a3', 'Bắc - Nam', 't3_luong_q91'), ('t3_luong_q91_a4', 'Đông - Tây', 't3_luong_q91'),
+('t3_luong_q92_a1', 'Độ dốc lớn, lưu tốc lớn và có nhiều bãi cạn', 't3_luong_q92'), ('t3_luong_q92_a2', 'Độ dốc lớn, lưu tốc nhỏ và có nhiều ghềnh đá nguy hiểm', 't3_luong_q92'), ('t3_luong_q92_a3', 'Độ dốc lớn, lưu tốc lớn, nhiều ghềnh đá nguy hiểm và có ít bãi cạn', 't3_luong_q92'), ('t3_luong_q92_a4', 'Độ dốc lớn, lưu tốc nhỏ và có ít bãi cạn', 't3_luong_q92'),
+('t3_luong_q93_a1', 'Thượng lưu cầu', 't3_luong_q93'), ('t3_luong_q93_a2', 'Giữa hai trụ cầu', 't3_luong_q93'), ('t3_luong_q93_a3', 'Hạ lưu cầu', 't3_luong_q93'), ('t3_luong_q93_a4', 'Phía hai bờ', 't3_luong_q93'),
+('t3_luong_q94_a1', 'Thường có màu sáng lấp lánh, mặt sông phẳng, êm và lưu tốc chậm', 't3_luong_q94'), ('t3_luong_q94_a2', 'Thường có màu xanh thẫm, mặt sông gồ ghề, lưu tốc chậm', 't3_luong_q94'), ('t3_luong_q94_a3', 'Thường có màu xanh thẫm, mặt sông phẳng, êm và lưu tốc nhanh', 't3_luong_q94'), ('t3_luong_q94_a4', 'Thường có màu sáng lấp lánh, mặt sông gồ ghề, lưu tốc nhanh', 't3_luong_q94'),
+('t3_luong_q95_a1', 'Bên bờ vịnh thường có bãi cạn', 't3_luong_q95'), ('t3_luong_q95_a2', 'Bên bờ doi thường có bãi cạn', 't3_luong_q95'), ('t3_luong_q95_a3', 'Cả hai bên bờ thường có bãi cạn', 't3_luong_q95'), ('t3_luong_q95_a4', 'Giữa sông có bãi cạn', 't3_luong_q95'),
+('t3_luong_q96_a1', 'Đoạn sông cong', 't3_luong_q96'), ('t3_luong_q96_a2', 'Đoạn sông bị phân luồng', 't3_luong_q96'), ('t3_luong_q96_a3', 'Đoạn sông thẳng', 't3_luong_q96'), ('t3_luong_q96_a4', 'Đoạn sông bị phủ luồng', 't3_luong_q96'),
+('t3_luong_q97_a1', 'Nơi bờ sông bị lở đột ngột, nơi có các công trình ngầm hoặc chướng ngại vật', 't3_luong_q97'), ('t3_luong_q97_a2', 'Nơi sông thẳng', 't3_luong_q97'), ('t3_luong_q97_a3', 'Nơi sông cong đều', 't3_luong_q97'), ('t3_luong_q97_a4', 'Nơi cửa sông', 't3_luong_q97'),
+('t3_luong_q98_a1', 'Có nước lũ nhỏ, hoặc khi thuỷ triều dâng chưa cao', 't3_luong_q98'), ('t3_luong_q98_a2', 'Có nước lũ lớn, hoặc khi thủy triều dâng cao, chưa kịp thoát tỏa rộng trên mặt sông phủ kín các cồn bãi, chướng ngại vật', 't3_luong_q98'), ('t3_luong_q98_a3', 'Có nước lũ, hoặc khi thuỷ triều dâng chưa cao', 't3_luong_q98'), ('t3_luong_q98_a4', 'Nước cạn, hoặc khi thuỷ triều dâng chưa cao', 't3_luong_q98'),
+('t3_luong_q99_a1', 'Có cồn ở giữa sông', 't3_luong_q99'), ('t3_luong_q99_a2', 'Có cồn ở bờ phải', 't3_luong_q99'), ('t3_luong_q99_a3', 'Có cồn ở bờ trái', 't3_luong_q99'), ('t3_luong_q99_a4', 'Có cồn ở cả hai bên bờ', 't3_luong_q99'),
+('t3_luong_q100_a1', 'Đoạn sông cong', 't3_luong_q100'), ('t3_luong_q100_a2', 'Đoạn sông có dòng chảy phân luồng', 't3_luong_q100'), ('t3_luong_q100_a3', 'Đoạn sông có dòng chảy phủ luồng', 't3_luong_q100'), ('t3_luong_q100_a4', 'Đoạn sông thẳng', 't3_luong_q100'),
+('t3_luong_q101_a1', 'Ở giữa sông cạn, độ dốc của hai bờ sông gần bằng nhau', 't3_luong_q101'), ('t3_luong_q101_a2', 'Ở giữa sông sâu, độ dốc của hai bờ sông gần bằng nhau', 't3_luong_q101'), ('t3_luong_q101_a3', 'Ở giữa sông sâu, độ dốc của hai bờ sông khác nhau', 't3_luong_q101'), ('t3_luong_q101_a4', 'Ở giữa sông sâu, xuất hiện bờ lở và đối diện là bờ bồi', 't3_luong_q101'),
+('t3_luong_q102_a1', 'Miền Bắc', 't3_luong_q102'), ('t3_luong_q102_a2', 'Miền Trung', 't3_luong_q102'), ('t3_luong_q102_a3', 'Nam Trung bộ', 't3_luong_q102'), ('t3_luong_q102_a4', 'd. Nam bộ', 't3_luong_q102'),
+('t3_luong_q103_a1', 'Miền Bắc', 't3_luong_q103'), ('t3_luong_q103_a2', 'Miền Trung', 't3_luong_q103'), ('t3_luong_q103_a3', 'Tây Nguyên', 't3_luong_q103'), ('t3_luong_q103_a4', 'Nam bộ', 't3_luong_q103'),
+('t3_luong_q104_a1', 'Hệ thống sông Hồng', 't3_luong_q104'), ('t3_luong_q104_a2', 'Hệ thống sông Thái Bình', 't3_luong_q104'), ('t3_luong_q104_a3', 'Hệ thống sông Đồng Nai', 't3_luong_q104'), ('t3_luong_q104_a4', 'Hệ thống sông Cửu Long', 't3_luong_q104'),
+('t3_luong_q105_a1', 'Hệ thống sông Hồng', 't3_luong_q105'), ('t3_luong_q105_a2', 'Hệ thống sông Mã', 't3_luong_q105'), ('t3_luong_q105_a3', 'Hệ thống sông Đồng Nai', 't3_luong_q105'), ('t3_luong_q105_a4', 'Hệ thống sông Cửu Long', 't3_luong_q105'),
+('t3_luong_q106_a1', 'Miền Bắc', 't3_luong_q106'), ('t3_luong_q106_a2', 'Miền Trung', 't3_luong_q106'), ('t3_luong_q106_a3', 'Bắc Trung bộ', 't3_luong_q106'), ('t3_luong_q106_a4', 'Nam bộ', 't3_luong_q106'),
+('t3_luong_q107_a1', 'Miền Bắc', 't3_luong_q107'), ('t3_luong_q107_a2', 'Miền Trung', 't3_luong_q107'), ('t3_luong_q107_a3', 'Nam Trung bộ', 't3_luong_q107'), ('t3_luong_q107_a4', 'Nam bộ', 't3_luong_q107'),
+('t3_luong_q108_a1', 'Phân tán', 't3_luong_q108'), ('t3_luong_q108_a2', 'Bắt nguồn', 't3_luong_q108'), ('t3_luong_q108_a3', 'Tạo thành', 't3_luong_q108'), ('t3_luong_q108_a4', 'd. Kết thúc', 't3_luong_q108'),
+('t3_luong_q109_a1', 'Lưu lượng nước giảm', 't3_luong_q109'), ('t3_luong_q109_a2', 'Độ dốc của địa hình giảm', 't3_luong_q109'), ('t3_luong_q109_a3', 'Lưu lượng nước giảm, độ dốc của địa hình giảm và dòng triều lên mạnh', 't3_luong_q109'), ('t3_luong_q109_a4', 'Dòng triều lên mạnh', 't3_luong_q109'),
+('t3_luong_q110_a1', 'Mùa mưa', 't3_luong_q110'), ('t3_luong_q110_a2', 'Mùa khô', 't3_luong_q110'), ('t3_luong_q110_a3', 'Cả mùa mưa và mùa khô', 't3_luong_q110'), ('t3_luong_q110_a4', 'Giữa mùa mưa và mùa khô', 't3_luong_q110'),
+('t3_luong_q111_a1', 'Miền Bắc', 't3_luong_q111'), ('t3_luong_q111_a2', 'Miền Trung', 't3_luong_q111'), ('t3_luong_q111_a3', 'Tây Nguyên', 't3_luong_q111'), ('t3_luong_q111_a4', 'Nam bộ', 't3_luong_q111'),
+('t3_luong_q112_a1', 'Trung lưu', 't3_luong_q112'), ('t3_luong_q112_a2', 'Thượng lưu', 't3_luong_q112'), ('t3_luong_q112_a3', 'Hạ lưu', 't3_luong_q112'), ('t3_luong_q112_a4', 'Thượng lưu - Trung lưu', 't3_luong_q112'),
+('t3_luong_q113_a1', 'Độ dốc lớn, lưu tốc lớn và có nhiều bãi cạn', 't3_luong_q113'), ('t3_luong_q113_a2', 'Độ dốc lớn, lưu tốc nhỏ và có nhiều ghềnh đá nguy hiểm', 't3_luong_q113'), ('t3_luong_q113_a3', 'Độ dốc lớn, lưu tốc lớn, nhiều ghềnh đá nguy hiểm', 't3_luong_q113'), ('t3_luong_q113_a4', 'Độ dốc lớn, lưu tốc nhỏ', 't3_luong_q113'),
+('t3_luong_q114_a1', 'Hệ thống sông, kênh miền Trung', 't3_luong_q114'), ('t3_luong_q114_a2', 'Hệ thống sông Hồng', 't3_luong_q114'), ('t3_luong_q114_a3', 'Hệ thống sông Mê Kông', 't3_luong_q114'), ('d. Hệ thống sông Đồng Nai', 'd. Hệ thống sông Đồng Nai', 't3_luong_q114'),
+('t3_luong_q115_a1', 'Sông Hồng', 't3_luong_q115'), ('t3_luong_q115_a2', 'Sông Thái Bình', 't3_luong_q115'), ('t3_luong_q115_a3', 'Sông Đồng Nai', 't3_luong_q115'), ('t3_luong_q115_a4', 'Sông Mê Công (Sông Cửu Long)', 't3_luong_q115')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === MÔN: NGHIỆP VỤ THUYỀN TRƯỞNG (15 câu) ===
+INSERT INTO questions (id, text, subject_id, correct_answer_id) VALUES
+('t3_nvtt_q116', 'Quản lý sổ nhật ký hành trình, danh bạ thuyền viên và các sổ sách giấy tờ cần thiết khác của phương tiện là trách nhiệm của', 't3_nvtt', 't3_nvtt_q116_a1'),
+('t3_nvtt_q117', 'Người chịu trách nhiệm chính về nội dung ghi trong nhật ký là', 't3_nvtt', 't3_nvtt_q117_a1'),
+('t3_nvtt_q118', 'Quản lý, bảo đảm an toàn về người, phương tiện và tài sản trên phương tiện là trách nhiệm của', 't3_nvtt', 't3_nvtt_q118_a1'),
+('t3_nvtt_q119', 'Tổ chức giao nhận hàng hóa, phục vụ hành khách theo lệnh điều động là trách nhiệm của', 't3_nvtt', 't3_nvtt_q119_a1'),
+('t3_nvtt_q120', 'Trường hợp nhật ký ghi bị sai thì thuyền trưởng có thể', 't3_nvtt', 't3_nvtt_q120_a4'),
+('t3_nvtt_q121', 'Theo tính pháp lý thuyền trưởng là người có quyền hạng cao nhất ở đâu?', 't3_nvtt', 't3_nvtt_q121_a1'),
+('t3_nvtt_q122', 'Ai có quyền hủy bỏ hoặc thay đổi ca trực của sỹ quan trực ca boong?', 't3_nvtt', 't3_nvtt_q122_a1'),
+('t3_nvtt_q123', 'Thuyền trưởng phải kiểm tra đèn hiệu vào lúc', 't3_nvtt', 't3_nvtt_q123_a3'),
+('t3_nvtt_q124', 'Trường hợp phương tiện bị đắm, sau khi đã thi hành các biện pháp cứu người, tài sản, hàng hoá và các giấy tờ cần thiết của phương tiện thì', 't3_nvtt', 't3_nvtt_q124_a1'),
+('t3_nvtt_q125', 'Lập kế hoạch chuyến đi, phân công trực ca là trách nhiệm của', 't3_nvtt', 't3_nvtt_q125_a2'),
+('t3_nvtt_q126', 'Tổ chức thực hiện việc sơ cứu, đưa đi bệnh viện đối với người bị ốm đau, tai nạn là trách nhiệm của', 't3_nvtt', 't3_nvtt_q126_a1'),
+('t3_nvtt_q127', 'Danh bạ thuyền viên mới do', 't3_nvtt', 't3_nvtt_q127_a2'),
+('t3_nvtt_q128', 'Nhiệm vụ của bộ phận boong là', 't3_nvtt', 't3_nvtt_q128_a1'),
+('t3_nvtt_q129', 'Bộ phận boong có nhiệm vụ', 't3_nvtt', 't3_nvtt_q129_a2'),
+('t3_nvtt_q130', 'Khi phương tiện chở vượt số hành khách, vượt quá số lượng hàng hóa, chở quá vạch dấu mớn nước an toàn của phương tiện thì biện pháp khắc phục sau khi xử phạt hành chính là', 't3_nvtt', 't3_nvtt_q130_a1')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id;
+
+INSERT INTO answers (id, text, question_id) VALUES
+('t3_nvtt_q116_a1', 'Thuyền trưởng', 't3_nvtt_q116'), ('t3_nvtt_q116_a2', 'Thuyền phó', 't3_nvtt_q116'), ('t3_nvtt_q116_a3', 'Máy trưởng', 't3_nvtt_q116'), ('t3_nvtt_q116_a4', 'Thủy thủ', 't3_nvtt_q116'),
+('t3_nvtt_q117_a1', 'Thuyền trưởng', 't3_nvtt_q117'), ('t3_nvtt_q117_a2', 'Thuyền phó', 't3_nvtt_q117'), ('t3_nvtt_q117_a3', 'Máy trưởng', 't3_nvtt_q117'), ('t3_nvtt_q117_a4', 'Thủy thủ', 't3_nvtt_q117'),
+('t3_nvtt_q118_a1', 'Thuyền trưởng', 't3_nvtt_q118'), ('t3_nvtt_q118_a2', 'Thuyền phó', 't3_nvtt_q118'), ('t3_nvtt_q118_a3', 'Chủ tàu', 't3_nvtt_q118'), ('t3_nvtt_q118_a4', 'Thủy thủ', 't3_nvtt_q118'),
+('t3_nvtt_q119_a1', 'Thuyền trưởng', 't3_nvtt_q119'), ('t3_nvtt_q119_a2', 'Thuyền phó', 't3_nvtt_q119'), ('t3_nvtt_q119_a3', 'Máy trưởng', 't3_nvtt_q119'), ('t3_nvtt_q119_a4', 'Thủy thủ', 't3_nvtt_q119'),
+('t3_nvtt_q120_a1', 'Xé bỏ các trang ghi sai', 't3_nvtt_q120'), ('t3_nvtt_q120_a2', 'Xóa trang ghi sai và có chữ ký xác nhận của sỹ quan đi ca', 't3_nvtt_q120'), ('t3_nvtt_q120_a3', 'Gạch một đường mảnh trên hàng chữ cần xóa', 't3_nvtt_q120'), ('t3_nvtt_q120_a4', 'Gạch đường mảnh trên hàng chỗ viết sai, sỹ quan đi ca và thuyền trưởng ký xác nhận', 't3_nvtt_q120'),
+('t3_nvtt_q121_a1', 'Trên tàu', 't3_nvtt_q121'), ('t3_nvtt_q121_a2', 'Tại công ty', 't3_nvtt_q121'), ('t3_nvtt_q121_a3', 'Trên ngành lái', 't3_nvtt_q121'), ('t3_nvtt_q121_a4', 'Trên ngành máy', 't3_nvtt_q121'),
+('t3_nvtt_q122_a1', 'Thuyền trưởng', 't3_nvtt_q122'), ('t3_nvtt_q122_a2', 'Thuyền phó', 't3_nvtt_q122'), ('t3_nvtt_q122_a3', 'Máy trưởng', 't3_nvtt_q122'), ('t3_nvtt_q122_a4', 'Chủ tàu', 't3_nvtt_q122'),
+('t3_nvtt_q123_a1', 'Ban đêm', 't3_nvtt_q123'), ('t3_nvtt_q123_a2', 'Ban ngày', 't3_nvtt_q123'), ('t3_nvtt_q123_a3', 'Khoảng 16 giờ hàng ngày', 't3_nvtt_q123'), ('t3_nvtt_q123_a4', 'Khi gặp tàu lớn hơn', 't3_nvtt_q123'),
+('t3_nvtt_q124_a1', 'Thuyền trưởng là người cuối cùng rời phương tiện', 't3_nvtt_q124'), ('t3_nvtt_q124_a2', 'Thuyền phó là người cuối cùng rời phương tiện', 't3_nvtt_q124'), ('t3_nvtt_q124_a3', 'Máy trưởng là người cuối cùng rời phương tiện', 't3_nvtt_q124'), ('t3_nvtt_q124_a4', 'Thủy thủ là người cuối cùng rời phương tiện', 't3_nvtt_q124'),
+('t3_nvtt_q125_a1', 'Thuyền trưởng', 't3_nvtt_q125'), ('t3_nvtt_q125_a2', 'Thuyền phó', 't3_nvtt_q125'), ('t3_nvtt_q125_a3', 'Chủ tàu', 't3_nvtt_q125'), ('t3_nvtt_q125_a4', 'Thủy thủ', 't3_nvtt_q125'),
+('t3_nvtt_q126_a1', 'Thuyền trưởng', 't3_nvtt_q126'), ('t3_nvtt_q126_a2', 'Thuyền phó', 't3_nvtt_q126'), ('t3_nvtt_q126_a3', 'Máy trưởng', 't3_nvtt_q126'), ('t3_nvtt_q126_a4', 'd. Thủy thủ', 't3_nvtt_q126'),
+('t3_nvtt_q127_a1', 'Cơ quan công an xác nhận', 't3_nvtt_q127'), ('t3_nvtt_q127_a2', 'Chủ tàu xác nhận', 't3_nvtt_q127'), ('t3_nvtt_q127_a3', 'Sở Xây dựng xác nhận', 't3_nvtt_q127'), ('t3_nvtt_q127_a4', 'Cục Hàng hải và Đường thủy xác nhận', 't3_nvtt_q127'),
+('t3_nvtt_q128_a1', 'Bảo quản bảo dưỡng boong, vỏ tàu, hầm hàng và các cấu trúc khác từ mớn nước không tải trở lên', 't3_nvtt_q128'), ('t3_nvtt_q128_a2', 'Vận hành máy đèn các công tắc và bảng phân phối điện', 't3_nvtt_q128'), ('t3_nvtt_q128_a3', 'Lập kế hoạch làm việc, nghỉ ngơi cho thuyền viên bộ phận phục vụ', 't3_nvtt_q128'), ('t3_nvtt_q128_a4', 'Tổ chức quản lý và điều hành hoạt động của bộ phận phục vụ trên tàu', 't3_nvtt_q128'),
+('t3_nvtt_q129_a1', 'Vận hành thiết bị lạnh, tất cả các máy móc khác có liên quan', 't3_nvtt_q129'), ('t3_nvtt_q129_a2', 'Thực hiện nhiệm vụ đi ca theo phân công của thuyền trưởng', 't3_nvtt_q129'), ('t3_nvtt_q129_a3', 'Giúp thuyền trưởng trong việc giao dịch, tổ chức các buổi tiếp khách, chiêu đãi trên tàu', 't3_nvtt_q129'), ('t3_nvtt_q129_a4', 'Theo dõi chế độ lao động, nhận và phát lương cho thuyền viên', 't3_nvtt_q129'),
+('t3_nvtt_q130_a1', 'Buộc đưa lên khỏi phương tiện số hành khách, số lượng hàng hóa vượt quá đó', 't3_nvtt_q130'), ('t3_nvtt_q130_a2', 'Tạm giữ giấy tờ tàu', 't3_nvtt_q130'), ('t3_nvtt_q130_a3', 'Tạm giữ bằng thuyền trưởng', 't3_nvtt_q130'), ('t3_nvtt_q130_a4', 'Buộc dừng tàu', 't3_nvtt_q130')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === MÔN: KINH TẾ VẬN TẢI (10 câu) ===
+INSERT INTO questions (id, text, subject_id, correct_answer_id) VALUES
+('t3_ktvt_q131', 'Phân loại dựa vào tính chất của hàng gồm những loại hàng nào?', 't3_ktvt', 't3_ktvt_q131_a4'),
+('t3_ktvt_q132', 'Yếu tố bên trong của hàng hóa là yếu tố', 't3_ktvt', 't3_ktvt_q132_a3'),
+('t3_ktvt_q133', 'Tính chất vật lý của hàng hóa thể hiện', 't3_ktvt', 't3_ktvt_q133_a1'),
+('t3_ktvt_q134', 'Hàng hóa được đóng gói bên ngoài có tác dụng gì?', 't3_ktvt', 't3_ktvt_q134_a2'),
+('t3_ktvt_q135', 'Khi xếp dỡ hàng hóa', 't3_ktvt', 't3_ktvt_q135_a1'),
+('t3_ktvt_q136', 'Nghĩa vụ của tổ chức, cá nhân kinh doanh vận tải hành khách hành lý, bao gửi trên đường thủy nội địa phải có', 't3_ktvt', 't3_ktvt_q136_a4'),
+('t3_ktvt_q137', 'Người nhận hành lý ký gửi, bao gửi phải', 't3_ktvt', 't3_ktvt_q137_a2'),
+('t3_ktvt_q138', 'Chuyến đi là', 't3_ktvt', 't3_ktvt_q138_a1'),
+('t3_ktvt_q139', 'Năng suất của tàu là', 't3_ktvt', 't3_ktvt_q139_a3'),
+('t3_ktvt_q140', 'Tốc độ chuyến đi của tàu là', 't3_ktvt', 't3_ktvt_q140_a2')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id;
+
+INSERT INTO answers (id, text, question_id) VALUES
+('t3_ktvt_q131_a1', 'Loại hàng xếp ở dưới đáy hầm phương tiện', 't3_ktvt_q131'), ('t3_ktvt_q131_a2', 'Loại hàng xếp ở giữa hầm phương tiện', 't3_ktvt_q131'), ('t3_ktvt_q131_a3', 'Loại hàng xếp trên boong phương tiện', 't3_ktvt_q131'), ('t3_ktvt_q131_a4', 'Loại hàng hút, tỏa mùi vị', 't3_ktvt_q131'),
+('t3_ktvt_q132_a1', 'Ảnh hưởng từ quá trình xếp dỡ', 't3_ktvt_q132'), ('t3_ktvt_q132_a2', 'Ảnh hưởng từ quá trình vận chuyển', 't3_ktvt_q132'), ('t3_ktvt_q132_a3', 'Ảnh hưởng từ nguyên vật liệu sản xuất, từ quá trình sản xuất và đóng gói', 't3_ktvt_q132'), ('t3_ktvt_q132_a4', 'Ảnh hưởng từ quá trình giao nhận', 't3_ktvt_q132'),
+('t3_ktvt_q133_a1', 'Tính bay bụi, hút ẩm, bay hơi, hút, tỏa mùi vị', 't3_ktvt_q133'), ('t3_ktvt_q133_a2', 'Tính ôxy hóa, tính ăn mòn, dễ cháy, dễ nổ', 't3_ktvt_q133'), ('t3_ktvt_q133_a3', 'Khả năng chịu lực bên ngoài tác dụng vào hàng hóa', 't3_ktvt_q133'), ('t3_ktvt_q133_a4', 'Quá trình phá hủy hàng hóa do vi sinh vật gây nên', 't3_ktvt_q133'),
+('t3_ktvt_q134_a1', 'Nhằm ngăn ngừa, chống lại các loại mùi vị bên ngoài xâm nhập vào hàng hóa', 't3_ktvt_q134'), ('t3_ktvt_q134_a2', 'Không bị hư hỏng, rơi vãi, va chạm, ngăn ngừa tạp chất bên ngoài lẫn vào hàng hóa', 't3_ktvt_q134'), ('t3_ktvt_q134_a3', 'Giữ cho hương vị của hàng hóa khỏi bị bay ra ngoài', 't3_ktvt_q134'), ('t3_ktvt_q134_a4', 'Được trực tiếp đặt hàng và đặt bên trong bao gói ngoài', 't3_ktvt_q134'),
+('t3_ktvt_q135_a1', 'Phải có sơ đồ xếp hàng', 't3_ktvt_q135'), ('t3_ktvt_q135_a2', 'Kiểm tra sự chằng buộc hàng hóa', 't3_ktvt_q135'), ('t3_ktvt_q135_a3', 'Tiến hành thông gió vào thời điểm thích hợp', 't3_ktvt_q135'), ('t3_ktvt_q135_a4', 'Các lô hàng được xếp liền với nhau', 't3_ktvt_q135'),
+('t3_ktvt_q136_a1', 'Các thiết bị chữa cháy, dụng cụ cứu sinh được bố trí theo yêu cầu của thuyền trưởng', 't3_ktvt_q136'), ('t3_ktvt_q136_a2', 'Các thiết bị chữa cháy, dụng cụ cứu sinh theo yêu cầu của chủ hàng', 't3_ktvt_q136'), ('t3_ktvt_q136_a3', 'Các thiết bị chữa cháy, dụng cụ cứu sinh theo yêu cầu của chủ tàu', 't3_ktvt_q136'), ('t3_ktvt_q136_a4', 'Các thiết bị chữa cháy, dụng cụ cứu sinh theo đúng thiết kế của phương tiện', 't3_ktvt_q136'),
+('t3_ktvt_q137_a1', 'Kiểm tra lại hành lý ký gửi, bao gửi trong quá trình vận chuyển', 't3_ktvt_q137'), ('t3_ktvt_q137_a2', 'Kiểm tra lại hành lý ký gửi, bao gửi tại nơi nhận', 't3_ktvt_q137'), ('t3_ktvt_q137_a3', 'Kiểm tra lại hành lý ký gửi, bao gửi tại nơi giao', 't3_ktvt_q137'), ('t3_ktvt_q137_a4', 'Kiểm tra lại hành lý ký gửi, bao gửi tại khi có tình huống bất khả kháng.', 't3_ktvt_q137'),
+('t3_ktvt_q138_a1', 'Sự tổng hợp của các quá trình làm việc gắn liền sự di chuyển của con tàu từ trạm khởi hành tới trạm đến', 't3_ktvt_q138'), ('t3_ktvt_q138_a2', 'Sự di chuyển của tàu từ lúc nhận hàng ở trạm khởi hành đến trạm bất kỳ', 't3_ktvt_q138'), ('t3_ktvt_q138_a3', 'Sự di chuyển của tàu từ cảng nhận hàng đến cảng trả hàng', 't3_ktvt_q138'), ('t3_ktvt_q138_a4', 'Sự tổng hợp của các quá trình làm việc gắn liền sự di chuyển của con tàu từ trạm khởi hành tới trạm bất kỳ', 't3_ktvt_q138'),
+('t3_ktvt_q139_a1', 'Số tấn hàng hay hành khách tàu nhận theo hợp đồng', 't3_ktvt_q139'), ('t3_ktvt_q139_a2', 'Số tấn mà tàu có thể chở được', 't3_ktvt_q139'), ('t3_ktvt_q139_a3', 'Số lượng sản phẩm vận tải sông được tính bằng T.km do 1 phương tiện làm ra trong một đơn vị thời gian', 't3_ktvt_q139'), ('t3_ktvt_q139_a4', 'Số tấn hàng mà tàu nhận được tại cảng', 't3_ktvt_q139'),
+('t3_ktvt_q140_a1', 'Tốc độ của tàu so với bờ', 't3_ktvt_q140'), ('t3_ktvt_q140_a2', 'Tốc độ tính bình quân trong cả chuyến đi', 't3_ktvt_q140'), ('t3_ktvt_q140_a3', 'Tốc độ tính bình quân khi tàu chạy', 't3_ktvt_q140'), ('t3_ktvt_q140_a4', 'Tốc độ tức thời tại một thời điểm nhất định', 't3_ktvt_q140')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === MÔN: CẤU TRÚC PHƯƠNG TIỆN (10 câu) ===
+INSERT INTO questions (id, text, subject_id, correct_answer_id) VALUES
+('t3_cautruc_q141', 'Chiều dài lớn nhất của tàu có ký hiệu là chữ', 't3_cautruc', 't3_cautruc_q141_a2'),
+('t3_cautruc_q142', 'Chiều rộng thiết kế của tàu có ký hiệu là chữ', 't3_cautruc', 't3_cautruc_q142_a4'),
+('t3_cautruc_q143', 'Lực nổi dự trữ khi tàu chở đầy tải có ký hiệu là chữ', 't3_cautruc', 't3_cautruc_q143_a1'),
+('t3_cautruc_q144', 'Chiều cao tĩnh không của tàu có ký hiệu là chữ', 't3_cautruc', 't3_cautruc_q144_a1'),
+('t3_cautruc_q145', 'Tên viết tắt của cơ quan Đăng kiểm Việt Nam là', 't3_cautruc', 't3_cautruc_q145_a3'),
+('t3_cautruc_q146', 'Vòng dấu chở hàng của tàu được đặt tại', 't3_cautruc', 't3_cautruc_q146_a2'),
+('t3_cautruc_q147', 'Chiều cao mạn tàu từ mặt boong xuống đáy tàu có ký hiệu là chữ', 't3_cautruc', 't3_cautruc_q147_a4'),
+('t3_cautruc_q148', 'Cột bích là thiết bị buộc dây tàu được bố trí hạ đặt', 't3_cautruc', 't3_cautruc_q148_a1'),
+('t3_cautruc_q149', 'Về cấu trúc, tàu được thiết kế chia tàu ra làm mấy bộ phận cơ bản?', 't3_cautruc', 't3_cautruc_q149_a2'),
+('t3_cautruc_q150', 'Để tàu thuyền hoạt động được trên mặt nước an toàn cần phải có mấy đặc tính?', 't3_cautruc', 't3_cautruc_q150_a3')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id;
+
+INSERT INTO answers (id, text, question_id) VALUES
+('t3_cautruc_q141_a1', 'L', 't3_cautruc_q141'), ('t3_cautruc_q141_a2', 'Lmax', 't3_cautruc_q141'), ('t3_cautruc_q141_a3', 'Ltt', 't3_cautruc_q141'), ('t3_cautruc_q141_a4', 'Ltk', 't3_cautruc_q141'),
+('t3_cautruc_q142_a1', 'B', 't3_cautruc_q142'), ('t3_cautruc_q142_a2', 'Bmax', 't3_cautruc_q142'), ('t3_cautruc_q142_a3', 'Btt', 't3_cautruc_q142'), ('t3_cautruc_q142_a4', 'Btk', 't3_cautruc_q142'),
+('t3_cautruc_q143_a1', 'F', 't3_cautruc_q143'), ('t3_cautruc_q143_a2', 'D', 't3_cautruc_q143'), ('t3_cautruc_q143_a3', 'H', 't3_cautruc_q143'), ('t3_cautruc_q143_a4', 'T', 't3_cautruc_q143'),
+('t3_cautruc_q144_a1', 'Hk', 't3_cautruc_q144'), ('t3_cautruc_q144_a2', 'Hmax', 't3_cautruc_q144'), ('t3_cautruc_q144_a3', 'Hmin', 't3_cautruc_q144'), ('t3_cautruc_q144_a4', 'Htk', 't3_cautruc_q144'),
+('t3_cautruc_q145_a1', 'VS', 't3_cautruc_q145'), ('t3_cautruc_q145_a2', 'CV', 't3_cautruc_q145'), ('t3_cautruc_q145_a3', 'VR', 't3_cautruc_q145'), ('t3_cautruc_q145_a4', 'VK', 't3_cautruc_q145'),
+('t3_cautruc_q146_a1', 'Đáy tàu', 't3_cautruc_q146'), ('t3_cautruc_q146_a2', 'Mạn tàu', 't3_cautruc_q146'), ('t3_cautruc_q146_a3', 'Đuôi tàu', 't3_cautruc_q146'), ('t3_cautruc_q146_a4', 'Mũi tàu', 't3_cautruc_q146'),
+('t3_cautruc_q147_a1', 'B', 't3_cautruc_q147'), ('t3_cautruc_q147_a2', 'd', 't3_cautruc_q147'), ('t3_cautruc_q147_a3', 'F', 't3_cautruc_q147'), ('t3_cautruc_q147_a4', 'D', 't3_cautruc_q147'),
+('t3_cautruc_q148_a1', 'Trên boong tàu', 't3_cautruc_q148'), ('t3_cautruc_q148_a2', 'Trong hầm hàng', 't3_cautruc_q148'), ('t3_cautruc_q148_a3', 'Trên nóc tàu', 't3_cautruc_q148'), ('t3_cautruc_q148_a4', 'Trong buồng máy', 't3_cautruc_q148'),
+('t3_cautruc_q149_a1', 'Hai bộ phận cơ bản', 't3_cautruc_q149'), ('t3_cautruc_q149_a2', 'Ba bộ phận cơ bản', 't3_cautruc_q149'), ('t3_cautruc_q149_a3', 'Bốn bộ phận cơ bản', 't3_cautruc_q149'), ('t3_cautruc_q149_a4', 'Năm bộ phận cơ bản', 't3_cautruc_q149'),
+('t3_cautruc_q150_a1', 'Có 5 đặc tính', 't3_cautruc_q150'), ('t3_cautruc_q150_a2', 'Có 6 đặc tính', 't3_cautruc_q150'), ('t3_cautruc_q150_a3', 'Có 7 đặc tính', 't3_cautruc_q150'), ('t3_cautruc_q150_a4', 'Có 8 đặc tính', 't3_cautruc_q150')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === KẾT THÚC SCRIPT ===

@@ -1,0 +1,129 @@
+-- Hướng dẫn:
+-- 1. Vào project Supabase của anh.
+-- 2. Mở SQL Editor (biểu tượng </> ở menu bên trái).
+-- 3. Tạo một query mới ("+ New query").
+-- 4. Xóa hết nội dung cũ (nếu có) và dán TOÀN BỘ nội dung file này vào.
+-- 5. Nhấn "RUN".
+--
+-- Lưu ý: Script này được thiết kế để thêm bộ đề thi mới "Chứng chỉ An toàn hóa chất".
+-- Anh chỉ cần chạy file này MỘT LẦN để thêm dữ liệu mới.
+
+-- === BƯỚC 1: TẠO VÀ CẬP NHẬT CẤU TRÚC BẢNG (NẾU CẦN) ===
+CREATE TABLE IF NOT EXISTS licenses (id TEXT PRIMARY KEY, name TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS subjects (id TEXT PRIMARY KEY, name TEXT NOT NULL, license_id TEXT REFERENCES licenses(id) ON DELETE CASCADE);
+CREATE TABLE IF NOT EXISTS questions (id TEXT PRIMARY KEY, text TEXT NOT NULL, image TEXT, subject_id TEXT REFERENCES subjects(id) ON DELETE CASCADE, correct_answer_id TEXT);
+CREATE TABLE IF NOT EXISTS answers (id TEXT PRIMARY KEY, text TEXT NOT NULL, question_id TEXT REFERENCES questions(id) ON DELETE CASCADE);
+
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'licenses' AND column_name = 'display_order') THEN ALTER TABLE licenses ADD COLUMN display_order INT; END IF; END$$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'subjects' AND column_name = 'display_order') THEN ALTER TABLE subjects ADD COLUMN display_order INT; END IF; END$$;
+
+-- === BƯỚC 2: CHÈN DỮ LIỆU BỘ ĐỀ MỚI ===
+
+-- === HẠNG BẰNG MỚI: CHỨNG CHỈ AN TOÀN HÓA CHẤT ===
+
+INSERT INTO licenses (id, name, display_order) VALUES
+('antoan-hoa-chat', 'Chứng chỉ An toàn hóa chất', 14)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, display_order = EXCLUDED.display_order;
+
+-- Thêm các môn học cho hạng bằng trên
+INSERT INTO subjects (id, name, license_id, display_order) VALUES
+('athc_antoan_lamviec', 'An toàn làm việc trên phương tiện chở hóa chất', 'antoan-hoa-chat', 1),
+('athc_vanhanh', 'Vận hành hệ thống làm hàng trên phương tiện chở hóa chất', 'antoan-hoa-chat', 2)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, license_id = EXCLUDED.license_id, display_order = EXCLUDED.display_order;
+
+
+-- === MÔN: An toàn làm việc trên phương tiện chở hóa chất (30 câu) ===
+INSERT INTO questions (id, text, subject_id, correct_answer_id, image) VALUES
+('athc_q1', 'Trang thiết bị an toàn trên tàu thủy gồm những loại nào?', 'athc_antoan_lamviec', 'athc_q1_a1', NULL),
+('athc_q2', 'Người lao động sử dụng trang thiết bị bảo hộ lao động như thế nào?', 'athc_antoan_lamviec', 'athc_q2_a4', NULL),
+('athc_q3', 'Khi xảy ra sự cố tai nạn lao động về điện, người có mặt tại hiện trường phải:', 'athc_antoan_lamviec', 'athc_q3_a1', NULL),
+('athc_q4', 'Khi có sự cố hoặc nghi ngờ thiết bị có sự cố cháy nổ, trước hết người lao động phải:', 'athc_antoan_lamviec', 'athc_q4_a1', NULL),
+('athc_q5', 'Khi có đám cháy trên tàu, thuyền viên có mặt tại hiện trường phải làm gì?', 'athc_antoan_lamviec', 'athc_q5_a1', NULL),
+('athc_q6', 'Trong quy định an toàn lao động, người lao động nào được sử dụng và vận hành thiết bị?', 'athc_antoan_lamviec', 'athc_q6_a2', NULL),
+('athc_q7', 'Thuyền phó khi trực ca bờ, trường hợp tàu đậu trong cầu cảng cần nắm rõ:', 'athc_antoan_lamviec', 'athc_q7_a1', NULL),
+('athc_q8', 'Nếu có báo động, người trực ca khi tàu hành trình phải ở đâu?', 'athc_antoan_lamviec', 'athc_q8_a2', NULL),
+('athc_q9', 'Khi có xảy ra cháy, nổ trên phương tiện, thuyền viên phải tuân thủ theo sự chỉ đạo của ai?', 'athc_antoan_lamviec', 'athc_q9_a1', NULL),
+('athc_q10', 'Khi xảy ra cháy nổ trong khu vực buồng máy trên phương tiện, thợ máy có nhiệm vụ:', 'athc_antoan_lamviec', 'athc_q10_a1', NULL),
+('athc_q11', 'Để đảm bảo an toàn phòng cháy, chữa cháy trên tàu, thuyền viên phải có kỹ năng nào?', 'athc_antoan_lamviec', 'athc_q11_a1', NULL),
+('athc_q12', 'Trên phương tiện chở hóa chất, ngoài các giấy chứng nhận khả năng chuyên môn theo chức danh trên phương tiện, thuyền viên phải có', 'athc_antoan_lamviec', 'athc_q12_a4', NULL),
+('athc_q13', 'Trang thiết bị bảo vệ người làm công tác vận tải hóa chất phải bảo đảm nguyên tắc là:', 'athc_antoan_lamviec', 'athc_q13_a4', NULL),
+('athc_q14', 'Thuyền viên làm việc trên phương tiện vận tải hóa chất sử dụng trang thiết bị bảo vệ khi:', 'athc_antoan_lamviec', 'athc_q14_a2', NULL),
+('athc_q15', 'Thời gian tối thiểu phải kiểm tra thiết bị thở của phương tiện chở hóa chất là:', 'athc_antoan_lamviec', 'athc_q15_a1', NULL),
+('athc_q16', 'Trên phương tiện chở hóa chất, hàng hóa nguy hiểm, người quyết định sơ đồ xếp dỡ hàng hóa là', 'athc_antoan_lamviec', 'athc_q16_a3', NULL),
+('athc_q17', 'Bảo hộ, trang thiết bị an toàn trên phương tiện chở hóa chất được cất giữ trên phương tiện ở đâu?', 'athc_antoan_lamviec', 'athc_q17_a3', NULL),
+('athc_q18', 'Thuyền viên được phép vào làm việc trong khu vực kín khi nồng độ Ôxy tối thiểu là:', 'athc_antoan_lamviec', 'athc_q18_a2', NULL),
+('athc_q19', 'Khi làm việc trong khu vực kín, nghi ngờ có tồn đọng hơi độc, người lao động nhất thiết phải mang:', 'athc_antoan_lamviec', 'athc_q19_a3', NULL),
+('athc_q20', 'Khi khí và hơi phát cháy thì dùng loại bình chữa cháy hóa học nào để dập cháy tốt nhất ?', 'athc_antoan_lamviec', 'athc_q20_a2', NULL),
+('athc_q21', 'Sử dụng loại bình hóa học nào để dập cháy phải đeo mặt nạ phòng ngạt ?', 'athc_antoan_lamviec', 'athc_q21_a3', NULL),
+('athc_q22', 'Các thiết bị điện, hóa chất không gây phản ứng với CO2 thì dùng loại bình chữa cháy hóa học tốt nhất để dập cháy là:', 'athc_antoan_lamviec', 'athc_q22_a1', NULL),
+('athc_q23', 'Trong thời gian làm việc, người lao động phải chấp hành quy định đi lại tại hiện trường:', 'athc_antoan_lamviec', 'athc_q23_a2', NULL),
+('athc_q24', 'Đám cháy khí và hơi thuộc', 'athc_antoan_lamviec', 'athc_q24_a3', NULL),
+('athc_q25', 'Đám cháy kim loại thuộc', 'athc_antoan_lamviec', 'athc_q25_a4', NULL),
+('athc_q26', 'Biển chỉ vị trí đặt thiết bị chữa cháy là', 'athc_antoan_lamviec', 'athc_q26_a1', 'https://i.imgur.com/2s4R0f4.png'),
+('athc_q27', 'Biển chỉ lối đi an toàn là', 'athc_antoan_lamviec', 'athc_q27_a2', 'https://i.imgur.com/Y1Z2f4n.png'),
+('athc_q28', 'Biển chỉ chú ý nguy hiểm là', 'athc_antoan_lamviec', 'athc_q28_a2', 'https://i.imgur.com/i9T5C6f.png'),
+('athc_q29', 'Trang thiết bị cứu hỏa trên tàu được sơn màu gì?', 'athc_antoan_lamviec', 'athc_q29_a1', NULL),
+('athc_q30', 'Trang thiết bị cứu hỏa trên tàu thường được đặt ở đâu ?', 'athc_antoan_lamviec', 'athc_q30_a3', NULL)
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id, image = EXCLUDED.image;
+
+INSERT INTO answers (id, text, question_id) VALUES
+('athc_q1_a1', 'Cứu hỏa, cứu sinh, cứu đắm, dụng cụ y tế', 'athc_q1'), ('athc_q1_a2', 'Hệ thống đường ống', 'athc_q1'), ('athc_q1_a3', 'Danh mục các loại bơm', 'athc_q1'), ('athc_q1_a4', 'Động cơ chính', 'athc_q1'),
+('athc_q2_a1', 'Sử dụng vào việc gì cũng được.', 'athc_q2'), ('athc_q2_a2', 'Sử dụng các trang thiết bị nào cũng được.', 'athc_q2'), ('athc_q2_a3', 'Chỉ một loại cho trang thiết bị quan trọng.', 'athc_q2'), ('athc_q2_a4', 'Phải sử dụng đúng mục đích và đủ các trang thiết bị theo yêu cầu.', 'athc_q2'),
+('athc_q3_a1', 'Ngắt nguồn điện, sơ cứu nạn nhân, báo ngay cho người phụ trách', 'athc_q3'), ('athc_q3_a2', 'Báo ngay cho người phụ trách bộ phận máy', 'athc_q3'), ('athc_q3_a3', 'Tham gia bảo vệ hiện trường để người có trách nhiệm xử lý.', 'athc_q3'), ('athc_q3_a4', 'Rời khỏi hiện trường tai nạn.', 'athc_q3'),
+('athc_q4_a1', 'Báo cho người phụ trách an toàn biết.', 'athc_q4'), ('athc_q4_a2', 'Tiến hành tự sửa chữa, khắc phục.', 'athc_q4'), ('athc_q4_a3', 'Lập tức rời khỏi hiện trường.', 'athc_q4'), ('athc_q4_a4', 'Dừng hoạt động.', 'athc_q4'),
+('athc_q5_a1', 'Báo động toàn tàu, sử dụng thiết bị chữa cháy dập cháy, cứu nạn nhân, báo ngay cho người phụ trách', 'athc_q5'), ('athc_q5_a2', 'Rời khỏi hiện trường', 'athc_q5'), ('athc_q5_a3', 'Dừng động cơ', 'athc_q5'), ('athc_q5_a4', 'Đóng cửa buồng máy', 'athc_q5'),
+('athc_q6_a1', 'Người mới vào làm việc.', 'athc_q6'), ('athc_q6_a2', 'Người đã được huấn luyện về quy tắc an toàn và vận hành thiết bị.', 'athc_q6'), ('athc_q6_a3', 'Người được huấn luyện vận hành thiết bị.', 'athc_q6'), ('athc_q6_a4', 'Người đã làm việc lâu năm.', 'athc_q6'),
+('athc_q7_a1', 'Thủy triều, nội quy của cảng.', 'athc_q7'), ('athc_q7_a2', 'Điều kiện thiên nhiên.', 'athc_q7'), ('athc_q7_a3', 'Báo hiệu khu vực cầu tàu.', 'athc_q7'), ('athc_q7_a4', 'Làm theo sự chỉ đạo của cơ quan Cảng vụ.', 'athc_q7'),
+('athc_q8_a1', 'Vị trí cao nhất.', 'athc_q8'), ('athc_q8_a2', 'Vị trí quy định, chỉ ra khỏi vị trí khi có người thay thế.', 'athc_q8'), ('athc_q8_a3', 'Những nơi cần thiết.', 'athc_q8'), ('athc_q8_a4', 'Mũi tàu.', 'athc_q8'),
+('athc_q9_a1', 'Thuyền trưởng.', 'athc_q9'), ('athc_q9_a2', 'Thuyền phó.', 'athc_q9'), ('athc_q9_a3', 'Máy trưởng.', 'athc_q9'), ('athc_q9_a4', 'Thủy thủ.', 'athc_q9'),
+('athc_q10_a1', 'Báo động cháy, hỗ trợ ứng cứu, đóng cửa thông gió, ngắt van nhiên liệu, tham gia cứu người.', 'athc_q10'), ('athc_q10_a2', 'Đóng cửa thông gió, phun nước làm mát, chữa cháy và di chuyển tài sản có giá trị.', 'athc_q10'), ('athc_q10_a3', 'Di chuyển tài sản, tham gia cứu người.', 'athc_q10'), ('athc_q10_a4', 'Rời khỏi hiện trường.', 'athc_q10'),
+('athc_q11_a1', 'Sử dụng được các trang thiết bị phòng cháy, chữa cháy. Định kỳ diễn tập phòng cháy, chữa cháy trên tàu đúng quy định.', 'athc_q11'), ('athc_q11_a2', 'Thường xuyên diễn tập phòng chữa cháy trên tàu.', 'athc_q11'), ('athc_q11_a3', 'Sử dụng hệ thống đường ống.', 'athc_q11'), ('athc_q11_a4', 'Biết vận hành động cơ.', 'athc_q11'),
+('athc_q12_a1', 'Chứng nhận về sử dụng hóa chất.', 'athc_q12'), ('athc_q12_a2', 'Chứng nhận về sản xuất hóa chất.', 'athc_q12'), ('athc_q12_a3', 'Chứng nhận mua bán hóa chất.', 'athc_q12'), ('athc_q12_a4', 'Chứng chỉ an toàn làm việc trên phương tiện chở hóa chất.', 'athc_q12'),
+('athc_q13_a1', 'Bền, đẹp.', 'athc_q13'), ('athc_q13_a2', 'Không cháy.', 'athc_q13'), ('athc_q13_a3', 'Cách nhiệt.', 'athc_q13'), ('athc_q13_a4', 'Toàn thân được bảo vệ.', 'athc_q13'),
+('athc_q14_a1', 'Mọi lúc, mọi nơi.', 'athc_q14'), ('athc_q14_a2', 'Bất kỳ công việc nào có thể tạo ra nguy hiểm cho thuyền viên.', 'athc_q14'), ('athc_q14_a3', 'Chỉ khi xếp hàng.', 'athc_q14'), ('athc_q14_a4', 'Chỉ khi dỡ hàng.', 'athc_q14'),
+('athc_q15_a1', '1 tháng.', 'athc_q15'), ('athc_q15_a2', '3 tháng.', 'athc_q15'), ('athc_q15_a3', '6 tháng.', 'athc_q15'), ('athc_q15_a4', '1 năm.', 'athc_q15'),
+('athc_q16_a1', 'Thủy thủ.', 'athc_q16'), ('athc_q16_a2', 'Thuyền phó.', 'athc_q16'), ('athc_q16_a3', 'Thuyền trưởng.', 'athc_q16'), ('athc_q16_a4', 'Máy trưởng.', 'athc_q16'),
+('athc_q17_a1', 'Tủ cá nhân.', 'athc_q17'), ('athc_q17_a2', 'Giường cá nhân.', 'athc_q17'), ('athc_q17_a3', 'Tủ chuyên dùng.', 'athc_q17'), ('athc_q17_a4', 'Nơi làm việc.', 'athc_q17'),
+('athc_q18_a1', '18%.', 'athc_q18'), ('athc_q18_a2', '19.5%.', 'athc_q18'), ('athc_q18_a3', '20%.', 'athc_q18'), ('athc_q18_a4', '21%.', 'athc_q18'),
+('athc_q19_a1', 'Mũ bảo hiểm.', 'athc_q19'), ('athc_q19_a2', 'Khẩu trang.', 'athc_q19'), ('athc_q19_a3', 'Mặt nạ phòng độc có dưỡng khí và buộc dây an toàn.', 'athc_q19'), ('athc_q19_a4', 'Quần áo bảo vệ kín người.', 'athc_q19'),
+('athc_q20_a1', 'Bình bọt.', 'athc_q20'), ('athc_q20_a2', 'Bình bột.', 'athc_q20'), ('athc_q20_a3', 'Bình CO2.', 'athc_q20'), ('athc_q20_a4', 'Bình axit bazo.', 'athc_q20'),
+('athc_q21_a1', 'Bình bọt.', 'athc_q21'), ('athc_q21_a2', 'Bình bột.', 'athc_q21'), ('athc_q21_a3', 'Bình CO2.', 'athc_q21'), ('athc_q21_a4', 'Bình axit bazo.', 'athc_q21'),
+('athc_q22_a1', 'Bình CO2.', 'athc_q22'), ('athc_q22_a2', 'Bình bột.', 'athc_q22'), ('athc_q22_a3', 'Bình bọt.', 'athc_q22'), ('athc_q22_a4', 'Bình Axít bazo.', 'athc_q22'),
+('athc_q23_a1', 'Tùy ý đi lại.', 'athc_q23'), ('athc_q23_a2', 'Chỉ được phép đi lại trong phạm vi được phân công.', 'athc_q23'), ('athc_q23_a3', 'Trong và ngoài phạm vi khu vực mình làm việc.', 'athc_q23'), ('athc_q23_a4', 'Chỉ được phép đi lại trên boong.', 'athc_q23'),
+('athc_q24_a1', 'Loại A.', 'athc_q24'), ('athc_q24_a2', 'Loại B.', 'athc_q24'), ('athc_q24_a3', 'Loại C.', 'athc_q24'), ('athc_q24_a4', 'Loại D.', 'athc_q24'),
+('athc_q25_a1', 'Loại A.', 'athc_q25'), ('athc_q25_a2', 'Loại B.', 'athc_q25'), ('athc_q25_a3', 'Loại C.', 'athc_q25'), ('athc_q25_a4', 'Loại D.', 'athc_q25'),
+('athc_q26_a1', 'Biển 1.', 'athc_q26'), ('athc_q26_a2', 'Biển 2.', 'athc_q26'), ('athc_q26_a3', 'Biển 3.', 'athc_q26'), ('athc_q26_a4', 'Biển 4.', 'athc_q26'),
+('athc_q27_a1', 'Biển 1.', 'athc_q27'), ('athc_q27_a2', 'Biển 2.', 'athc_q27'), ('athc_q27_a3', 'Biển 3.', 'athc_q27'), ('athc_q27_a4', 'Biển 4.', 'athc_q27'),
+('athc_q28_a1', 'Biển 1.', 'athc_q28'), ('athc_q28_a2', 'Biển 2.', 'athc_q28'), ('athc_q28_a3', 'Biển 3.', 'athc_q28'), ('athc_q28_a4', 'Biển 4.', 'athc_q28'),
+('athc_q29_a1', 'Màu đỏ.', 'athc_q29'), ('athc_q29_a2', 'Màu xanh.', 'athc_q29'), ('athc_q29_a3', 'Màu vàng.', 'athc_q29'), ('athc_q29_a4', 'Màu xám.', 'athc_q29'),
+('athc_q30_a1', 'Trong hầm, kho mũi.', 'athc_q30'), ('athc_q30_a2', 'Trong hầm, kho lái.', 'athc_q30'), ('athc_q30_a3', 'Tại vị trí quy định.', 'athc_q30'), ('athc_q30_a4', 'Cả ba đáp án trên.', 'athc_q30')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === MÔN: Vận hành hệ thống làm hàng trên phương tiện chở hóa chất (10 câu) ===
+INSERT INTO questions (id, text, subject_id, correct_answer_id) VALUES
+('athc_q31', 'Tàu có đủ tiêu chuẩn về cấu trúc để chở hóa chất gây nguy hiểm và ô nhiễm nghiêm trọng đáng kể là:', 'athc_vanhanh', 'athc_q31_a3'),
+('athc_q32', 'Tàu có đủ tiêu chuẩn về cấu trúc để chở hóa chất gây nguy hiểm và ô nhiễm tương đối nghiêm trọng đáng kể là:', 'athc_vanhanh', 'athc_q32_a4'),
+('athc_q33', 'Khoang, két chứa hàng của phương tiện chở hóa chất phải được cách ly khỏi khu vực nào?', 'athc_vanhanh', 'athc_q33_a2'),
+('athc_q34', 'Thuyền viên trên phương tiện chở hóa chất được huấn luyện thích đáng trình tự xếp dỡ hàng là:', 'athc_vanhanh', 'athc_q34_a1'),
+('athc_q35', 'Những nơi nào trên phương tiện chở hóa chất, thuyền viên không được vào khi không có sự giám sát của sĩ quan có trách nhiệm khi làm hàng?', 'athc_vanhanh', 'athc_q35_a3'),
+('athc_q36', 'Nắp két hàng luôn phải đóng kín khi xếp, dỡ loại hàng hóa chất nào?', 'athc_vanhanh', 'athc_q36_a1'),
+('athc_q37', 'Két chứa loại hàng hóa chất nào sau đây không được đặt trên boong tàu nếu không được cách nhiệt ?', 'athc_vanhanh', 'athc_q37_a3'),
+('athc_q38', 'Đối tượng thuyền viên nào trên phương tiện chở hóa chất được đào tạo, huấn luyện quy trình ứng cứu khẩn cấp để xử lý các tình trạng rò rỉ, tràn hoặc cháy có liên quan đến hàng hóa chất là:', 'athc_vanhanh', 'athc_q38_a4'),
+('athc_q39', 'Tàu chở hàng có phản ứng nguy hiểm với các hàng hóa khác, cấu trúc tàu phải thỏa mãn những yêu cầu nào ?', 'athc_vanhanh', 'athc_q39_a1'),
+('athc_q40', 'Cơ quan chức năng nào chấp nhận bản hướng dẫn vận hành trên phương tiện chở hóa chất?', 'athc_vanhanh', 'athc_q40_a3')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id;
+
+INSERT INTO answers (id, text, question_id) VALUES
+('athc_q31_a1', 'Các loại tàu.', 'athc_q31'), ('athc_q31_a2', 'Tàu loại 1.', 'athc_q31'), ('athc_q31_a3', 'Tàu loại 2.', 'athc_q31'), ('athc_q31_a4', 'Tàu loại 3.', 'athc_q31'),
+('athc_q32_a1', 'Các loại tàu.', 'athc_q32'), ('athc_q32_a2', 'Tàu loại 1.', 'athc_q32'), ('athc_q32_a3', 'Tàu loại 1 và 2.', 'athc_q32'), ('athc_q32_a4', 'Tàu loại 3.', 'athc_q32'),
+('athc_q33_a1', 'Khu vực xử lý rác thải.', 'athc_q33'), ('athc_q33_a2', 'Buồng ở, buồng phục vụ, buồng máy, buồng lái, két nước sinh hoạt, kho thực phẩm.', 'athc_q33'), ('athc_q33_a3', 'Nơi chứa các thiết bị bơm.', 'athc_q33'), ('athc_q33_a4', 'Khu vực có thiết bị tời neo.', 'athc_q33'),
+('athc_q34_a1', 'Thuyền trưởng, thuyền phó, thủy thủ.', 'athc_q34'), ('athc_q34_a2', 'Máy trưởng.', 'athc_q34'), ('athc_q34_a3', 'Máy phó.', 'athc_q34'), ('athc_q34_a4', 'Thợ máy.', 'athc_q34'),
+('athc_q35_a1', 'Khu sinh hoạt thuyền viên', 'athc_q35'), ('athc_q35_a2', 'Khu vực để các thiết bị chữa cháy', 'athc_q35'), ('athc_q35_a3', 'Két hàng, khu vực xếp dỡ có không gian kín, nơi có nguy cơ cháy tự nhiên.', 'athc_q35'), ('athc_q35_a4', 'Kho thực phẩm, nhà bếp, buồng ở.', 'athc_q35'),
+('athc_q36_a1', 'Hàng tạo ra hơi dễ cháy, hàng tạo ra hơi độc, hàng có tính chất nguy hiểm.', 'athc_q36'), ('athc_q36_a2', 'Hàng có tính chất an toàn.', 'athc_q36'), ('athc_q36_a3', 'Hàng không có tính chất cháy và bay hơi.', 'athc_q36'), ('athc_q36_a4', 'Hàng chứa một số tạp chất phụ gia.', 'athc_q36'),
+('athc_q37_a1', 'Dễ nổ.', 'athc_q37'), ('athc_q37_a2', 'Dễ cháy.', 'athc_q37'), ('athc_q37_a3', 'Nhạy cảm với nhiệt độ.', 'athc_q37'), ('athc_q37_a4', 'Nhạy cảm với ánh sáng.', 'athc_q37'),
+('athc_q38_a1', 'Máy trưởng.', 'athc_q38'), ('athc_q38_a2', 'Thợ máy.', 'athc_q38'), ('athc_q38_a3', 'Thủy thủ.', 'athc_q38'), ('athc_q38_a4', 'Các sĩ quan.', 'athc_q38'),
+('athc_q39_a1', 'Cách ly với hàng hóa khác bằng két cách ly, có hệ thống bơm hàng riêng biệt, hệ thống thông hơi khoang, két hàng tách biệt.', 'athc_q39'), ('athc_q39_a2', 'Có trang thiết bị bơm nước.', 'athc_q39'), ('athc_q39_a3', 'Hệ thống thông hơi khoang, két hàng.', 'athc_q39'), ('athc_q39_a4', 'Hệ thống không cần tách biệt.', 'athc_q39'),
+('athc_q40_a1', 'Bộ Xây dựng.', 'athc_q40'), ('athc_q40_a2', 'Sở Xây dựng.', 'athc_q40'), ('athc_q40_a3', 'Cơ quan đăng kiểm.', 'athc_q40'), ('athc_q40_a4', 'Cục Hàng hải và Đường thủy .', 'athc_q40')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === KẾT THÚC SCRIPT ===

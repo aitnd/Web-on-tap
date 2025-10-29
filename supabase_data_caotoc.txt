@@ -1,0 +1,129 @@
+-- Hướng dẫn:
+-- 1. Vào project Supabase của anh.
+-- 2. Mở SQL Editor (biểu tượng </> ở menu bên trái).
+-- 3. Tạo một query mới ("+ New query").
+-- 4. Xóa hết nội dung cũ (nếu có) và dán TOÀN BỘ nội dung file này vào.
+-- 5. Nhấn "RUN".
+--
+-- Lưu ý: Script này được thiết kế để thêm bộ đề thi mới "Chứng chỉ Điều khiển phương tiện cao tốc".
+-- Anh chỉ cần chạy file này MỘT LẦN để thêm dữ liệu mới.
+
+-- === BƯỚC 1: TẠO VÀ CẬP NHẬT CẤU TRÚC BẢNG (NẾU CẦN) ===
+CREATE TABLE IF NOT EXISTS licenses (id TEXT PRIMARY KEY, name TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS subjects (id TEXT PRIMARY KEY, name TEXT NOT NULL, license_id TEXT REFERENCES licenses(id) ON DELETE CASCADE);
+CREATE TABLE IF NOT EXISTS questions (id TEXT PRIMARY KEY, text TEXT NOT NULL, image TEXT, subject_id TEXT REFERENCES subjects(id) ON DELETE CASCADE, correct_answer_id TEXT);
+CREATE TABLE IF NOT EXISTS answers (id TEXT PRIMARY KEY, text TEXT NOT NULL, question_id TEXT REFERENCES questions(id) ON DELETE CASCADE);
+
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'licenses' AND column_name = 'display_order') THEN ALTER TABLE licenses ADD COLUMN display_order INT; END IF; END$$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'subjects' AND column_name = 'display_order') THEN ALTER TABLE subjects ADD COLUMN display_order INT; END IF; END$$;
+
+-- === BƯỚC 2: CHÈN DỮ LIỆU BỘ ĐỀ MỚI ===
+
+-- === HẠNG BẰNG MỚI: CHỨNG CHỈ ĐIỀU KHIỂN PHƯƠNG TIỆN CAO TỐC ===
+
+INSERT INTO licenses (id, name, display_order) VALUES
+('caotoc', 'Chứng chỉ Điều khiển phương tiện cao tốc', 10)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, display_order = EXCLUDED.display_order;
+
+-- Thêm các môn học cho hạng bằng trên
+INSERT INTO subjects (id, name, license_id, display_order) VALUES
+('ct_cautruc', 'Cấu trúc và thiết bị phương tiện cao tốc', 'caotoc', 1),
+('ct_dieudong', 'Điều động tàu', 'caotoc', 2)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, license_id = EXCLUDED.license_id, display_order = EXCLUDED.display_order;
+
+-- === MÔN: CẤU TRÚC VÀ THIẾT BỊ PHƯƠNG TIỆN CAO TỐC (10 câu) ===
+INSERT INTO questions (id, text, subject_id, correct_answer_id) VALUES
+('ct_cautruc_q1', 'Phương tiện cao tốc có mấy đặc tính khai thác ?', 'ct_cautruc', 'ct_cautruc_q1_a1'),
+('ct_cautruc_q2', 'Phương tiện cao tốc có mấy đặc tính hoạt động?', 'ct_cautruc', 'ct_cautruc_q2_a3'),
+('ct_cautruc_q3', 'Khi quay trở, tàu cánh ngầm có thể bị nghiêng ngang đến mấy độ?', 'ct_cautruc', 'ct_cautruc_q3_a1'),
+('ct_cautruc_q4', 'Đường kính vòng quay trở của phương tiện thủy cao tốc, khi bẻ lái hết sang một bên mạn bằng bao nhiêu lần chiều dài thân tàu ?', 'ct_cautruc', 'ct_cautruc_q4_a2'),
+('ct_cautruc_q5', 'Cánh ngầm của phương tiện cao tốc có tuyến hình gì?', 'ct_cautruc', 'ct_cautruc_q5_a3'),
+('ct_cautruc_q6', 'Trục chân vịt của tàu cánh ngầm được đặt nghiêng so với mặt phẳng ngang bao nhiêu độ?', 'ct_cautruc', 'ct_cautruc_q6_a3'),
+('ct_cautruc_q7', 'Tàu cánh ngầm khi chạy, thân được nâng lên trên cánh là do nguyên nhân nào?', 'ct_cautruc', 'ct_cautruc_q7_a2'),
+('ct_cautruc_q8', 'Hệ thống lái mà khi tàu chạy tới, bẻ lái về bên nào mũi ngã sang bên đó gọi là hệ thống lái', 'ct_cautruc', 'ct_cautruc_q8_a1'),
+('ct_cautruc_q9', 'Ăng ten của Radar có chức năng nào?', 'ct_cautruc', 'ct_cautruc_q9_a4'),
+('ct_cautruc_q10', 'Hệ thống định vị toàn cầu GPS có mấy khâu?', 'ct_cautruc', 'ct_cautruc_q10_a3')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id;
+
+INSERT INTO answers (id, text, question_id) VALUES
+('ct_cautruc_q1_a1', '3', 'ct_cautruc_q1'), ('ct_cautruc_q1_a2', '4', 'ct_cautruc_q1'), ('ct_cautruc_q1_a3', '5', 'ct_cautruc_q1'), ('ct_cautruc_q1_a4', '6', 'ct_cautruc_q1'),
+('ct_cautruc_q2_a1', '3', 'ct_cautruc_q2'), ('ct_cautruc_q2_a2', '5', 'ct_cautruc_q2'), ('ct_cautruc_q2_a3', '7', 'ct_cautruc_q2'), ('ct_cautruc_q2_a4', '9', 'ct_cautruc_q2'),
+('ct_cautruc_q3_a1', '3⁰', 'ct_cautruc_q3'), ('ct_cautruc_q3_a2', '4⁰', 'ct_cautruc_q3'), ('ct_cautruc_q3_a3', '5⁰', 'ct_cautruc_q3'), ('ct_cautruc_q3_a4', '6⁰', 'ct_cautruc_q3'),
+('ct_cautruc_q4_a1', '5', 'ct_cautruc_q4'), ('ct_cautruc_q4_a2', '6', 'ct_cautruc_q4'), ('ct_cautruc_q4_a3', '7', 'ct_cautruc_q4'), ('ct_cautruc_q4_a4', '8', 'ct_cautruc_q4'),
+('ct_cautruc_q5_a1', 'Mặt phẳng.', 'ct_cautruc_q5'), ('ct_cautruc_q5_a2', 'Khối hộp.', 'ct_cautruc_q5'), ('ct_cautruc_q5_a3', 'Lưu tuyến.', 'ct_cautruc_q5'), ('ct_cautruc_q5_a4', 'Hình bến.', 'ct_cautruc_q5'),
+('ct_cautruc_q6_a1', '9⁰', 'ct_cautruc_q6'), ('ct_cautruc_q6_a2', '11⁰', 'ct_cautruc_q6'), ('ct_cautruc_q6_a3', '13⁰', 'ct_cautruc_q6'), ('ct_cautruc_q6_a4', '15⁰', 'ct_cautruc_q6'),
+('ct_cautruc_q7_a1', 'Tốc độ cao.', 'ct_cautruc_q7'), ('ct_cautruc_q7_a2', 'Sự chênh áp trên và dưới cánh.', 'ct_cautruc_q7'), ('ct_cautruc_q7_a3', 'Có cơ cấu đẩy từ dưới lên.', 'ct_cautruc_q7'), ('ct_cautruc_q7_a4', 'Do không khí nhẹ hơn nước.', 'ct_cautruc_q7'),
+('ct_cautruc_q8_a1', 'Thuận.', 'ct_cautruc_q8'), ('ct_cautruc_q8_a2', 'Nghịch.', 'ct_cautruc_q8'), ('ct_cautruc_q8_a3', 'Gián tiếp.', 'ct_cautruc_q8'), ('ct_cautruc_q8_a4', 'Chân vịt.', 'ct_cautruc_q8'),
+('ct_cautruc_q9_a1', 'Nhận tín hiệu từ máy thu và phát sóng vào không gian.', 'ct_cautruc_q9'), ('ct_cautruc_q9_a2', 'Nhận sóng phản xạ.', 'ct_cautruc_q9'), ('ct_cautruc_q9_a3', 'Đưa sóng phản xạ về máy thu.', 'ct_cautruc_q9'), ('ct_cautruc_q9_a4', 'Tất cả các đáp án trên.', 'ct_cautruc_q9'),
+('ct_cautruc_q10_a1', '1', 'ct_cautruc_q10'), ('ct_cautruc_q10_a2', '2', 'ct_cautruc_q10'), ('ct_cautruc_q10_a3', '3', 'ct_cautruc_q10'), ('ct_cautruc_q10_a4', '4', 'ct_cautruc_q10')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+
+-- === MÔN: ĐIỀU ĐỘNG TÀU (30 câu) ===
+INSERT INTO questions (id, text, subject_id, correct_answer_id) VALUES
+('ct_dieudong_q11', 'Các đại lượng đặc trưng cho quán tính là', 'ct_dieudong', 'ct_dieudong_q11_a1'),
+('ct_dieudong_q12', 'Khi điều động tàu cập bến, cập phao, thả neo thì thường lựa chọn', 'ct_dieudong', 'ct_dieudong_q12_a1'),
+('ct_dieudong_q13', 'Tàu chạy ngược nước thì', 'ct_dieudong', 'ct_dieudong_q13_a1'),
+('ct_dieudong_q14', 'Tàu chạy xuôi nước thì', 'ct_dieudong', 'ct_dieudong_q14_a2'),
+('ct_dieudong_q15', 'Khi tàu chạy trong sông hẹp và tầm nhìn hạn chế thì', 'ct_dieudong', 'ct_dieudong_q15_a2'),
+('ct_dieudong_q16', 'Điều động tàu rời bến đi theo hướng đậu, có nước chảy từ lái về mũi, muốn ra lái trước phải', 'ct_dieudong', 'ct_dieudong_q16_a2'),
+('ct_dieudong_q17', 'Điều động tàu cập bến ngược nước, khi mũi tàu vào sát bến phải', 'ct_dieudong', 'ct_dieudong_q17_a2'),
+('ct_dieudong_q18', 'Khi có người ngã xuống nước, người điều khiển tàu phải', 'ct_dieudong', 'ct_dieudong_q18_a1'),
+('ct_dieudong_q19', 'Tàu đang chạy xuôi nước mà có người ngã xuống nước thì điều động theo phương pháp nào?', 'ct_dieudong', 'ct_dieudong_q19_a2'),
+('ct_dieudong_q20', 'Tàu đang chạy ngược nước mà có người ngã xuống nước thì điều động theo phương pháp nào?', 'ct_dieudong', 'ct_dieudong_q20_a1'),
+('ct_dieudong_q21', 'Khi tàu đang chạy tới, nếu bẻ bánh lái sang phải thì hướng mũi tàu sẽ', 'ct_dieudong', 'ct_dieudong_q21_a1'),
+('ct_dieudong_q22', 'Khi tàu đang chạy tới, nếu bẻ bánh lái sang trái thì hướng mũi tàu sẽ', 'ct_dieudong', 'ct_dieudong_q22_a2'),
+('ct_dieudong_q23', 'Khi tàu đang chạy lùi, nếu bẻ bánh lái sang trái thì hướng mũi tàu sẽ', 'ct_dieudong', 'ct_dieudong_q23_a1'),
+('ct_dieudong_q24', 'Khi tàu đang chạy lùi, nếu bẻ bánh lái sang phải thì hướng mũi tàu sẽ', 'ct_dieudong', 'ct_dieudong_q24_a2'),
+('ct_dieudong_q25', 'Điều động tàu rời bến đi theo hướng đậu, có nước chảy từ lái về mũi, muốn ra lái trước phải', 'ct_dieudong', 'ct_dieudong_q25_a2'),
+('ct_dieudong_q26', 'Điều động tàu rời bến đi theo hướng đậu, có nước chảy từ lái về mũi, khi lái tàu ngả được góc khoảng 30⁰ thì', 'ct_dieudong', 'ct_dieudong_q26_a2'),
+('ct_dieudong_q27', 'Điều động tàu rời bến đi theo hướng đậu, có gió ngoài bến thổi vào muốn ra lái trước thì', 'ct_dieudong', 'ct_dieudong_q27_a2'),
+('ct_dieudong_q28', 'Điều động tàu cập bến nước đứng, sóng gió yên, mũi tàu đã vào sát bến, sau khi bắt được dây chéo mũi, để đưa lái tàu vào sát bến thì', 'ct_dieudong', 'ct_dieudong_q28_a1'),
+('ct_dieudong_q29', 'Điều động tàu cập bến ngược nước, khi mũi tàu vào sát bến phải', 'ct_dieudong', 'ct_dieudong_q29_a2'),
+('ct_dieudong_q30', 'Điều động tàu cập bến xuôi nước, khi lái tàu vào sát bến phải', 'ct_dieudong', 'ct_dieudong_q30_a2'),
+('ct_dieudong_q31', 'Điều động tàu cập bến, gió trong bến thổi ra, khi bắt được dây chéo mũi thì', 'ct_dieudong', 'ct_dieudong_q31_a3'),
+('ct_dieudong_q32', 'Khi có gió lớn từ ngoài bến thổi vào thì sử dụng phương pháp điều động cập an toàn nhất là', 'ct_dieudong', 'ct_dieudong_q32_a3'),
+('ct_dieudong_q33', 'Phương tiện cao tốc chạy trong luồng hẹp phải', 'ct_dieudong', 'ct_dieudong_q33_a2'),
+('ct_dieudong_q34', 'Điều khiển tàu đi đường có ảnh hưởng của gió, nước ngang, để trừ hao độ dạt người điều khiển cần', 'ct_dieudong', 'ct_dieudong_q34_a4'),
+('ct_dieudong_q35', 'Điều khiển tàu đi đường có ảnh hưởng của sóng, để giảm được ảnh hưởng của sóng hướng đi người điều khiển cần chọn là', 'ct_dieudong', 'ct_dieudong_q35_a3'),
+('ct_dieudong_q36', 'Nguyên tắc điều động tàu cập bến?', 'ct_dieudong', 'ct_dieudong_q36_a1'),
+('ct_dieudong_q37', 'Điều động tàu chạy trên đoạn sông dài thì thường lựa chọn', 'ct_dieudong', 'ct_dieudong_q37_a2'),
+('ct_dieudong_q38', 'Tàu chạy ngược nước, gió ngược thì', 'ct_dieudong', 'ct_dieudong_q38_a1'),
+('ct_dieudong_q39', 'Tàu chạy xuôi nước, xuôi gió thì', 'ct_dieudong', 'ct_dieudong_q39_a2'),
+('ct_dieudong_q40', 'Điều động tàu rời bến đi theo hướng đậu khi có nước chảy từ mũi về lái, muốn ra mũi trước phải', 'ct_dieudong', 'ct_dieudong_q40_a2')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id;
+
+INSERT INTO answers (id, text, question_id) VALUES
+('ct_dieudong_q11_a1', 'Quãng đường và thời gian.', 'ct_dieudong_q11'), ('ct_dieudong_q11_a2', 'Quãng đường và vận tốc.', 'ct_dieudong_q11'), ('ct_dieudong_q11_a3', 'Quãng đường và khối lượng.', 'ct_dieudong_q11'), ('ct_dieudong_q11_a4', 'Vận tốc và khối lượng.', 'ct_dieudong_q11'),
+('ct_dieudong_q12_a1', 'Nước ngược nhẹ.', 'ct_dieudong_q12'), ('ct_dieudong_q12_a2', 'Nước xuôi.', 'ct_dieudong_q12'), ('ct_dieudong_q12_a3', 'Nước ngược mạnh.', 'ct_dieudong_q12'), ('ct_dieudong_q12_a4', 'Nước nào cũng được.', 'ct_dieudong_q12'),
+('ct_dieudong_q13_a1', 'Tốc độ giảm, ăn lái tốt.', 'ct_dieudong_q13'), ('ct_dieudong_q13_a2', 'Tốc độ giảm, ăn lái giảm.', 'ct_dieudong_q13'), ('ct_dieudong_q13_a3', 'Tốc độ không đổi, ăn lái tốt.', 'ct_dieudong_q13'), ('ct_dieudong_q13_a4', 'Tốc độ không đổi, ăn lái giảm.', 'ct_dieudong_q13'),
+('ct_dieudong_q14_a1', 'Tốc độ tăng, ăn lái tốt.', 'ct_dieudong_q14'), ('ct_dieudong_q14_a2', 'Tốc độ tăng, ăn lái giảm.', 'ct_dieudong_q14'), ('ct_dieudong_q14_a3', 'Tốc độ không đổi, ăn lái tốt.', 'ct_dieudong_q14'), ('ct_dieudong_q14_a4', 'Tốc độ không đổi, ăn lái giảm.', 'ct_dieudong_q14'),
+('ct_dieudong_q15_a1', 'Không cần thay đổi tốc độ.', 'ct_dieudong_q15'), ('ct_dieudong_q15_a2', 'Phải giảm tốc độ.', 'ct_dieudong_q15'), ('ct_dieudong_q15_a3', 'Phải tăng tốc độ.', 'ct_dieudong_q15'), ('ct_dieudong_q15_a4', 'Chạy thế nào cũng được.', 'ct_dieudong_q15'),
+('ct_dieudong_q16_a1', 'Để lại dây dọc lái, bẻ lái ra ngoài.', 'ct_dieudong_q16'), ('ct_dieudong_q16_a2', 'Để lại dây chéo mũi, bẻ lái ra ngoài.', 'ct_dieudong_q16'), ('ct_dieudong_q16_a3', 'Để lại dây ngang mũi, bẻ lái ra ngoài.', 'ct_dieudong_q16'), ('ct_dieudong_q16_a4', 'Để lại dây chéo, bẻ lái vào trong.', 'ct_dieudong_q16'),
+('ct_dieudong_q17_a1', 'Bắt dây ngang mũi, bẻ lái ra ngoài.', 'ct_dieudong_q17'), ('ct_dieudong_q17_a2', 'Bắt dây dọc mũi, bẻ lái ra ngoài.', 'ct_dieudong_q17'), ('ct_dieudong_q17_a3', 'Bắt dây dọc mũi, bẻ lái vào trong.', 'ct_dieudong_q17'), ('ct_dieudong_q17_a4', 'Bắt dây chéo mũi, bẻ lái ra ngoài.', 'ct_dieudong_q17'),
+('ct_dieudong_q18_a1', 'Phải lập tức dừng máy, bẻ lái về phía người ngã, ném phao cho người ngã, theo dõi người.', 'ct_dieudong_q18'), ('ct_dieudong_q18_a2', 'Phải lập tức bẻ lái về phía người ngã, ném phao cho người ngã.', 'ct_dieudong_q18'), ('ct_dieudong_q18_a3', 'Nhanh chóng lái tàu về phía người ngã, ném nhiều phao cho người ngã.', 'ct_dieudong_q18'), ('ct_dieudong_q18_a4', 'Dừng ngay tàu, cử người bơi giỏi xuống cứu người bị nạn.', 'ct_dieudong_q18'),
+('ct_dieudong_q19_a1', 'Điều động tàu quay trở 270⁰ (chữ C) để cứu người.', 'ct_dieudong_q19'), ('ct_dieudong_q19_a2', 'Điều động tàu quay trở 180⁰ (số 8) để cứu người.', 'ct_dieudong_q19'), ('ct_dieudong_q19_a3', 'Điều động tàu quay trở ngay lập tức để cứu người.', 'ct_dieudong_q19'), ('ct_dieudong_q19_a4', 'Cả 3 cách trên đều được.', 'ct_dieudong_q19'),
+('ct_dieudong_q20_a1', 'Điều động tàu quay trở 270⁰ (chữ C) để cứu người.', 'ct_dieudong_q20'), ('ct_dieudong_q20_a2', 'Điều động tàu quay trở 180⁰ (số 8) để cứu người.', 'ct_dieudong_q20'), ('ct_dieudong_q20_a3', 'Điều động tàu quay trở ngay lập tức để cứu người.', 'ct_dieudong_q20'), ('ct_dieudong_q20_a4', 'Cả 3 cách trên đều được.', 'ct_dieudong_q20'),
+('ct_dieudong_q21_a1', 'Ngả sang phải.', 'ct_dieudong_q21'), ('ct_dieudong_q21_a2', 'Ngả sang trái.', 'ct_dieudong_q21'), ('ct_dieudong_q21_a3', 'Không thay đổi.', 'ct_dieudong_q21'), ('ct_dieudong_q21_a4', 'Khi ngả phải, khi ngả trái.', 'ct_dieudong_q21'),
+('ct_dieudong_q22_a1', 'Ngả sang phải.', 'ct_dieudong_q22'), ('ct_dieudong_q22_a2', 'Ngả sang trái.', 'ct_dieudong_q22'), ('ct_dieudong_q22_a3', 'Không thay đổi.', 'ct_dieudong_q22'), ('ct_dieudong_q22_a4', 'Khi ngả phải, khi ngả trái.', 'ct_dieudong_q22'),
+('ct_dieudong_q23_a1', 'Ngả sang phải.', 'ct_dieudong_q23'), ('ct_dieudong_q23_a2', 'Ngả sang trái.', 'ct_dieudong_q23'), ('ct_dieudong_q23_a3', 'Không thay đổi.', 'ct_dieudong_q23'), ('ct_dieudong_q23_a4', 'Khi ngả phải, khi ngả trái.', 'ct_dieudong_q23'),
+('ct_dieudong_q24_a1', 'Ngả sang phải.', 'ct_dieudong_q24'), ('ct_dieudong_q24_a2', 'Ngả sang trái.', 'ct_dieudong_q24'), ('ct_dieudong_q24_a3', 'Không thay đổi.', 'ct_dieudong_q24'), ('ct_dieudong_q24_a4', 'Khi ngả phải, khi ngả trái.', 'ct_dieudong_q24'),
+('ct_dieudong_q25_a1', 'Để lại dây dọc lái, bẻ lái ra ngoài.', 'ct_dieudong_q25'), ('ct_dieudong_q25_a2', 'Để lại dây chéo mũi, bẻ lái ra ngoài.', 'ct_dieudong_q25'), ('ct_dieudong_q25_a3', 'Để lại dây ngang mũi, bẻ lái ra ngoài.', 'ct_dieudong_q25'), ('ct_dieudong_q25_a4', 'Để lại dây chéo, bẻ lái vào trong.', 'ct_dieudong_q25'),
+('ct_dieudong_q26_a1', 'Bẻ lái ra ngoài bến, cho máy lùi nhẹ, tàu có trớn lùi, dây chùng, mở dây', 'ct_dieudong_q26'), ('ct_dieudong_q26_a2', 'Bẻ lái vào trong bến, cho máy lùi nhẹ, tàu có trớn lùi, dây chùng, mở dây.', 'ct_dieudong_q26'), ('ct_dieudong_q26_a3', 'Bánh lái để 0⁰, cho máy lùi nhẹ, tàu có trớn lùi, dây chùng, mở dây.', 'ct_dieudong_q26'), ('ct_dieudong_q26_a4', 'Bẻ lái ra ngoài bến, mở dây', 'ct_dieudong_q26'),
+('ct_dieudong_q27_a1', 'Để lại dây chéo mũi, bẻ lái ra ngoài, cho máy tới.', 'ct_dieudong_q27'), ('ct_dieudong_q27_a2', 'Để lại dây chéo mũi, bẻ lái vào trong, cho máy tới.', 'ct_dieudong_q27'), ('ct_dieudong_q27_a3', 'Để lại dây dọc mũi, bẻ lái ra ngoài, cho máy lùi.', 'ct_dieudong_q27'), ('ct_dieudong_q27_a4', 'Để lại dây ngang mũi, bẻ lái ra ngoài, cho máy tới.', 'ct_dieudong_q27'),
+('ct_dieudong_q28_a1', 'Bẻ lái ra ngoài, cho máy tới.', 'ct_dieudong_q28'), ('ct_dieudong_q28_a2', 'Bẻ lái vào trong, cho máy tới.', 'ct_dieudong_q28'), ('ct_dieudong_q28_a3', 'Để lái 0⁰, cho máy tới.', 'ct_dieudong_q28'), ('ct_dieudong_q28_a4', 'Bẻ lái ra ngoài, cho máy lùi.', 'ct_dieudong_q28'),
+('ct_dieudong_q29_a1', 'Bắt dây ngang mũi, bẻ lái ra ngoài.', 'ct_dieudong_q29'), ('ct_dieudong_q29_a2', 'Bắt dây dọc mũi, bẻ lái ra ngoài.', 'ct_dieudong_q29'), ('ct_dieudong_q29_a3', 'Bắt dây dọc mũi, bẻ lái vào trong.', 'ct_dieudong_q29'), ('ct_dieudong_q29_a4', 'Bắt dây chéo mũi, bẻ lái ra ngoài.', 'ct_dieudong_q29'),
+('ct_dieudong_q30_a1', 'Bắt dây ngang lái, bẻ lái ra ngoài.', 'ct_dieudong_q30'), ('ct_dieudong_q30_a2', 'Bắt dây dọc lái, bẻ lái ra ngoài.', 'ct_dieudong_q30'), ('ct_dieudong_q30_a3', 'Bắt dây dọc lái, bẻ lái vào trong.', 'ct_dieudong_q30'), ('ct_dieudong_q30_a4', 'Bắt dây ngang lái, bẻ lái vào trong.', 'ct_dieudong_q30'),
+('ct_dieudong_q31_a1', 'Để lái thẳng, cho máy tới để đưa lái tàu vào', 'ct_dieudong_q31'), ('ct_dieudong_q31_a2', 'Bẻ lái vào trong, cho máy tới để đưa lái tàu vào', 'ct_dieudong_q31'), ('ct_dieudong_q31_a3', 'Bẻ lái ra ngoài, cho máy tới để đưa lái tàu vào', 'ct_dieudong_q31'), ('ct_dieudong_q31_a4', 'Bẻ lái vào trong, cho máy lùi để đưa lái tàu vào', 'ct_dieudong_q31'),
+('ct_dieudong_q32_a1', 'Cập kết hợp sào hỗ trợ.', 'ct_dieudong_q32'), ('ct_dieudong_q32_a2', 'Cập với góc lớn.', 'ct_dieudong_q32'), ('ct_dieudong_q32_a3', 'Cập bằng neo.', 'ct_dieudong_q32'), ('ct_dieudong_q32_a4', 'Cập với góc nhỏ.', 'ct_dieudong_q32'),
+('ct_dieudong_q33_a1', 'Tăng tốc độ, tăng cường quan sát.', 'ct_dieudong_q33'), ('ct_dieudong_q33_a2', 'Giảm tốc độ, tăng cường quan sát.', 'ct_dieudong_q33'), ('ct_dieudong_q33_a3', 'Tăng tốc độ, chạy về bên phải.', 'ct_dieudong_q33'), ('ct_dieudong_q33_a4', 'Tăng tốc độ, chạy về bên trái.', 'ct_dieudong_q33'),
+('ct_dieudong_q34_a1', 'Tăng tốc độ.', 'ct_dieudong_q34'), ('ct_dieudong_q34_a2', 'Giảm tốc độ.', 'ct_dieudong_q34'), ('ct_dieudong_q34_a3', 'Giữ nguyên tốc đô.', 'ct_dieudong_q34'), ('ct_dieudong_q34_a4', 'Bẻ lái về phía đầu gió, đầu nước.', 'ct_dieudong_q34'),
+('ct_dieudong_q35_a1', 'Ngược với hướng sóng.', 'ct_dieudong_q35'), ('ct_dieudong_q35_a2', 'Ngang với hướng sóng.', 'ct_dieudong_q35'), ('ct_dieudong_q35_a3', 'Vát, chếch với hướng sóng.', 'ct_dieudong_q35'), ('ct_dieudong_q35_a4', 'Chạy Xuôi với hướng sóng.', 'ct_dieudong_q35'),
+('ct_dieudong_q36_a1', 'Nước ngược nhẹ.', 'ct_dieudong_q36'), ('ct_dieudong_q36_a2', 'Nước xuôi.', 'ct_dieudong_q36'), ('ct_dieudong_q36_a3', 'Nước ngược mạnh.', 'ct_dieudong_q36'), ('ct_dieudong_q36_a4', 'Nước nào cũng được.', 'ct_dieudong_q36'),
+('ct_dieudong_q37_a1', 'Nước ngược.', 'ct_dieudong_q37'), ('ct_dieudong_q37_a2', 'Nước xuôi.', 'ct_dieudong_q37'), ('ct_dieudong_q37_a3', 'Nước ngược mạnh.', 'ct_dieudong_q37'), ('ct_dieudong_q37_a4', 'Nước nào cũng được.', 'ct_dieudong_q37'),
+('ct_dieudong_q38_a1', 'Tốc độ giảm, ăn lái tốt.', 'ct_dieudong_q38'), ('ct_dieudong_q38_a2', 'Tốc độ giảm, ăn lái giảm.', 'ct_dieudong_q38'), ('ct_dieudong_q38_a3', 'Tốc độ không đổi, ăn lái tốt.', 'ct_dieudong_q38'), ('ct_dieudong_q38_a4', 'Tốc độ không đổi, ăn lái giảm.', 'ct_dieudong_q38'),
+('ct_dieudong_q39_a1', 'Tốc độ tăng, ăn lái tốt.', 'ct_dieudong_q39'), ('ct_dieudong_q39_a2', 'Tốc độ tăng, ăn lái giảm.', 'ct_dieudong_q39'), ('ct_dieudong_q39_a3', 'Tốc độ không đổi, ăn lái tốt.', 'ct_dieudong_q39'), ('ct_dieudong_q39_a4', 'Tốc độ không đổi, ăn lái giảm.', 'ct_dieudong_q39'),
+('ct_dieudong_q40_a1', 'Để lại dây dọc mũi, bẻ lái ra ngoài', 'ct_dieudong_q40'), ('ct_dieudong_q40_a2', 'Để lại dây chéo lái, bẻ lái ra ngoài', 'ct_dieudong_q40'), ('ct_dieudong_q40_a3', 'Để lại dây ngang lái, bẻ lái ra ngoài', 'ct_dieudong_q40'), ('ct_dieudong_q40_a4', 'Để lại dây chéo lái, bẻ lái vào trong', 'ct_dieudong_q40')
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, question_id = EXCLUDED.question_id;
+
+-- === KẾT THÚC SCRIPT ===

@@ -1,0 +1,148 @@
+-- Hướng dẫn:
+-- 1. Vào project Supabase của anh.
+-- 2. Mở SQL Editor (biểu tượng </> ở menu bên trái).
+-- 3. Tạo một query mới ("+ New query").
+-- 4. Xóa hết nội dung cũ (nếu có) và dán TOÀN BỘ nội dung file này vào.
+-- 5. Nhấn "RUN".
+--
+-- Lưu ý: Script này đã được cập nhật để tự động tạo và sửa đổi các bảng cần thiết.
+-- Anh có thể chạy script này một cách an toàn nhiều lần.
+
+-- === BƯỚC 1: TẠO VÀ CẬP NHẬT CẤU TRÚC BẢNG ===
+-- Các lệnh này đảm bảo các bảng và các cột cần thiết đều tồn tại.
+
+-- Tạo bảng `licenses` (nếu chưa có)
+CREATE TABLE IF NOT EXISTS licenses (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL
+);
+
+-- Tạo bảng `subjects` (nếu chưa có)
+CREATE TABLE IF NOT EXISTS subjects (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    license_id TEXT REFERENCES licenses(id) ON DELETE CASCADE
+);
+
+-- Tạo bảng `questions` (nếu chưa có)
+CREATE TABLE IF NOT EXISTS questions (
+    id TEXT PRIMARY KEY,
+    text TEXT NOT NULL,
+    image TEXT,
+    subject_id TEXT REFERENCES subjects(id) ON DELETE CASCADE,
+    correct_answer_id TEXT
+);
+
+-- Tạo bảng `answers` (nếu chưa có)
+CREATE TABLE IF NOT EXISTS answers (
+    id TEXT PRIMARY KEY,
+    text TEXT NOT NULL,
+    question_id TEXT REFERENCES questions(id) ON DELETE CASCADE
+);
+
+-- Cập nhật các bảng để thêm cột `display_order` một cách an toàn
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'licenses' AND column_name = 'display_order') THEN
+        ALTER TABLE licenses ADD COLUMN display_order INT;
+    END IF;
+END$$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'subjects' AND column_name = 'display_order') THEN
+        ALTER TABLE subjects ADD COLUMN display_order INT;
+    END IF;
+END$$;
+
+
+-- === BƯỚC 2: CHÈN DỮ LIỆU VÀO CÁC BẢNG ===
+
+-- === HẠNG BẰNG MỚI: MÁY TRƯỞNG HẠNG BA - M3 ===
+
+-- Thêm hạng bằng "Máy trưởng hạng ba - M3"
+INSERT INTO licenses (id, name, display_order) VALUES
+('maytruong-h3', 'Máy trưởng hạng ba - M3', 3)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, display_order = EXCLUDED.display_order;
+
+-- Thêm các môn học cho hạng bằng trên (ID môn học có tiền tố 'm3_' để đảm bảo tính duy nhất)
+INSERT INTO subjects (id, name, license_id, display_order) VALUES
+('m3_nvmt', 'Nghiệp vụ máy trưởng', 'maytruong-h3', 1),
+('m3_ktvt', 'Kinh tế vận tải', 'maytruong-h3', 2),
+('m3_mtt', 'Máy tàu thuỷ', 'maytruong-h3', 3),
+('m3_dtt', 'Điện tàu thuỷ', 'maytruong-h3', 4)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, license_id = EXCLUDED.license_id, display_order = EXCLUDED.display_order;
+
+
+-- === MÔN: NGHIỆP VỤ MÁY TRƯỞNG (35 câu) ===
+
+INSERT INTO questions (id, text, subject_id, correct_answer_id, image) VALUES
+('m3_nvmt_q1', 'Người được dự kiểm tra lấy chứng chỉ an toàn làm việc trên phương tiện đi ven biển, phương tiện chở xăng dầu, chở hoá chất, chở khí hoá lỏng phải', 'm3_nvmt', 'm3_nvmt_q1_a4', NULL),
+('m3_nvmt_q2', 'Thuyền viên có GCNKNCM máy trưởng hạng ba được đảm nhiệm chức danh máy trưởng của phương tiện lắp máy trong có tổng công suất máy chính', 'm3_nvmt', 'm3_nvmt_q2_a3', NULL),
+('m3_nvmt_q3', 'Nếu trên phương tiện không bố trí cơ cấu chức danh máy phó thì người sẽ thực hiện nhiệm vụ thay thế là:', 'm3_nvmt', 'm3_nvmt_q3_a2', NULL),
+('m3_nvmt_q4', 'Độ tuổi được dự kiểm tra lấy chứng chỉ thuỷ thủ, chứng chỉ thợ máy là:', 'm3_nvmt', 'm3_nvmt_q4_a1', NULL),
+('m3_nvmt_q5', 'Nguyên tắc bảo vệ môi trường (được quy định trong Luật bảo vệ môi trường, số 72/2020/QH14 ngày 17 tháng 11 năm 2020)', 'm3_nvmt', 'm3_nvmt_q5_a3', NULL),
+('m3_nvmt_q6', 'Khi người lên xuống tàu làm việc không thực hiện những quy định, nội quy của tàu thì người trực ca phải:', 'm3_nvmt', 'm3_nvmt_q6_a1', NULL),
+('m3_nvmt_q7', 'Công dụng của dầu bôi trơn:', 'm3_nvmt', 'm3_nvmt_q7_a4', NULL),
+('m3_nvmt_q8', 'Bảo vệ môi trường là trách nhiệm của:', 'm3_nvmt', 'm3_nvmt_q8_a1', NULL),
+('m3_nvmt_q9', 'Thợ máy chịu sự quản lý trực tiếp của:', 'm3_nvmt', 'm3_nvmt_q9_a4', NULL),
+('m3_nvmt_q10', 'Nhìn vào những hình dưới cho biết đâu là kìm chết:', 'm3_nvmt', 'm3_nvmt_q10_a1', 'https://i.imgur.com/v82M9d0.png'),
+('m3_nvmt_q11', 'Công dụng của bình bọt chữa cháy:', 'm3_nvmt', 'm3_nvmt_q11_a2', NULL),
+('m3_nvmt_q12', 'Trách nhiệm của thuyền viên tập sự trên tàu:', 'm3_nvmt', 'm3_nvmt_q12_a4', NULL),
+('m3_nvmt_q13', 'Người lái phương tiện khi đứng quay vô lăng phải đứng cách vô lăng ít nhất bao xa để đề phòng vô lăng đánh vào người:', 'm3_nvmt', 'm3_nvmt_q13_a2', NULL),
+('m3_nvmt_q14', 'Chiều siết đúng của mỏ lết', 'm3_nvmt', 'm3_nvmt_q14_a2', 'https://i.imgur.com/P4uQJjP.png'),
+('m3_nvmt_q15', 'Vị trí kim đồng hồ áp suất trên bình bọt chữa cháy phải mang bình đi nạp lại khi:', 'm3_nvmt', 'm3_nvmt_q15_a3', NULL),
+('m3_nvmt_q16', 'Đơn vị của công suất là', 'm3_nvmt', 'm3_nvmt_q16_a4', NULL),
+('m3_nvmt_q17', 'Nhìn vào hình vẽ cho biết tác dụng của dụng cụ dưới đây', 'm3_nvmt', 'm3_nvmt_q17_a3', 'https://i.imgur.com/n6o2x3H.png'),
+('m3_nvmt_q18', 'Công dụng của bình chữa cháy CO2 là:', 'm3_nvmt', 'm3_nvmt_q18_a2', NULL),
+('m3_nvmt_q19', 'Thuyền viên có GCNKNCM máy trưởng hạng nhì được đảm nhiệm chức danh máy trưởng của phương tiện lắp máy trong có tổng công suất máy chính:', 'm3_nvmt', 'm3_nvmt_q19_a3', NULL),
+('m3_nvmt_q20', 'Máy trưởng là người giúp việc thuyền trưởng, trực tiếp phụ trách bộ phận máy và có trách nhiệm và quyền hạn sau đây:', 'm3_nvmt', 'm3_nvmt_q20_a4', NULL),
+('m3_nvmt_q21', 'Đơn vị của độ nhớt là', 'm3_nvmt', 'm3_nvmt_q21_a3', NULL),
+('m3_nvmt_q22', 'Trước khi dùng thảm để chữa cháy ta cần phải chú ý yêu cầu:', 'm3_nvmt', 'm3_nvmt_q22_a2', NULL),
+('m3_nvmt_q23', 'Đơn vị khối lượng riêng là:', 'm3_nvmt', 'm3_nvmt_q23_a1', NULL),
+('m3_nvmt_q24', 'Tại sao máy trưởng phải lập kế hoạch trước khi nhận dầu:', 'm3_nvmt', 'm3_nvmt_q24_a4', NULL),
+('m3_nvmt_q25', 'Số thuyền viên được phép lên bờ khi tàu cập cảng:', 'm3_nvmt', 'm3_nvmt_q25_a1', NULL),
+('m3_nvmt_q26', 'Số thuyền viên được phép lên bờ khi tàu neo ở các vùng neo đậu:', 'm3_nvmt', 'm3_nvmt_q26_a2', NULL),
+('m3_nvmt_q27', 'Đơn vị đo của nhiệt độ là:', 'm3_nvmt', 'm3_nvmt_q27_a4', NULL),
+('m3_nvmt_q28', 'Thuyền viên có GCNKNCM máy trưởng hạng nhất được đảm nhiệm chức danh máy trưởng của:', 'm3_nvmt', 'm3_nvmt_q28_a2', NULL),
+('m3_nvmt_q29', 'Máy trưởng phân công công việc cho thuyền viên bộ phận mình quản lý căn cứ vào:', 'm3_nvmt', 'm3_nvmt_q29_a3', NULL),
+('m3_nvmt_q30', 'Quy đổi một cv ra W bằng', 'm3_nvmt', 'm3_nvmt_q30_a2', NULL),
+('m3_nvmt_q31', 'Người trực ca có trách nhiệm dừng ngay động cơ (sau khi được sự đồng ý của người điều khiển phương tiện) trong trường hợp:', 'm3_nvmt', 'm3_nvmt_q31_a1', NULL),
+('m3_nvmt_q32', 'Thuyền viên tập sự chịu sự quản lý của:', 'm3_nvmt', 'm3_nvmt_q32_a2', NULL),
+('m3_nvmt_q33', 'Công dụng của bình bột chữa cháy cho đám cháy (loại bình ký hiệu ABC):', 'm3_nvmt', 'm3_nvmt_q33_a4', NULL),
+('m3_nvmt_q34', 'Những chỉ số quan trọng khi lựa chọn dầu bôi trơn cho động cơ', 'm3_nvmt', 'm3_nvmt_q34_a2', NULL),
+('m3_nvmt_q35', 'Đơn vị của áp suất là:', 'm3_nvmt', 'm3_nvmt_q35_a3', NULL)
+ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, subject_id = EXCLUDED.subject_id, correct_answer_id = EXCLUDED.correct_answer_id, image = EXCLUDED.image;
+
+INSERT INTO answers (id, text, question_id) VALUES
+('m3_nvmt_q1_a1', 'Có chứng chỉ thủy thủ trở lên.', 'm3_nvmt_q1'), ('m3_nvmt_q1_a2', 'Có chứng chỉ thợ máy trở lên.', 'm3_nvmt_q1'), ('m3_nvmt_q1_a3', 'Có chứng chỉ lái phương tiện trở lên.', 'm3_nvmt_q1'), ('m3_nvmt_q1_a4', 'Tất cả các đáp án trên đều đúng.', 'm3_nvmt_q1'),
+('m3_nvmt_q2_a1', 'Từ trên 15 đến 150 sức ngựa.', 'm3_nvmt_q2'), ('m3_nvmt_q2_a2', 'Trên 400 sức ngựa.', 'm3_nvmt_q2'), ('m3_nvmt_q2_a3', 'Đến 250 sức ngựa.', 'm3_nvmt_q2'), ('m3_nvmt_q2_a4', 'Từ trên 150 đến 400 sức ngựa.', 'm3_nvmt_q2'),
+('m3_nvmt_q3_a1', 'Máy phó hai.', 'm3_nvmt_q3'), ('m3_nvmt_q3_a2', 'Máy trưởng.', 'm3_nvmt_q3'), ('m3_nvmt_q3_a3', 'Thợ máy.', 'm3_nvmt_q3'), ('m3_nvmt_q3_a4', 'Máy phó hai và thợ máy.', 'm3_nvmt_q3'),
+('m3_nvmt_q4_a1', 'Đủ 16 tuổi trở lên.', 'm3_nvmt_q4'), ('m3_nvmt_q4_a2', 'Đủ 17 tuổi trở lên.', 'm3_nvmt_q4'), ('m3_nvmt_q4_a3', 'Đủ 18 tuổi trở lên.', 'm3_nvmt_q4'), ('m3_nvmt_q4_a4', 'Đủ 20 tuổi trở lên.', 'm3_nvmt_q4'),
+('m3_nvmt_q5_a1', '5 nguyên tắc.', 'm3_nvmt_q5'), ('m3_nvmt_q5_a2', '6 nguyên tắc.', 'm3_nvmt_q5'), ('m3_nvmt_q5_a3', '7 nguyên tắc.', 'm3_nvmt_q5'), ('m3_nvmt_q5_a4', '8 nguyên tắc.', 'm3_nvmt_q5'),
+('m3_nvmt_q6_a1', 'Mời lên khỏi tàu sau khi đã có nhắc nhở.', 'm3_nvmt_q6'), ('m3_nvmt_q6_a2', 'Nhắc nhở nhẹ nhàng.', 'm3_nvmt_q6'), ('m3_nvmt_q6_a3', 'Mời lên khỏi tàu.', 'm3_nvmt_q6'), ('m3_nvmt_q6_a4', 'Báo cáo cho thuyền trưởng biết.', 'm3_nvmt_q6'),
+('m3_nvmt_q7_a1', 'Bôi trơn các bề mặt có chuyển động trượt giữa các chi tiết nhằm giảm ma sát do đó giảm mài mòn, tăng tuổi thọ của chi tiết.', 'm3_nvmt_q7'), ('m3_nvmt_q7_a2', 'Rửa sạch bề mặt ma sát của các chi tiết, làm mát một số chi tiết.', 'm3_nvmt_q7'), ('m3_nvmt_q7_a3', 'Bao kín khe hở giữa các chi tiết máy, chống ôxy hóa (kết gỉ) bề mặt chi tiết nhờ những chất phụ gia trong dầu.', 'm3_nvmt_q7'), ('m3_nvmt_q7_a4', 'Tất cả các đáp án trên đều đúng.', 'm3_nvmt_q7'),
+('m3_nvmt_q8_a1', 'Toàn xã hội, quyền và trách nhiệm của cơ quan nhà nước, tổ chức, hộ gia đình, cá nhân.', 'm3_nvmt_q8'), ('m3_nvmt_q8_a2', 'Cơ quan nhà nước.', 'm3_nvmt_q8'), ('m3_nvmt_q8_a3', 'Cơ quan quản lý môi trường nhà nước.', 'm3_nvmt_q8'), ('m3_nvmt_q8_a4', 'Từng cá nhân trong xã hội.', 'm3_nvmt_q8'),
+('m3_nvmt_q9_a1', 'Máy trưởng.', 'm3_nvmt_q9'), ('m3_nvmt_q9_a2', 'Máy phó một.', 'm3_nvmt_q9'), ('m3_nvmt_q9_a3', 'Máy phó hai.', 'm3_nvmt_q9'), ('m3_nvmt_q9_a4', 'Máy trưởng và người phụ trách ca máy.', 'm3_nvmt_q9'),
+('m3_nvmt_q10_a1', 'Hình 1.', 'm3_nvmt_q10'), ('m3_nvmt_q10_a2', 'Hình 1 và 3.', 'm3_nvmt_q10'), ('m3_nvmt_q10_a3', 'Hình 2.', 'm3_nvmt_q10'), ('m3_nvmt_q10_a4', 'Hình 3.', 'm3_nvmt_q10'),
+('m3_nvmt_q11_a1', 'Chữa cháy kim loại, chữa cháy điện, hợp kim.', 'm3_nvmt_q11'), ('m3_nvmt_q11_a2', 'Dùng để chữa đám cháy nhiên liệu.', 'm3_nvmt_q11'), ('m3_nvmt_q11_a3', 'Dùng để chữa đám cháy điện.', 'm3_nvmt_q11'), ('m3_nvmt_q11_a4', 'Dùng để chữa đám cháy kim loại.', 'm3_nvmt_q11'),
+('m3_nvmt_q12_a1', 'Chấp hành nghiêm chỉnh các quy định chung đối với thuyền viên.', 'm3_nvmt_q12'), ('m3_nvmt_q12_a2', 'Tham gia làm việc, sinh hoạt trên phương tiện theo sự phân công, hướng dẫn của thuyền trưởng hoặc máy trưởng hay người được thuyền trưởng hoặc máy trưởng ủy quyền.', 'm3_nvmt_q12'), ('m3_nvmt_q12_a3', 'Chỉ được sử dụng, vận hành máy, trang thiết bị trên phương tiện khi có sự giám sát của người trực tiếp hướng dẫn.', 'm3_nvmt_q12'), ('m3_nvmt_q12_a4', 'Tất cả các đáp án trên đều đúng.', 'm3_nvmt_q12'),
+('m3_nvmt_q13_a1', '0,2 m.', 'm3_nvmt_q13'), ('m3_nvmt_q13_a2', '0,3 m.', 'm3_nvmt_q13'), ('m3_nvmt_q13_a3', '0,4 m.', 'm3_nvmt_q13'), ('m3_nvmt_q13_a4', '0,5m.', 'm3_nvmt_q13'),
+('m3_nvmt_q14_a1', 'Hình 1.', 'm3_nvmt_q14'), ('m3_nvmt_q14_a2', 'Hình 2.', 'm3_nvmt_q14'), ('m3_nvmt_q14_a3', 'Hình 3.', 'm3_nvmt_q14'), ('m3_nvmt_q14_a4', 'Hình 1 và 2.', 'm3_nvmt_q14'),
+('m3_nvmt_q15_a1', 'Vạch màu xanh.', 'm3_nvmt_q15'), ('m3_nvmt_q15_a2', 'Vạch màu vàng.', 'm3_nvmt_q15'), ('m3_nvmt_q15_a3', 'Vạch màu đỏ.', 'm3_nvmt_q15'), ('m3_nvmt_q15_a4', 'Tất cả các đáp áp trên đều sai.', 'm3_nvmt_q15'),
+('m3_nvmt_q16_a1', 'W.', 'm3_nvmt_q16'), ('m3_nvmt_q16_a2', 'Hp.', 'm3_nvmt_q16'), ('m3_nvmt_q16_a3', 'Cv.', 'm3_nvmt_q16'), ('m3_nvmt_q16_a4', 'Tất cả các đáp án trên đều đúng.', 'm3_nvmt_q16'),
+('m3_nvmt_q17_a1', 'Dùng để tháo nắp xilanh.', 'm3_nvmt_q17'), ('m3_nvmt_q17_a2', 'Dùng để tháo sơ mi xilanh.', 'm3_nvmt_q17'), ('m3_nvmt_q17_a3', 'Dùng để tháo các bánh răng hay puly ra khỏi trục.', 'm3_nvmt_q17'), ('m3_nvmt_q17_a4', 'Tất cả các đáp án trên đều đúng.', 'm3_nvmt_q17'),
+('m3_nvmt_q18_a1', 'Dùng để chữa đám cháy kim loại.', 'm3_nvmt_q18'), ('m3_nvmt_q18_a2', 'Dùng để chữa đám cháy điện.', 'm3_nvmt_q18'), ('m3_nvmt_q18_a3', 'Dùng để chữa đám cháy nhiên liệu, đám cháy kim loại.', 'm3_nvmt_q18'), ('m3_nvmt_q18_a4', 'Tất cả các đáp án trên đều đúng.', 'm3_nvmt_q18'),
+('m3_nvmt_q19_a1', 'Từ trên 15 đến 150 sức ngựa.', 'm3_nvmt_q19'), ('m3_nvmt_q19_a2', 'Từ trên 15 đến 500 sức ngựa.', 'm3_nvmt_q19'), ('m3_nvmt_q19_a3', 'Đến 1000 sức ngựa.', 'm3_nvmt_q19'), ('m3_nvmt_q19_a4', 'Trên 400 sức ngựa.', 'm3_nvmt_q19'),
+('m3_nvmt_q20_a1', 'Quản lý, nắm vững tình trạng kỹ thuật hệ thống động lực; tổ chức phân công, giám sát thuyên viên bộ phận máy trong quá trình vận hành.', 'm3_nvmt_q20'), ('m3_nvmt_q20_a2', 'Thực hiện đầy đủ quy định về vận hành máy móc, thiết bị; tổ chức bảo dưỡng thường xuyên, sửa chữa những hạng mục công việc được phép làm của máy móc, thiết bị để bảo đảm hệ thống máy hoạt động có hiệu quả.', 'm3_nvmt_q20'), ('m3_nvmt_q20_a3', 'Trực tiếp phụ trách một ca máy. Ngoài giờ đi ca, khi cần thiết phải có mặt ở buồng máy để kịp thời giải quyết công việc theo yêu cầu của thuyền trưởng hoặc đề nghị của máy phó.', 'm3_nvmt_q20'), ('m3_nvmt_q20_a4', 'Tất cả các đáp án trên đều đúng.', 'm3_nvmt_q20'),
+('m3_nvmt_q21_a1', '°K.', 'm3_nvmt_q21'), ('m3_nvmt_q21_a2', '%.', 'm3_nvmt_q21'), ('m3_nvmt_q21_a3', 'Cst.', 'm3_nvmt_q21'), ('m3_nvmt_q21_a4', '°C.', 'm3_nvmt_q21'),
+('m3_nvmt_q22_a1', 'Phải được sơn phủ một lớp sơn.', 'm3_nvmt_q22'), ('m3_nvmt_q22_a2', 'Phải được nhúng vào nước.', 'm3_nvmt_q22'), ('m3_nvmt_q22_a3', 'Không cần phải sơn hay nhúng nước.', 'm3_nvmt_q22'), ('m3_nvmt_q22_a4', 'Phải được phủ một lớp bạt.', 'm3_nvmt_q22'),
+('m3_nvmt_q23_a1', 'kg/m.3', 'm3_nvmt_q23'), ('m3_nvmt_q23_a2', 'Kg.', 'm3_nvmt_q23'), ('m3_nvmt_q23_a3', 'Tất cả các đáp án trên đều đúng.', 'm3_nvmt_q23'), ('m3_nvmt_q23_a4', 'kG/m³', 'm3_nvmt_q23'),
+('m3_nvmt_q24_a1', 'Để hạn chế những sai sót gây hậu quả đâm va.', 'm3_nvmt_q24'), ('m3_nvmt_q24_a2', 'Để hạn chế những sai sót gây hậu quả chìm tàu.', 'm3_nvmt_q24'), ('m3_nvmt_q24_a3', 'Để hạn chế mất điều khiển tàu.', 'm3_nvmt_q24'), ('m3_nvmt_q24_a4', 'Để hạn chế những sai sót gây hậu quả tràn dầu g y cháy, nổ hay ô nhiễm môi trường trong quá trình nhận dầu.', 'm3_nvmt_q24'),
+('m3_nvmt_q25_a1', 'Không quá 1/2 tổng số thuyền viên của mỗi bộ phận.', 'm3_nvmt_q25'), ('m3_nvmt_q25_a2', 'Không quá 2/3 tổng số thuyền viên của mỗi bộ phận.', 'm3_nvmt_q25'), ('m3_nvmt_q25_a3', 'Không quá 1/3 tổng số thuyền viên của mỗi bộ phận.', 'm3_nvmt_q25'), ('m3_nvmt_q25_a4', 'Tùy thuyền phó quyết định.', 'm3_nvmt_q25'),
+('m3_nvmt_q26_a1', 'Không quá 1/2 tổng số thuyền viên của mỗi bộ phận.', 'm3_nvmt_q26'), ('m3_nvmt_q26_a2', 'Không quá 1/3 tổng số thuyền viên của mỗi bộ phận.', 'm3_nvmt_q26'), ('m3_nvmt_q26_a3', 'Tùy thuộc vào máy trưởng.', 'm3_nvmt_q26'), ('m3_nvmt_q26_a4', 'Tùy thuộc vào thuyền phó.', 'm3_nvmt_q26'),
+('m3_nvmt_q27_a1', '°C.', 'm3_nvmt_q27'), ('m3_nvmt_q27_a2', '°F.', 'm3_nvmt_q27'), ('m3_nvmt_q27_a3', '°K.', 'm3_nvmt_q27'), ('m3_nvmt_q27_a4', 'Tất cả các đáp án trên đều đúng.', 'm3_nvmt_q27'),
+('m3_nvmt_q28_a1', 'Phương tiện có tổng công suất máy chính từ trên 15 đến 150 sức ngựa.', 'm3_nvmt_q28'), ('m3_nvmt_q28_a2', 'Các loại phương tiện.', 'm3_nvmt_q28'), ('m3_nvmt_q28_a3', 'Phương tiện có tổng công suất máy chính trên 400 sức ngựa.', 'm3_nvmt_q28'), ('m3_nvmt_q28_a4', 'Phương tiện có tổng công suất máy chính từ trên 15 đến 400 sức ngựa.', 'm3_nvmt_q28'),
+('m3_nvmt_q29_a1', 'Khả năng, tay nghề thực tế của mỗi thuyền viên.', 'm3_nvmt_q29'), ('m3_nvmt_q29_a2', 'Thực tế công việc dưới tàu.', 'm3_nvmt_q29'), ('m3_nvmt_q29_a3', 'Khả năng chuyên môn thông qua giấy chứng nhận trình độ chuyên môn và tay nghề thực tế của thuyền viên.', 'm3_nvmt_q29'), ('m3_nvmt_q29_a4', 'Sự phân công trực tiếp của thuyền trưởng.', 'm3_nvmt_q29'),
+('m3_nvmt_q30_a1', '0,76 kW.', 'm3_nvmt_q30'), ('m3_nvmt_q30_a2', '0,736 kW.', 'm3_nvmt_q30'), ('m3_nvmt_q30_a3', '736 kW.', 'm3_nvmt_q30'), ('m3_nvmt_q30_a4', '760 kW.', 'm3_nvmt_q30'),
+('m3_nvmt_q31_a1', 'Áp lực dầu bôi trơn giảm xuống dưới mức quy định và không có khả năng khắc phục ngay trong khi động cơ đang hoạt động.',
