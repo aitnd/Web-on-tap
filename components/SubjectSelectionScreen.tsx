@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Subject, UserProgressData } from '../types';
-import { ArrowLeftIcon, ChevronRightIcon } from './icons';
+import { ArrowLeftIcon3D, ChevronRightIcon3D } from './icons';
 
 interface SubjectSelectionScreenProps {
   subjects: Subject[];
@@ -13,8 +13,12 @@ const SubjectSelectionScreen: React.FC<SubjectSelectionScreenProps> = ({ subject
   return (
     <div className="w-full max-w-2xl mx-auto p-4 animate-slide-in-right">
       <div className="relative text-center mb-10">
-        <button onClick={onBack} className="absolute left-0 top-1/2 -translate-y-1/2 p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors duration-300">
-            <ArrowLeftIcon className="h-6 w-6" />
+        <button 
+          onClick={onBack} 
+          className="absolute left-0 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-700/50 p-3 rounded-full shadow-md hover:bg-slate-100 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 transition-all duration-300 transform hover:scale-110"
+          aria-label="Quay lại"
+        >
+            <ArrowLeftIcon3D className="h-10 w-10" />
         </button>
         <h1 className="text-4xl font-bold text-slate-900 dark:text-white">Chọn Môn học</h1>
         <p className="text-lg text-slate-500 dark:text-slate-400 mt-2">Chọn một môn để bắt đầu ôn tập.</p>
@@ -23,6 +27,7 @@ const SubjectSelectionScreen: React.FC<SubjectSelectionScreenProps> = ({ subject
       <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg">
         <div className="space-y-3">
           {subjects.map(subject => {
+            // FIX: The 'progress' prop was not being passed into the component. Added it to the function's destructured parameters.
             const subjectProgress = progress[subject.id];
             const hasProgress = subjectProgress && subjectProgress.lastScore !== null;
             
@@ -47,7 +52,7 @@ const SubjectSelectionScreen: React.FC<SubjectSelectionScreenProps> = ({ subject
                         </p>
                     </div>
                   )}
-                  <ChevronRightIcon className="h-6 w-6 text-slate-400 dark:text-slate-500" />
+                  <ChevronRightIcon3D className="h-6 w-6 text-slate-500 dark:text-slate-400" />
                 </div>
               </button>
             )

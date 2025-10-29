@@ -9,7 +9,7 @@ import QuizScreen from './components/QuizScreen';
 import ResultsScreen from './components/ResultsScreen';
 import Footer from './components/Footer';
 import { fetchLicenses } from './services/dataService';
-import { SparklesIcon } from './components/icons';
+import { HelmIcon3D } from './components/icons';
 
 // Helper function to shuffle an array
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -224,7 +224,7 @@ const App: React.FC = () => {
       return (
         <div className="text-center p-4 animate-slide-in-right">
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 md:p-12 max-w-2xl mx-auto">
-            <SparklesIcon className="h-20 w-20 mx-auto text-indigo-500 mb-4 animate-pulse" />
+            <HelmIcon3D className="h-24 w-24 mx-auto text-indigo-500 mb-4 animate-pulse" />
             <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white mb-4">
               Chào mừng anh/chị học viên!
             </h1>

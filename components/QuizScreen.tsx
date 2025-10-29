@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import type { Quiz, UserAnswers } from '../types';
-import { CheckIcon, XIcon, ClockIcon, ArrowLeftIcon } from './icons';
+import { CheckIcon3D, XIcon3D, ClockIcon3D, ArrowLeftIcon3D } from './icons';
 
 interface QuizScreenProps {
   quiz: Quiz;
@@ -78,8 +78,12 @@ const QuizScreen: React.FC<QuizScreenProps> = ({ quiz, onFinish, onBack }) => {
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 md:p-8">
         <div className="mb-6">
             <div className="flex justify-between items-center mb-4 relative">
-                <button onClick={onBack} className="absolute left-0 top-1/2 -translate-y-1/2 p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors duration-300">
-                    <ArrowLeftIcon className="h-6 w-6" />
+                <button 
+                  onClick={onBack} 
+                  className="absolute left-0 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-700/50 p-3 rounded-full shadow-md hover:bg-slate-100 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 transition-all duration-300 transform hover:scale-110"
+                  aria-label="Quay lại"
+                >
+                    <ArrowLeftIcon3D className="h-10 w-10" />
                 </button>
                 <h1 className="text-xl font-bold text-slate-800 dark:text-slate-200 text-center flex-grow">{quiz.title}</h1>
                 <button 
@@ -96,7 +100,7 @@ const QuizScreen: React.FC<QuizScreenProps> = ({ quiz, onFinish, onBack }) => {
                 <span>Câu {currentQuestionIndex + 1} / {quiz.questions.length}</span>
                 {timeLeft !== undefined && (
                     <div className="flex items-center font-semibold text-red-500 dark:text-red-400">
-                        <ClockIcon className="h-4 w-4 mr-1.5" />
+                        <ClockIcon3D className="h-5 w-5 mr-1" />
                         <span>{formatTime(timeLeft)}</span>
                     </div>
                 )}
@@ -142,8 +146,8 @@ const QuizScreen: React.FC<QuizScreenProps> = ({ quiz, onFinish, onBack }) => {
                   className={buttonClass}
                 >
                   <span>{answer.text}</span>
-                  {isAnswered && isCorrect && <CheckIcon className="h-6 w-6 text-green-600 dark:text-green-400" />}
-                  {isAnswered && isSelected && !isCorrect && <XIcon className="h-6 w-6 text-red-600 dark:text-red-400" />}
+                  {isAnswered && isCorrect && <CheckIcon3D className="h-6 w-6 text-green-600 dark:text-green-400" />}
+                  {isAnswered && isSelected && !isCorrect && <XIcon3D className="h-6 w-6 text-red-600 dark:text-red-400" />}
                 </button>
               );
             })}
