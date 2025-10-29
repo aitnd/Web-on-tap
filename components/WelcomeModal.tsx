@@ -26,10 +26,24 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ onStart }) => {
             <details className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg cursor-pointer">
                 <summary className="font-semibold flex items-center gap-2">
                     <InformationCircleIcon className="h-5 w-5"/>
-                    Lịch sử cập nhật (v2.7.9)
+                    Lịch sử cập nhật (v2.8.1)
                 </summary>
                 <div className="mt-3 pl-2 border-l-2 border-slate-300 dark:border-slate-600 max-h-[30vh] overflow-y-auto">
-                    <p className="font-semibold text-slate-600 dark:text-slate-300"><strong>Cập nhật phiên bản v2.7.9:</strong></p>
+                    <p className="font-semibold text-slate-600 dark:text-slate-300"><strong>Cập nhật phiên bản v2.8.1:</strong></p>
+                    <ul className="list-disc list-inside mt-1 space-y-1">
+                        <li>Thi thử: Bổ sung nút "Câu trước" và "Câu tiếp" để điều hướng tuần tự qua các câu hỏi, song song với lưới câu hỏi.</li>
+                    </ul>
+                    <p className="font-semibold mt-3"><strong>Cập nhật phiên bản v2.8.0:</strong></p>
+                    <ul className="list-disc list-inside mt-1 space-y-1">
+                        <li>Cải tiến chế độ Thi thử:
+                            <ul className="list-[circle] list-inside ml-4">
+                                <li>Đổi tên nút "Kết thúc" thành "Nộp bài".</li>
+                                <li>Thêm thanh điều hướng câu hỏi, cho phép chuyển đổi và xem lại các câu đã trả lời.</li>
+                                <li>Đáp án sẽ không hiển thị ngay lập tức để mô phỏng một kỳ thi thật.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <p className="font-semibold mt-3"><strong>Cập nhật phiên bản v2.7.9:</strong></p>
                     <ul className="list-disc list-inside mt-1 space-y-1">
                         <li>Sửa lỗi giao diện (lần 2): Căn chỉnh lại màn hình nhập tên triệt để, đảm bảo nút "Quay lại" không bao giờ che mất tiêu đề.</li>
                     </ul>
