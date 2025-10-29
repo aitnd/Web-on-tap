@@ -24,10 +24,10 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({ onModeSelect,
          </div>
 
         <h1 className="text-4xl font-bold text-slate-900 dark:text-white">
-          Chào anh {userName}!
+          Chào anh/chị {userName}!
         </h1>
         <p className="text-lg text-slate-500 dark:text-slate-400 mt-2">
-          Anh đang học hạng bằng <span className="font-semibold text-indigo-500 dark:text-indigo-400">{licenseName}</span>.
+          Anh/chị đang học hạng bằng <span className="font-semibold text-indigo-500 dark:text-indigo-400">{licenseName}</span>.
         </p>
         <p className="text-lg text-slate-500 dark:text-slate-400 mt-1">
           Hãy chọn một chế độ để bắt đầu.

@@ -17,7 +17,7 @@ const LicenseSelectionScreen: React.FC<LicenseSelectionScreenProps> = ({ license
         </button>
         <BookOpenIcon className="h-16 w-16 mx-auto text-indigo-500 mb-4" />
         <h1 className="text-4xl font-bold text-slate-900 dark:text-white">Chọn Hạng Bằng</h1>
-        <p className="text-lg text-slate-500 dark:text-slate-400 mt-2">Anh vui lòng chọn hạng bằng muốn ôn tập và thi thử.</p>
+        <p className="text-lg text-slate-500 dark:text-slate-400 mt-2">Anh/chị vui lòng chọn hạng bằng muốn ôn tập và thi thử.</p>
       </div>
 
       <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg">

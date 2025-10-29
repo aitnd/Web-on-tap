@@ -20,7 +20,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ quiz, userAnswers, score,
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 text-center mb-8">
             <TrophyIcon className="h-20 w-20 mx-auto text-yellow-400 dark:text-yellow-300 mb-4" />
             <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">Hoàn thành!</h1>
-            <p className="text-xl text-slate-600 dark:text-slate-300 mb-6">Đây là kết quả của anh:</p>
+            <p className="text-xl text-slate-600 dark:text-slate-300 mb-6">Đây là kết quả của anh/chị:</p>
             <div className="bg-indigo-50 dark:bg-indigo-900/50 inline-block p-6 rounded-xl border border-indigo-200 dark:border-indigo-800">
                 <p className="text-5xl font-extrabold text-indigo-600 dark:text-indigo-300">
                     {score} / {totalQuestions}

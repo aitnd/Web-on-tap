@@ -37,10 +37,10 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ onStart }) => {
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 md:p-12 max-w-2xl mx-auto relative">
         <SparklesIcon className="h-20 w-20 mx-auto text-indigo-500 mb-4" />
         <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white mb-4">
-          Ôn Thi Hàng Hải Pro
+          Ứng dụng Ôn tập
         </h1>
         <p className="text-lg text-slate-600 dark:text-slate-300 mb-8">
-          Chào mừng anh đã đến với ứng dụng chuyên ôn thi các chứng chỉ ngành hàng hải. Cùng nhau chinh phục mọi kỳ thi nhé!
+          Chào mừng anh/chị đã đến với ứng dụng chuyên ôn thi các chứng chỉ ngành hàng hải. Cùng nhau chinh phục mọi kỳ thi nhé!
         </p>
         <button
           onClick={onStart}
@@ -49,7 +49,12 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ onStart }) => {
           Bắt đầu ngay
         </button>
         <div ref={scrollContainerRef} className="mt-8 text-sm text-left text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg max-h-[40vh] overflow-y-auto">
-            <p className="font-semibold"><strong>Cập nhật phiên bản v2.7.0:</strong></p>
+            <p className="font-semibold"><strong>Cập nhật phiên bản v2.7.1:</strong></p>
+            <ul className="list-disc list-inside mt-1 space-y-1">
+                <li>Cập nhật tiêu đề và một số văn bản để mang tính trung lập về giới tính (anh/chị).</li>
+                <li>Cho phép bỏ qua màn hình nhập tên, tên mặc định sẽ là "Học viên".</li>
+            </ul>
+            <p className="font-semibold mt-3"><strong>Cập nhật phiên bản v2.7.0:</strong></p>
             <ul className="list-disc list-inside mt-1 space-y-1">
                 <li>Bổ sung bộ đề thi mới: "Chứng chỉ An toàn khí hoá lỏng" với 2 môn và 40 câu hỏi trắc nghiệm.</li>
             </ul>
