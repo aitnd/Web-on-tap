@@ -116,7 +116,7 @@ const ExamQuizScreen: React.FC<ExamQuizScreenProps> = ({ quiz, onFinish, onBack 
               if (isCurrent) {
                 btnClass += 'bg-indigo-600 text-white scale-110 shadow-lg ring-2 ring-indigo-400 dark:ring-indigo-500';
               } else if (isQuestionAnswered) {
-                btnClass += 'bg-blue-200 dark:bg-blue-800/60 text-blue-800 dark:text-blue-200 border border-blue-300 dark:border-blue-700 hover:bg-blue-300';
+                btnClass += 'bg-green-500 text-white hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700';
               } else {
                 btnClass += 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-600';
               }

@@ -26,10 +26,14 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ onStart }) => {
             <details className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg cursor-pointer">
                 <summary className="font-semibold flex items-center gap-2">
                     <InformationCircleIcon className="h-5 w-5"/>
-                    Lịch sử cập nhật (v2.9.2)
+                    Lịch sử cập nhật (v2.9.3)
                 </summary>
                 <div className="mt-3 pl-2 border-l-2 border-slate-300 dark:border-slate-600 max-h-[30vh] overflow-y-auto">
-                    <p className="font-semibold text-slate-600 dark:text-slate-300"><strong>Cập nhật phiên bản v2.9.2:</strong></p>
+                    <p className="font-semibold text-slate-600 dark:text-slate-300"><strong>Cập nhật phiên bản v2.9.3:</strong></p>
+                    <ul className="list-disc list-inside mt-1 space-y-1">
+                        <li>Cải thiện giao diện Thi thử: Đổi màu đánh dấu các câu đã trả lời sang màu xanh lá cây nổi bật hơn, giúp anh dễ dàng theo dõi tiến độ làm bài.</li>
+                    </ul>
+                    <p className="font-semibold mt-3 text-slate-600 dark:text-slate-300"><strong>Cập nhật phiên bản v2.9.2:</strong></p>
                     <ul className="list-disc list-inside mt-1 space-y-1">
                         <li>Sửa lỗi nút "Nộp bài" trong chế độ "Thi thử" đôi khi không hoạt động.</li>
                         <li>Tăng thời gian làm bài "Thi thử" từ 30 phút lên 45 phút.</li>
