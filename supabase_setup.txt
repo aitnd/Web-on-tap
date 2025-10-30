@@ -1,0 +1,102 @@
+-- === HƯỚNG DẪN DỌN DẸP VÀ CÀI ĐẶT LẠI CSDL ===
+-- File này sẽ DỌN DẸP các thiết lập cũ gây lỗi và cài đặt lại cấu trúc một cách chính xác.
+-- Anh chỉ cần chạy file này MỘT LẦN DUY NHẤT trong SQL Editor của Supabase.
+--
+-- CÁC BƯỚC THỰC HIỆN:
+-- 1. (DỌN DẸP) Xóa trigger và function cũ có thể còn sót lại đang gây lỗi.
+-- 2. Tạo bảng `profiles` để lưu thông tin người dùng.
+-- 3. Thiết lập RLS (Row Level Security) cho bảng `profiles` một cách ĐẦY ĐỦ (thêm quyền INSERT).
+-- 4. Tạo các bảng cho bộ đề thi: `licenses`, `subjects`, `questions`, `answers`.
+-- 5. Thiết lập RLS cho các bảng bộ đề thi để cho phép đọc công khai.
+
+-- === BƯỚC 1: DỌN DẸP CÁC ĐỐI TƯỢNG CSDL CŨ GÂY LỖI ===
+-- Lệnh này sẽ xóa trigger và function cũ nếu chúng còn tồn tại.
+-- Chạy lệnh này an toàn ngay cả khi chúng không tồn tại.
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+DROP FUNCTION IF EXISTS public.handle_new_user();
+
+-- === BƯỚC 2: TẠO BẢNG PROFILES ===
+-- Bảng này sẽ lưu trữ thông tin bổ sung của người dùng như vai trò (role).
+
+CREATE TABLE IF NOT EXISTS public.profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email VARCHAR(255),
+  role TEXT DEFAULT 'student'::text
+);
+
+-- Comment để giải thích
+COMMENT ON TABLE public.profiles IS 'Bảng lưu thông tin bổ sung cho người dùng, liên kết với bảng auth.users.';
+
+-- === BƯỚC 3: THIẾT LẬP ROW LEVEL SECURITY (RLS) ĐẦY ĐỦ CHO PROFILES ===
+-- Bật RLS
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+-- Xóa các policy cũ nếu có để tạo lại cho thống nhất
+DROP POLICY IF EXISTS "Users can view their own profile." ON public.profiles;
+DROP POLICY IF EXISTS "Users can update their own profile." ON public.profiles;
+DROP POLICY IF EXISTS "Users can insert their own profile." ON public.profiles;
+
+-- Policy: Người dùng có thể XEM hồ sơ của chính mình.
+CREATE POLICY "Users can view their own profile."
+ON public.profiles FOR SELECT
+USING (auth.uid() = id);
+
+-- Policy: Người dùng có thể CẬP NHẬT hồ sơ của chính mình.
+CREATE POLICY "Users can update their own profile."
+ON public.profiles FOR UPDATE
+USING (auth.uid() = id);
+
+-- Policy: Người dùng có thể TẠO MỚI hồ sơ của chính mình. (Đây là phần quan trọng bị thiếu)
+CREATE POLICY "Users can insert their own profile."
+ON public.profiles FOR INSERT
+WITH CHECK (auth.uid() = id);
+
+
+-- === BƯỚC 4: TẠO CÁC BẢNG CHO BỘ ĐỀ THI ===
+
+CREATE TABLE IF NOT EXISTS public.licenses (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    display_order INT
+);
+
+CREATE TABLE IF NOT EXISTS public.subjects (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    license_id TEXT REFERENCES public.licenses(id) ON DELETE CASCADE,
+    display_order INT
+);
+
+CREATE TABLE IF NOT EXISTS public.questions (
+    id TEXT PRIMARY KEY,
+    text TEXT NOT NULL,
+    image TEXT,
+    subject_id TEXT REFERENCES public.subjects(id) ON DELETE CASCADE,
+    correct_answer_id TEXT
+);
+
+CREATE TABLE IF NOT EXISTS public.answers (
+    id TEXT PRIMARY KEY,
+    text TEXT NOT NULL,
+    question_id TEXT REFERENCES public.questions(id) ON DELETE CASCADE
+);
+
+-- === BƯỚC 5: THIẾT LẬP RLS CHO CÁC BẢNG BỘ ĐỀ THI ===
+-- Bật RLS và cho phép mọi người đọc (SELECT) dữ liệu đề thi.
+ALTER TABLE public.licenses ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public read access" ON public.licenses;
+CREATE POLICY "Allow public read access" ON public.licenses FOR SELECT USING (true);
+
+ALTER TABLE public.subjects ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public read access" ON public.subjects;
+CREATE POLICY "Allow public read access" ON public.subjects FOR SELECT USING (true);
+
+ALTER TABLE public.questions ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public read access" ON public.questions;
+CREATE POLICY "Allow public read access" ON public.questions FOR SELECT USING (true);
+
+ALTER TABLE public.answers ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public read access" ON public.answers;
+CREATE POLICY "Allow public read access" ON public.answers FOR SELECT USING (true);
+
+-- === KẾT THÚC SCRIPT CÀI ĐẶT ===

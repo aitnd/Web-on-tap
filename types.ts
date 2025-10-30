@@ -1,3 +1,5 @@
+import type { Session } from '@supabase/supabase-js';
+
 export interface Answer {
   id: string;
   text: string;
@@ -39,6 +41,8 @@ export interface Quiz {
 
 export type AppState =
   | 'welcome'
+  | 'login'
+  | 'dashboard'
   | 'license_selection'
   | 'name_input'
   | 'mode_selection'
@@ -47,3 +51,9 @@ export type AppState =
   | 'results';
 
 export type UserAnswers = Record<string, string>;
+
+export interface UserProfile {
+    id: string;
+    email?: string;
+    role: 'admin' | 'teacher' | 'student';
+}
