@@ -26,10 +26,23 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ onStart }) => {
             <details className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg cursor-pointer">
                 <summary className="font-semibold flex items-center gap-2">
                     <InformationCircleIcon className="h-5 w-5"/>
-                    Lịch sử cập nhật (v2.8.1)
+                    Lịch sử cập nhật (v2.9.1)
                 </summary>
                 <div className="mt-3 pl-2 border-l-2 border-slate-300 dark:border-slate-600 max-h-[30vh] overflow-y-auto">
-                    <p className="font-semibold text-slate-600 dark:text-slate-300"><strong>Cập nhật phiên bản v2.8.1:</strong></p>
+                    <p className="font-semibold text-slate-600 dark:text-slate-300"><strong>Cập nhật phiên bản v2.9.1:</strong></p>
+                    <ul className="list-disc list-inside mt-1 space-y-1">
+                        <li>Sửa lỗi nghiêm trọng: Khắc phục dứt điểm lỗi nút "Nộp bài" (Thi thử) và "Trả lời" (Ôn tập) không phản hồi do quản lý state phức tạp sau khi tái cấu trúc.</li>
+                        <li>Cải tiến trải nghiệm (Ôn tập): Loại bỏ nút "Trả lời", đáp án sẽ được hiển thị ngay sau khi chọn, giúp luồng ôn tập nhanh và mượt hơn.</li>
+                    </ul>
+                    <p className="font-semibold mt-3"><strong>Cập nhật phiên bản v2.9.0:</strong></p>
+                    <ul className="list-disc list-inside mt-1 space-y-1">
+                        <li>Tái cấu trúc lớn: Tách biệt hoàn toàn luồng "Thi thử" và "Ôn tập" vào các thành phần giao diện riêng biệt (QuizScreen, ResultsScreen) để dễ dàng bảo trì và phát triển tính năng mới cho từng chế độ.</li>
+                    </ul>
+                    <p className="font-semibold mt-3"><strong>Cập nhật phiên bản v2.8.2:</strong></p>
+                    <ul className="list-disc list-inside mt-1 space-y-1">
+                        <li>Sửa lỗi nút "Nộp bài" (Thi thử) và "Trả lời" (Ôn tập) không hoạt động đúng như mong đợi, đảm bảo mọi câu trả lời đều được ghi nhận chính xác.</li>
+                    </ul>
+                    <p className="font-semibold mt-3"><strong>Cập nhật phiên bản v2.8.1:</strong></p>
                     <ul className="list-disc list-inside mt-1 space-y-1">
                         <li>Thi thử: Bổ sung nút "Câu trước" và "Câu tiếp" để điều hướng tuần tự qua các câu hỏi, song song với lưới câu hỏi.</li>
                     </ul>

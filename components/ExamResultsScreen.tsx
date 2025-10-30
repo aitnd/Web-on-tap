@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import type { Quiz, UserAnswers } from '../types';
 import { CheckIcon3D, XIcon3D, TrophyIcon3D } from './icons';
 
-interface ResultsScreenProps {
+interface ExamResultsScreenProps {
   quiz: Quiz;
   userAnswers: UserAnswers;
   score: number;
@@ -10,11 +10,12 @@ interface ResultsScreenProps {
   onBack: () => void;
 }
 
-const ResultsScreen: React.FC<ResultsScreenProps> = ({ quiz, userAnswers, score, onRetry, onBack }) => {
+const ExamResultsScreen: React.FC<ExamResultsScreenProps> = ({ quiz, userAnswers, score, onRetry, onBack }) => {
   const [filter, setFilter] = useState<'all' | 'incorrect'>('all');
   
   const totalQuestions = quiz.questions.length;
-  const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+  const scoreOutOf10 = totalQuestions > 0 ? (score / totalQuestions * 10).toFixed(1) : '0.0';
+  const isPass = score >= 25; // Exam mode pass threshold
 
   const filteredQuestions = useMemo(() => {
     if (filter === 'incorrect') {
@@ -27,13 +28,15 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ quiz, userAnswers, score,
     <div className="w-full max-w-4xl mx-auto p-4 animate-slide-in-right">
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 text-center mb-8">
             <TrophyIcon3D className="h-24 w-24 mx-auto text-yellow-400 dark:text-yellow-300 mb-4" />
-            <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">Hoàn thành!</h1>
-            <p className="text-xl text-slate-600 dark:text-slate-300 mb-6">Đây là kết quả ôn tập của anh/chị:</p>
-            <div className="bg-indigo-50 dark:bg-indigo-900/50 inline-block p-6 rounded-xl border border-indigo-200 dark:border-indigo-800">
-                <p className="text-5xl font-extrabold text-indigo-600 dark:text-indigo-300">
-                    {score} / {totalQuestions}
-                </p>
-                <p className="text-2xl font-semibold text-indigo-500 dark:text-indigo-400 mt-1">({percentage}%)</p>
+            <p className="text-xl text-slate-600 dark:text-slate-300 mb-4">Đây là kết quả thi thử của anh/chị:</p>
+            {isPass ? (
+                <p className="text-7xl font-extrabold text-green-500 dark:text-green-400 mb-4">ĐẠT</p>
+            ) : (
+                <p className="text-7xl font-extrabold text-red-500 dark:text-red-400 mb-4">KHÔNG ĐẠT</p>
+            )}
+            <div>
+                <p className="text-4xl font-bold text-slate-800 dark:text-slate-200">{scoreOutOf10} Điểm</p>
+                <p className="text-lg text-slate-500 dark:text-slate-400 mt-1">({score}/{totalQuestions})</p>
             </div>
         </div>
 
@@ -96,17 +99,17 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ quiz, userAnswers, score,
               onClick={onBack}
               className="w-full sm:w-auto bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:focus:ring-indigo-800 transition-all duration-300 transform hover:scale-105"
           >
-              Các môn khác
+              Quay lại
           </button>
           <button
               onClick={onRetry}
               className="w-full sm:w-auto bg-slate-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-slate-700 focus:outline-none focus:ring-4 focus:ring-slate-300 dark:focus:ring-slate-800 transition-colors duration-300"
           >
-              Làm lại
+              Làm lại bài thi
           </button>
         </div>
     </div>
   );
 };
 
-export default ResultsScreen;
+export default ExamResultsScreen;

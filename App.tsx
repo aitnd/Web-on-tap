@@ -7,6 +7,8 @@ import ModeSelectionScreen from './components/ModeSelectionScreen';
 import SubjectSelectionScreen from './components/SubjectSelectionScreen';
 import QuizScreen from './components/QuizScreen';
 import ResultsScreen from './components/ResultsScreen';
+import ExamQuizScreen from './components/ExamQuizScreen';
+import ExamResultsScreen from './components/ExamResultsScreen';
 import Footer from './components/Footer';
 import { fetchLicenses } from './services/dataService';
 import { HelmIcon3D } from './components/icons';
@@ -263,19 +265,33 @@ const App: React.FC = () => {
       case 'subject_selection':
         return <SubjectSelectionScreen subjects={selectedLicense?.subjects || []} progress={userProgress} onSelect={handleSubjectSelect} onBack={() => setAppState('mode_selection')} />;
       case 'in_quiz':
-        return currentQuiz && <QuizScreen quiz={currentQuiz} onFinish={handleQuizFinish} onBack={handleBackFromQuiz} />;
+        if (currentQuiz) {
+          const isExam = currentQuiz.timeLimit !== undefined;
+          return isExam
+            ? <ExamQuizScreen quiz={currentQuiz} onFinish={handleQuizFinish} onBack={handleBackFromQuiz} />
+            : <QuizScreen quiz={currentQuiz} onFinish={handleQuizFinish} onBack={handleBackFromQuiz} />;
+        }
+        return null;
       case 'results':
-        const isPracticeQuiz = currentQuiz && currentQuiz.id !== 'exam-quiz';
-        return currentQuiz && (
-            <ResultsScreen
-              quiz={currentQuiz}
-              userAnswers={userAnswers}
-              score={score}
-              isPracticeQuiz={isPracticeQuiz}
-              onRetry={handleRetryQuiz}
-              onBack={isPracticeQuiz ? handleBackToSubjectSelection : handleBackToModeSelection}
-            />
-          );
+        if (currentQuiz) {
+          const isPractice = currentQuiz.id !== 'exam-quiz';
+          return isPractice
+            ? <ResultsScreen
+                quiz={currentQuiz}
+                userAnswers={userAnswers}
+                score={score}
+                onRetry={handleRetryQuiz}
+                onBack={handleBackToSubjectSelection}
+              />
+            : <ExamResultsScreen
+                quiz={currentQuiz}
+                userAnswers={userAnswers}
+                score={score}
+                onRetry={handleRetryQuiz}
+                onBack={handleBackToModeSelection}
+              />;
+        }
+        return null;
       default:
         return null;
     }
