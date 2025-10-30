@@ -105,7 +105,7 @@ const App: React.FC = () => {
           ...q,
           answers: shuffleArray(q.answers)
         })),
-        timeLimit: 30 * 60, // 30 minutes
+        timeLimit: 45 * 60, // 45 minutes
       };
       setCurrentQuiz(examQuiz);
       setUserAnswers({});

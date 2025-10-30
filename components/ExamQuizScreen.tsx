@@ -21,15 +21,15 @@ const ExamQuizScreen: React.FC<ExamQuizScreenProps> = ({ quiz, onFinish, onBack 
 
   const currentQuestion = useMemo(() => quiz.questions[currentQuestionIndex], [quiz.questions, currentQuestionIndex]);
 
-  // Use a ref to hold the latest userAnswers for the timer callback,
-  // preventing the interval from being reset on every answer selection.
+  // Use a ref to hold the latest userAnswers for callbacks,
+  // preventing stale state issues in closures.
   const latestAnswers = useRef(userAnswers);
   useEffect(() => {
     latestAnswers.current = userAnswers;
   }, [userAnswers]);
 
   const handleFinishQuiz = useCallback(() => {
-    const finalAnswers = userAnswers;
+    const finalAnswers = latestAnswers.current; // Use the ref to get the latest answers
     const unansweredCount = quiz.questions.length - Object.keys(finalAnswers).length;
     const confirmationMessage = unansweredCount > 0 
         ? `Anh/chị vẫn còn ${unansweredCount} câu chưa trả lời. Anh/chị có chắc chắn muốn nộp bài không?`
@@ -38,7 +38,7 @@ const ExamQuizScreen: React.FC<ExamQuizScreenProps> = ({ quiz, onFinish, onBack 
     if (window.confirm(confirmationMessage)) {
         onFinish(finalAnswers);
     }
-  }, [userAnswers, quiz.questions.length, onFinish]);
+  }, [quiz.questions.length, onFinish]);
 
   // Set up the countdown timer. Runs only once on mount.
   useEffect(() => {
