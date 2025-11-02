@@ -16,9 +16,11 @@ import Footer from './components/Footer';
 import LoginScreen from './components/LoginScreen';
 import Dashboard from './components/Dashboard';
 import Header from './components/Header';
+import ChangelogModal from './components/ChangelogModal'; // Import modal mới
 
 import { fetchLicenses } from './services/dataService';
 import { HelmIcon3D } from './components/icons';
+import { useTheme } from './contexts/ThemeContext';
 
 // Helper function to shuffle an array
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -30,6 +32,8 @@ const App: React.FC = () => {
   const [licenses, setLicenses] = useState<License[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
+  const { theme } = useTheme();
 
   // Auth state
   const [session, setSession] = useState<Session | null>(null);
@@ -299,13 +303,22 @@ const App: React.FC = () => {
     if (isLoading) {
       return (
         <div className="text-center p-4 animate-slide-in-right">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 md:p-12 max-w-2xl mx-auto">
-            <HelmIcon3D className="h-24 w-24 mx-auto text-indigo-500 mb-4 animate-pulse" />
-            <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white mb-4">
+          <div className="bg-card text-card-foreground rounded-2xl shadow-xl p-8 md:p-12 max-w-2xl mx-auto">
+            {theme === 'tri-an' ? (
+              <img src="https://i.postimg.cc/MH9hVp8S/happy-techers-day.jpg" alt="Icon Chúc mừng Ngày Nhà giáo" className="h-24 w-24 mx-auto mb-4 animate-pulse rounded-full object-cover" />
+            ) : (
+              <HelmIcon3D className="h-24 w-24 mx-auto text-primary mb-4 animate-pulse" />
+            )}
+            <h1 className="text-3xl md:text-4xl font-extrabold text-foreground mb-2">
               Ứng Dụng Ôn Tập
             </h1>
-            <p className="text-lg text-slate-600 dark:text-slate-300">
-              Hệ thống đang tải bộ đề thi mới nhất, vui lòng chờ trong giây lát.
+            {theme === 'tri-an' && (
+              <p className="text-xl font-semibold text-primary mb-4">
+                Kính mừng ngày Nhà giáo Việt Nam
+              </p>
+            )}
+            <p className="text-lg text-muted-foreground">
+              Hệ thống đang tải bộ đề thi mới nhất, vui lòng chờ trong giây lát...
             </p>
           </div>
         </div>
@@ -315,11 +328,11 @@ const App: React.FC = () => {
     if (error) {
       return (
          <div className="text-center p-4 animate-slide-in-right">
-            <div className="bg-red-100 dark:bg-red-900/50 border-2 border-red-400 dark:border-red-600 rounded-2xl shadow-xl p-8 md:p-12 max-w-2xl mx-auto">
-                <h1 className="text-3xl md:text-4xl font-extrabold text-red-800 dark:text-red-200 mb-4">
+            <div className="bg-destructive/20 border-2 border-destructive/50 rounded-2xl shadow-xl p-8 md:p-12 max-w-2xl mx-auto">
+                <h1 className="text-3xl md:text-4xl font-extrabold text-destructive-foreground mb-4">
                   Đã xảy ra lỗi
                 </h1>
-                <p className="text-lg text-red-700 dark:text-red-300">{error}</p>
+                <p className="text-lg text-destructive-foreground/80">{error}</p>
             </div>
         </div>
       );
@@ -363,12 +376,13 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-slate-50 to-slate-200 dark:from-slate-900 dark:to-slate-800 text-slate-800 dark:text-slate-200 p-4 font-sans transition-colors duration-500">
+    <div className="min-h-screen flex flex-col items-center text-foreground p-4 pb-20 transition-colors duration-500">
       {session && userProfile && <Header userProfile={userProfile} onLogout={handleLogout} />}
       <main className="w-full max-w-4xl mx-auto flex-grow flex flex-col justify-center">
         {renderContent()}
       </main>
-      <Footer />
+      {isChangelogModalOpen && <ChangelogModal onClose={() => setIsChangelogModalOpen(false)} />}
+      <Footer onVersionClick={() => setIsChangelogModalOpen(true)} />
     </div>
   );
 };

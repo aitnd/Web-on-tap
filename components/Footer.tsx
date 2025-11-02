@@ -1,17 +1,26 @@
 import React from 'react';
+import ThemeSwitcher from './ThemeSwitcher';
+import { useTheme } from '../contexts/ThemeContext';
 
-const Footer: React.FC = () => {
+interface FooterProps {
+  onVersionClick: () => void;
+}
+
+const Footer: React.FC<FooterProps> = ({ onVersionClick }) => {
+  const { theme } = useTheme();
+  const versionText = theme === 'tri-an' 
+    ? "Phiên bản v3.1.1 - Kính tặng Quý Thầy Cô!"
+    : "Phiên bản v3.1.1 - Chúc anh/chị ôn thi hiệu quả!";
+
   return (
-    <footer className="w-full text-center py-4 mt-8">
-      <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
-        Bản quyền © {new Date().getFullYear()} Công ty cổ phần tư vấn và giáo dục Ninh Bình.
-      </p>
-      <p className="text-xs text-slate-400 dark:text-slate-500">
-        Địa chỉ: Đường Triệu Việt Vương, phường Hoa lư, tỉnh Ninh Bình
-      </p>
-       <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
-        Phiên bản v2.9.8 - Chúc anh/chị ôn thi hiệu quả!
-      </p>
+    <footer className="fixed bottom-0 left-0 right-0 z-40 flex h-14 w-full items-center justify-between border-t border-border bg-card/80 px-4 backdrop-blur-sm sm:px-6">
+      <button 
+        onClick={onVersionClick}
+        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        {versionText}
+      </button>
+      <ThemeSwitcher />
     </footer>
   );
 };

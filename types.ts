@@ -1,5 +1,7 @@
 import type { Session } from '@supabase/supabase-js';
 
+export type Theme = 'modern' | 'classic' | 'sunrise' | 'tri-an';
+
 export interface Answer {
   id: string;
   text: string;

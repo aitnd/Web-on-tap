@@ -36,35 +36,35 @@ const ExamResultsScreen: React.FC<ExamResultsScreenProps> = ({ quiz, userAnswers
   }, [filter, quiz.questions, userAnswers]);
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4 animate-slide-in-right">
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 text-center mb-8">
-            <TrophyIcon3D className="h-24 w-24 mx-auto text-yellow-400 dark:text-yellow-300 mb-4" />
-            <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">Kết quả Thi thử</h1>
+    <div className="w-full max-w-4xl mx-auto p-4 animate-slide-in-right font-quiz-default">
+        <div className="bg-card text-card-foreground rounded-2xl shadow-xl p-8 text-center mb-8">
+            <TrophyIcon3D className="h-24 w-24 mx-auto text-yellow-400 mb-4" />
+            <h1 className="text-4xl font-bold text-foreground mb-2">Kết quả Thi thử</h1>
             
-            <div className="my-4 text-slate-600 dark:text-slate-300">
-                <p className="text-lg">Thí sinh: <span className="font-bold text-indigo-500 dark:text-indigo-400">{userName}</span></p>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Hoàn thành lúc: {formattedDate}</p>
+            <div className="my-4 text-muted-foreground">
+                <p className="text-lg">Thí sinh: <span className="font-bold text-primary">{userName}</span></p>
+                <p className="text-sm">Hoàn thành lúc: {formattedDate}</p>
             </div>
 
-            <p className={`text-2xl font-bold mb-6 ${isPass ? 'text-green-500' : 'text-red-500'}`}>
+            <p className={`text-2xl font-bold mb-6 ${isPass ? 'text-success' : 'text-destructive'}`}>
                 {isPass ? 'Chúc mừng, anh/chị đã ĐẠT!' : 'Rất tiếc, anh/chị KHÔNG ĐẠT.'}
             </p>
-            <div className={`inline-block p-6 rounded-xl border ${isPass ? 'bg-green-50 dark:bg-green-900/50 border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/50 border-red-200 dark:border-red-800'}`}>
-                <p className={`text-5xl font-extrabold ${isPass ? 'text-green-600 dark:text-green-300' : 'text-red-600 dark:text-red-300'}`}>
+            <div className={`inline-block p-6 rounded-xl border ${isPass ? 'bg-success/10 border-success/20' : 'bg-destructive/10 border-destructive/20'}`}>
+                <p className={`text-5xl font-extrabold ${isPass ? 'text-success' : 'text-destructive'}`}>
                     {score} / {totalQuestions}
                 </p>
-                <p className="text-lg text-slate-500 dark:text-slate-400 mt-1">Số câu đúng</p>
+                <p className="text-lg text-muted-foreground mt-1">Số câu đúng</p>
             </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8">
+        <div className="bg-card text-card-foreground rounded-2xl shadow-xl p-8">
             <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">Xem lại bài làm</h2>
+              <h2 className="text-2xl font-bold text-foreground">Xem lại bài làm</h2>
               <div className="flex items-center gap-2 mt-4 sm:mt-0">
-                  <button onClick={() => setFilter('all')} className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors ${filter === 'all' ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'}`}>
+                  <button onClick={() => setFilter('all')} className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors ${filter === 'all' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}`}>
                       Tất cả
                   </button>
-                  <button onClick={() => setFilter('incorrect')} className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors ${filter === 'incorrect' ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'}`}>
+                  <button onClick={() => setFilter('incorrect')} className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors ${filter === 'incorrect' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}`}>
                       Chỉ câu sai ({quiz.questions.length - score})
                   </button>
               </div>
@@ -76,8 +76,8 @@ const ExamResultsScreen: React.FC<ExamResultsScreenProps> = ({ quiz, userAnswers
                     const correctAnswerId = question.correctAnswerId;
                     
                     return (
-                        <div key={question.id} className="p-4 border-b border-slate-200 dark:border-slate-700 last:border-b-0">
-                            <p className="font-semibold text-lg mb-3 text-slate-800 dark:text-slate-200">
+                        <div key={question.id} className="p-4 border-b border-border last:border-b-0">
+                            <p className="font-semibold text-lg mb-3 text-foreground">
                                 <span className="mr-2">Câu {quiz.questions.findIndex(q => q.id === question.id) + 1}:</span>
                                 {question.text}
                             </p>
@@ -88,16 +88,16 @@ const ExamResultsScreen: React.FC<ExamResultsScreenProps> = ({ quiz, userAnswers
                                     
                                     let itemClass = "flex items-center p-3 rounded-md text-sm ";
                                     if(isCorrectAnswer) {
-                                        itemClass += "bg-green-50 dark:bg-green-900/30 text-green-800 dark:text-green-300";
+                                        itemClass += "bg-success/10 text-success";
                                     } else if(isUserAnswer) {
-                                        itemClass += "bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-300";
+                                        itemClass += "bg-destructive/10 text-destructive";
                                     } else {
-                                        itemClass += "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400";
+                                        itemClass += "bg-muted/50 text-muted-foreground";
                                     }
 
                                     return (
                                         <div key={answer.id} className={itemClass}>
-                                            {isCorrectAnswer ? <CheckIcon3D className="h-5 w-5 mr-3 text-green-500" /> : isUserAnswer ? <XIcon3D className="h-5 w-5 mr-3 text-red-500" /> : <div className="w-5 h-5 mr-3"></div>}
+                                            {isCorrectAnswer ? <CheckIcon3D className="h-5 w-5 mr-3 text-success" /> : isUserAnswer ? <XIcon3D className="h-5 w-5 mr-3 text-destructive" /> : <div className="w-5 h-5 mr-3"></div>}
                                             <span>{answer.text}</span>
                                         </div>
                                     )
@@ -106,7 +106,7 @@ const ExamResultsScreen: React.FC<ExamResultsScreenProps> = ({ quiz, userAnswers
                         </div>
                     );
                 }) : (
-                  <p className="text-center text-slate-500 dark:text-slate-400 py-8">Tuyệt vời! Anh/chị đã trả lời đúng tất cả các câu hỏi.</p>
+                  <p className="text-center text-muted-foreground py-8">Tuyệt vời! Anh/chị đã trả lời đúng tất cả các câu hỏi.</p>
                 )}
             </div>
         </div>
@@ -114,13 +114,13 @@ const ExamResultsScreen: React.FC<ExamResultsScreenProps> = ({ quiz, userAnswers
         <div className="text-center mt-8 flex flex-col sm:flex-row justify-center items-center gap-4">
           <button
               onClick={onBack}
-              className="w-full sm:w-auto bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:focus:ring-indigo-800 transition-all duration-300 transform hover:scale-105"
+              className="w-full sm:w-auto bg-primary text-primary-foreground font-bold py-3 px-8 rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-4 focus:ring-ring transition-all duration-300 transform hover:scale-105"
           >
               Quay lại
           </button>
           <button
               onClick={onRetry}
-              className="w-full sm:w-auto bg-slate-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-slate-700 focus:outline-none focus:ring-4 focus:ring-slate-300 dark:focus:ring-slate-800 transition-colors duration-300"
+              className="w-full sm:w-auto bg-secondary text-secondary-foreground font-bold py-3 px-8 rounded-lg hover:bg-muted focus:outline-none focus:ring-4 focus:ring-ring transition-colors duration-300"
           >
               Làm lại bài thi
           </button>

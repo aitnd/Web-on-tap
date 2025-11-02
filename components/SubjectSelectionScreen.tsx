@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Subject, UserProgressData } from '../types';
-import { ArrowLeftIcon3D, ChevronRightIcon3D } from './icons';
+import { ArrowLeftIcon3D, ChevronRightIcon3D, BookOpenIcon3D } from './icons';
 
 interface SubjectSelectionScreenProps {
   subjects: Subject[];
@@ -25,16 +25,17 @@ const SubjectSelectionScreen: React.FC<SubjectSelectionScreenProps> = ({ subject
       <div className="relative text-center mb-10">
         <button 
           onClick={onBack} 
-          className="absolute left-0 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-700/50 p-3 rounded-full shadow-md hover:bg-slate-100 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 transition-all duration-300 transform hover:scale-110"
+          className="absolute left-0 top-1/2 -translate-y-1/2 bg-card/50 p-3 rounded-full shadow-md hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background transition-all duration-300 transform hover:scale-110"
           aria-label="Quay lại"
         >
-            <ArrowLeftIcon3D className="h-10 w-10" />
+            <ArrowLeftIcon3D className="h-10 w-10 text-primary" />
         </button>
-        <h1 className="text-4xl font-bold text-slate-900 dark:text-white">Chọn Môn học</h1>
-        <p className="text-lg text-slate-500 dark:text-slate-400 mt-2">Chọn một môn để bắt đầu ôn tập.</p>
+        <BookOpenIcon3D className="h-20 w-20 mx-auto text-primary mb-4" />
+        <h1 className="text-4xl font-bold text-foreground">Chọn Môn học</h1>
+        <p className="text-lg text-muted-foreground mt-2">Chọn một môn để bắt đầu ôn tập.</p>
       </div>
 
-      <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg">
+      <div className="bg-card p-6 rounded-2xl shadow-lg">
         <div className="space-y-3">
           {subjects.map(subject => {
             const subjectProgress = progress[subject.id];
@@ -44,28 +45,28 @@ const SubjectSelectionScreen: React.FC<SubjectSelectionScreenProps> = ({ subject
               <button
                 key={subject.id}
                 onClick={() => onSelect(subject)}
-                className="w-full flex items-center justify-between p-5 bg-slate-100 dark:bg-slate-700 rounded-lg text-left hover:bg-indigo-100 dark:hover:bg-indigo-900 transition-all duration-300 transform hover:scale-[1.02] focus:ring-4 focus:ring-indigo-300 dark:focus:ring-indigo-800 focus:outline-none"
+                className="w-full flex items-center justify-between p-5 bg-background rounded-lg text-left hover:bg-primary/10 transition-all duration-300 transform hover:scale-[1.02] focus:ring-4 focus:ring-ring focus:outline-none"
               >
                 <div>
-                  <h3 className="text-lg font-bold text-indigo-700 dark:text-indigo-300">{subject.name}</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">{subject.questions.length} câu hỏi</p>
+                  <h3 className="text-lg font-bold text-primary">{subject.name}</h3>
+                  <p className="text-sm text-muted-foreground">{subject.questions.length} câu hỏi</p>
                 </div>
                 <div className="flex items-center gap-4">
                   {hasProgress && (
                     <div className="text-right text-sm">
-                        <p className="text-slate-600 dark:text-slate-300 flex items-center justify-end">
+                        <p className="text-muted-foreground flex items-center justify-end">
                             <span>Lần cuối:</span>
-                            <span className="font-semibold text-blue-600 dark:text-blue-400 ml-1">{subjectProgress.lastScore}/{subject.questions.length}</span>
-                            {subjectProgress.lastScoreTimestamp && <span className="ml-1.5 text-xs text-slate-400 dark:text-slate-500">{formatDate(subjectProgress.lastScoreTimestamp)}</span>}
+                            <span className="font-semibold text-primary ml-1">{subjectProgress.lastScore}/{subject.questions.length}</span>
+                            {subjectProgress.lastScoreTimestamp && <span className="ml-1.5 text-xs text-muted-foreground/80">{formatDate(subjectProgress.lastScoreTimestamp)}</span>}
                         </p>
-                        <p className="text-slate-500 dark:text-slate-400 flex items-center justify-end mt-0.5">
+                        <p className="text-muted-foreground flex items-center justify-end mt-0.5">
                             <span>Cao nhất:</span>
-                            <span className="font-semibold text-green-600 dark:text-green-400 ml-1">{subjectProgress.highScore}/{subject.questions.length}</span>
-                            {subjectProgress.highScoreTimestamp && <span className="ml-1.5 text-xs text-slate-400 dark:text-slate-500">{formatDate(subjectProgress.highScoreTimestamp)}</span>}
+                            <span className="font-semibold text-success ml-1">{subjectProgress.highScore}/{subject.questions.length}</span>
+                            {subjectProgress.highScoreTimestamp && <span className="ml-1.5 text-xs text-muted-foreground/80">{formatDate(subjectProgress.highScoreTimestamp)}</span>}
                         </p>
                     </div>
                   )}
-                  <ChevronRightIcon3D className="h-6 w-6 text-slate-500 dark:text-slate-400" />
+                  <ChevronRightIcon3D className="h-6 w-6 text-muted-foreground" />
                 </div>
               </button>
             )

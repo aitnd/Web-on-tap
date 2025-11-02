@@ -73,32 +73,32 @@ const ExamQuizScreen: React.FC<ExamQuizScreenProps> = ({ quiz, onFinish, onBack 
   const examProgress = (Object.keys(userAnswers).length / quiz.questions.length) * 100;
 
   return (
-    <div className="w-full max-w-3xl mx-auto p-4 md:p-6 animate-slide-in-right">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 md:p-8">
+    <div className="w-full max-w-3xl mx-auto p-4 md:p-6 animate-slide-in-right font-quiz-default">
+      <div className="bg-card text-card-foreground rounded-2xl shadow-xl p-6 md:p-8">
         <div className="mb-6">
             <div className="flex justify-between items-center mb-4 relative">
                 <button 
                   onClick={onBack} 
-                  className="absolute left-0 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-700/50 p-3 rounded-full shadow-md hover:bg-slate-100 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 transition-all duration-300 transform hover:scale-110"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 bg-background/50 p-3 rounded-full shadow-md hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-card transition-all duration-300 transform hover:scale-110"
                   aria-label="Quay lại"
                 >
                     <ArrowLeftIcon3D className="h-10 w-10" />
                 </button>
-                <h1 className="text-xl font-bold text-slate-800 dark:text-slate-200 text-center flex-grow">{quiz.title}</h1>
+                <h1 className="text-xl font-bold text-foreground text-center flex-grow">{quiz.title}</h1>
                 <button 
                     onClick={handleFinishQuiz}
-                    className={'bg-indigo-600 text-white hover:bg-indigo-700 text-sm font-bold py-2 px-4 rounded-lg transition-colors duration-300'}
+                    className={'bg-primary text-primary-foreground hover:bg-primary/90 text-sm font-bold py-2 px-4 rounded-lg transition-colors duration-300'}
                 >
                     Nộp bài
                 </button>
             </div>
-            <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5 mb-2">
-                <div className="bg-indigo-600 h-2.5 rounded-full transition-all duration-500" style={{ width: `${examProgress}%` }}></div>
+            <div className="w-full bg-secondary rounded-full h-2.5 mb-2">
+                <div className="bg-primary h-2.5 rounded-full transition-all duration-500" style={{ width: `${examProgress}%` }}></div>
             </div>
-            <div className="flex justify-between items-center text-sm text-slate-500 dark:text-slate-400">
+            <div className="flex justify-between items-center text-sm text-muted-foreground">
                 <span>Câu {currentQuestionIndex + 1} / {quiz.questions.length}</span>
                 {timeLeft !== undefined && (
-                    <div className="flex items-center font-semibold text-red-500 dark:text-red-400">
+                    <div className="flex items-center font-semibold text-destructive">
                         <ClockIcon3D className="h-5 w-5 mr-1" />
                         <span>{formatTime(timeLeft)}</span>
                     </div>
@@ -106,19 +106,19 @@ const ExamQuizScreen: React.FC<ExamQuizScreenProps> = ({ quiz, onFinish, onBack 
             </div>
         </div>
 
-        <div className="mb-6 border-b border-slate-200 dark:border-slate-700 pb-6">
-          <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-3">Danh sách câu hỏi:</h3>
+        <div className="mb-6 border-b border-border pb-6">
+          <h3 className="text-sm font-semibold text-muted-foreground mb-3">Danh sách câu hỏi:</h3>
           <div className="flex flex-wrap gap-2">
             {quiz.questions.map((q, index) => {
               const isCurrent = index === currentQuestionIndex;
               const isQuestionAnswered = userAnswers[q.id] !== undefined;
               let btnClass = 'w-8 h-8 rounded-md flex items-center justify-center font-bold text-xs transition-all duration-200 ';
               if (isCurrent) {
-                btnClass += 'bg-indigo-600 text-white scale-110 shadow-lg ring-2 ring-indigo-400 dark:ring-indigo-500';
+                btnClass += 'bg-primary text-primary-foreground scale-110 shadow-lg ring-2 ring-ring';
               } else if (isQuestionAnswered) {
-                btnClass += 'bg-green-500 text-white hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700';
+                btnClass += 'bg-success text-success-foreground hover:bg-success/80';
               } else {
-                btnClass += 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-600';
+                btnClass += 'bg-secondary text-secondary-foreground hover:bg-muted';
               }
               return (
                 <button key={q.id} className={btnClass} onClick={() => setCurrentQuestionIndex(index)}>
@@ -130,7 +130,7 @@ const ExamQuizScreen: React.FC<ExamQuizScreenProps> = ({ quiz, onFinish, onBack 
         </div>
 
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold mb-5 text-slate-900 dark:text-white">{currentQuestion.text}</h2>
+          <h2 className="text-2xl md:text-3xl font-bold mb-5 text-foreground">{currentQuestion.text}</h2>
           {currentQuestion.image && (
             <div className="mb-6 rounded-lg overflow-hidden">
               <img src={currentQuestion.image} alt="Câu hỏi" className="w-full h-auto object-cover max-h-80" />
@@ -143,9 +143,9 @@ const ExamQuizScreen: React.FC<ExamQuizScreenProps> = ({ quiz, onFinish, onBack 
               let buttonClass = 'w-full text-left p-4 rounded-lg border-2 transition-all duration-300 flex items-center justify-between text-lg';
               
               if(isSelected) {
-                  buttonClass += ' bg-indigo-100 border-indigo-500 dark:bg-indigo-900/50 dark:border-indigo-500 ring-2 ring-indigo-500';
+                  buttonClass += ' bg-primary/10 border-primary ring-2 ring-primary text-foreground';
               } else {
-                  buttonClass += ' bg-slate-50 dark:bg-slate-700 border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-600';
+                  buttonClass += ' bg-background hover:bg-muted border-border text-foreground';
               }
               
               return (
@@ -165,14 +165,14 @@ const ExamQuizScreen: React.FC<ExamQuizScreenProps> = ({ quiz, onFinish, onBack 
                 <button
                     onClick={() => setCurrentQuestionIndex(prev => prev - 1)}
                     disabled={currentQuestionIndex === 0}
-                    className="bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-3 px-8 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    className="bg-secondary text-secondary-foreground font-bold py-3 px-8 rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                 >
                     Câu trước
                 </button>
                 <button
                     onClick={() => setCurrentQuestionIndex(prev => prev + 1)}
                     disabled={currentQuestionIndex === quiz.questions.length - 1}
-                    className="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    className="bg-primary text-primary-foreground font-bold py-3 px-8 rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                 >
                     Câu tiếp
                 </button>
