@@ -35,10 +35,14 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ onStart, onLoginClick }) =>
             <details className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg cursor-pointer">
                 <summary className="font-semibold flex items-center gap-2">
                     <InformationCircleIcon className="h-5 w-5"/>
-                    Lịch sử cập nhật (v2.9.5)
+                    Lịch sử cập nhật (v2.9.6)
                 </summary>
                 <div className="mt-3 pl-2 border-l-2 border-slate-300 dark:border-slate-600 max-h-[30vh] overflow-y-auto">
-                    <p className="font-semibold text-slate-600 dark:text-slate-300"><strong>Cập nhật phiên bản v2.9.5:</strong></p>
+                    <p className="font-semibold text-slate-600 dark:text-slate-300"><strong>Cập nhật phiên bản v2.9.6:</strong></p>
+                    <ul className="list-disc list-inside mt-1 space-y-1">
+                        <li>Sửa lỗi không lưu được điểm cao và ngày giờ khi người dùng có dữ liệu ôn tập từ phiên bản cũ.</li>
+                    </ul>
+                    <p className="font-semibold text-slate-600 dark:text-slate-300 mt-2"><strong>Cập nhật phiên bản v2.9.5:</strong></p>
                     <ul className="list-disc list-inside mt-1 space-y-1">
                         <li>Hiển thị đầy đủ ngày giờ (thay vì chỉ ngày/tháng) cho điểm "Lần cuối" và "Cao nhất", giúp anh/chị theo dõi tiến độ chi tiết hơn.</li>
                     </ul>
