@@ -12,10 +12,10 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ onStart, onLoginClick }) =>
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 md:p-12 max-w-2xl mx-auto relative">
         <HelmIcon3D className="h-24 w-24 mx-auto text-indigo-500 mb-4" />
         <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white mb-4">
-          Ôn Thi Hàng Hải
+          Ứng Dụng Ôn tập
         </h1>
         <p className="text-lg text-slate-600 dark:text-slate-300 mb-8">
-          Chào mừng anh/chị đã đến với ứng dụng chuyên ôn thi các chứng chỉ ngành hàng hải. Cùng nhau chinh phục mọi kỳ thi nhé!
+          Chào mừng anh/chị đã đến với Ứng dụng Ôn tập, ôn thi chứng chỉ chuyên môn phương tiện thủy nội địa.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <button
@@ -35,10 +35,15 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ onStart, onLoginClick }) =>
             <details className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg cursor-pointer">
                 <summary className="font-semibold flex items-center gap-2">
                     <InformationCircleIcon className="h-5 w-5"/>
-                    Lịch sử cập nhật (v2.9.7)
+                    Lịch sử cập nhật (v2.9.8)
                 </summary>
                 <div className="mt-3 pl-2 border-l-2 border-slate-300 dark:border-slate-600 max-h-[30vh] overflow-y-auto">
-                    <p className="font-semibold text-slate-600 dark:text-slate-300"><strong>Cập nhật phiên bản v2.9.7:</strong></p>
+                    <p className="font-semibold text-slate-600 dark:text-slate-300"><strong>Cập nhật phiên bản v2.9.8:</strong></p>
+                    <ul className="list-disc list-inside mt-1 space-y-1">
+                        <li>Cập nhật thông tin bản quyền của công ty ở chân trang.</li>
+                        <li>Sửa lỗi chính tả trong câu chào mừng.</li>
+                    </ul>
+                    <p className="font-semibold text-slate-600 dark:text-slate-300 mt-2"><strong>Cập nhật phiên bản v2.9.7:</strong></p>
                     <ul className="list-disc list-inside mt-1 space-y-1">
                         <li>Sửa lỗi dứt điểm: Nâng cấp logic lưu trữ để đảm bảo điểm cao nhất và ngày giờ được ghi nhận chính xác trong mọi trường hợp, kể cả khi có dữ liệu cũ trong trình duyệt.</li>
                     </ul>
