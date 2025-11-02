@@ -8,14 +8,25 @@ interface ExamResultsScreenProps {
   score: number;
   onRetry: () => void;
   onBack: () => void;
+  userName: string;
 }
 
-const ExamResultsScreen: React.FC<ExamResultsScreenProps> = ({ quiz, userAnswers, score, onRetry, onBack }) => {
+const ExamResultsScreen: React.FC<ExamResultsScreenProps> = ({ quiz, userAnswers, score, onRetry, onBack, userName }) => {
   const [filter, setFilter] = useState<'all' | 'incorrect'>('all');
-  
+  const [completionDate] = useState(() => new Date());
+
   const totalQuestions = quiz.questions.length;
-  const scoreOutOf10 = totalQuestions > 0 ? (score / totalQuestions * 10).toFixed(1) : '0.0';
   const isPass = score >= 25; // Exam mode pass threshold
+
+  const formattedDate = useMemo(() => {
+    return new Intl.DateTimeFormat('vi-VN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    }).format(completionDate);
+  }, [completionDate]);
 
   const filteredQuestions = useMemo(() => {
     if (filter === 'incorrect') {
@@ -28,15 +39,21 @@ const ExamResultsScreen: React.FC<ExamResultsScreenProps> = ({ quiz, userAnswers
     <div className="w-full max-w-4xl mx-auto p-4 animate-slide-in-right">
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 text-center mb-8">
             <TrophyIcon3D className="h-24 w-24 mx-auto text-yellow-400 dark:text-yellow-300 mb-4" />
-            <p className="text-xl text-slate-600 dark:text-slate-300 mb-4">Đây là kết quả thi thử của anh/chị:</p>
-            {isPass ? (
-                <p className="text-7xl font-extrabold text-green-500 dark:text-green-400 mb-4">ĐẠT</p>
-            ) : (
-                <p className="text-7xl font-extrabold text-red-500 dark:text-red-400 mb-4">KHÔNG ĐẠT</p>
-            )}
-            <div>
-                <p className="text-4xl font-bold text-slate-800 dark:text-slate-200">{scoreOutOf10} Điểm</p>
-                <p className="text-lg text-slate-500 dark:text-slate-400 mt-1">({score}/{totalQuestions})</p>
+            <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">Kết quả Thi thử</h1>
+            
+            <div className="my-4 text-slate-600 dark:text-slate-300">
+                <p className="text-lg">Thí sinh: <span className="font-bold text-indigo-500 dark:text-indigo-400">{userName}</span></p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Hoàn thành lúc: {formattedDate}</p>
+            </div>
+
+            <p className={`text-2xl font-bold mb-6 ${isPass ? 'text-green-500' : 'text-red-500'}`}>
+                {isPass ? 'Chúc mừng, anh/chị đã ĐẠT!' : 'Rất tiếc, anh/chị KHÔNG ĐẠT.'}
+            </p>
+            <div className={`inline-block p-6 rounded-xl border ${isPass ? 'bg-green-50 dark:bg-green-900/50 border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/50 border-red-200 dark:border-red-800'}`}>
+                <p className={`text-5xl font-extrabold ${isPass ? 'text-green-600 dark:text-green-300' : 'text-red-600 dark:text-red-300'}`}>
+                    {score} / {totalQuestions}
+                </p>
+                <p className="text-lg text-slate-500 dark:text-slate-400 mt-1">Số câu đúng</p>
             </div>
         </div>
 

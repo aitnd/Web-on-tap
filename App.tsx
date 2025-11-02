@@ -332,7 +332,7 @@ const App: React.FC = () => {
         if (currentQuiz) {
           return currentQuiz.id !== 'exam-quiz'
             ? <ResultsScreen quiz={currentQuiz} userAnswers={userAnswers} score={score} onRetry={handleRetryQuiz} onBack={handleBackToSubjectSelection} />
-            : <ExamResultsScreen quiz={currentQuiz} userAnswers={userAnswers} score={score} onRetry={handleRetryQuiz} onBack={handleBackToModeSelection} />;
+            : <ExamResultsScreen quiz={currentQuiz} userAnswers={userAnswers} score={score} onRetry={handleRetryQuiz} onBack={handleBackToModeSelection} userName={userName} />;
         }
         return null;
       default:
