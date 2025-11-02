@@ -144,33 +144,33 @@ const App: React.FC = () => {
     if (session) return; // Don't save to localStorage if logged in
     const key = `progress_${userName}_${selectedLicense!.id}`;
     
-    // Create a new progress state to avoid direct mutation
     const newProgress = { ...userProgress };
     
-    // Get current progress for the subject, providing defaults for a robust structure
-    // This handles old data formats that might be missing new fields.
-    const existingSubjectProgress = newProgress[subjectId] || {};
-    const currentSubjectProgress = { 
-      lastScore: null, 
-      highScore: 0,
+    // Get existing progress or create a new one with defaults
+    const subjectProgress = newProgress[subjectId] || {
+      lastScore: null,
       lastScoreTimestamp: null,
+      highScore: 0, // Start with 0 if no record exists
       highScoreTimestamp: null,
-      ...existingSubjectProgress // Overwrite defaults with any existing saved values
     };
     
     const now = Date.now();
 
-    currentSubjectProgress.lastScore = newScore;
-    currentSubjectProgress.lastScoreTimestamp = now;
+    // Update last score info
+    subjectProgress.lastScore = newScore;
+    subjectProgress.lastScoreTimestamp = now;
+
+    // Use nullish coalescing to safely handle old data (null/undefined)
+    const oldHighScore = subjectProgress.highScore ?? 0;
 
     // Update high score if it's a new record
-    if (newScore >= currentSubjectProgress.highScore) {
-      currentSubjectProgress.highScore = newScore;
-      currentSubjectProgress.highScoreTimestamp = now;
+    if (newScore >= oldHighScore) {
+      subjectProgress.highScore = newScore;
+      subjectProgress.highScoreTimestamp = now;
     }
     
-    // Update the progress object with the new subject data
-    newProgress[subjectId] = currentSubjectProgress;
+    // Update the main progress object with the modified subject data
+    newProgress[subjectId] = subjectProgress;
     
     // Set the new state and save to localStorage
     setUserProgress(newProgress);
