@@ -144,10 +144,23 @@ const App: React.FC = () => {
     if (session) return; // Don't save to localStorage if logged in
     const key = `progress_${userName}_${selectedLicense!.id}`;
     const newProgress = { ...userProgress };
-    const currentSubjectProgress = newProgress[subjectId] || { lastScore: null, highScore: 0 };
+    const currentSubjectProgress = newProgress[subjectId] || { 
+      lastScore: null, 
+      highScore: 0,
+      lastScoreTimestamp: null,
+      highScoreTimestamp: null
+    };
     
+    const now = Date.now();
+
     currentSubjectProgress.lastScore = newScore;
-    currentSubjectProgress.highScore = Math.max(currentSubjectProgress.highScore, newScore);
+    currentSubjectProgress.lastScoreTimestamp = now;
+
+    // Also update high score if it's the first time or a new high score is achieved
+    if (newScore >= currentSubjectProgress.highScore) {
+      currentSubjectProgress.highScore = newScore;
+      currentSubjectProgress.highScoreTimestamp = now;
+    }
     
     newProgress[subjectId] = currentSubjectProgress;
     
@@ -331,7 +344,7 @@ const App: React.FC = () => {
       case 'results':
         if (currentQuiz) {
           return currentQuiz.id !== 'exam-quiz'
-            ? <ResultsScreen quiz={currentQuiz} userAnswers={userAnswers} score={score} onRetry={handleRetryQuiz} onBack={handleBackToSubjectSelection} />
+            ? <ResultsScreen quiz={currentQuiz} userAnswers={userAnswers} score={score} onRetry={handleRetryQuiz} onBack={handleBackToSubjectSelection} userName={userName} />
             : <ExamResultsScreen quiz={currentQuiz} userAnswers={userAnswers} score={score} onRetry={handleRetryQuiz} onBack={handleBackToModeSelection} userName={userName} />;
         }
         return null;

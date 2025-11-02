@@ -8,13 +8,25 @@ interface ResultsScreenProps {
   score: number;
   onRetry: () => void;
   onBack: () => void;
+  userName: string;
 }
 
-const ResultsScreen: React.FC<ResultsScreenProps> = ({ quiz, userAnswers, score, onRetry, onBack }) => {
+const ResultsScreen: React.FC<ResultsScreenProps> = ({ quiz, userAnswers, score, onRetry, onBack, userName }) => {
   const [filter, setFilter] = useState<'all' | 'incorrect'>('all');
+  const [completionDate] = useState(() => new Date());
   
   const totalQuestions = quiz.questions.length;
   const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+
+  const formattedDate = useMemo(() => {
+    return new Intl.DateTimeFormat('vi-VN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    }).format(completionDate);
+  }, [completionDate]);
 
   const filteredQuestions = useMemo(() => {
     if (filter === 'incorrect') {
@@ -27,9 +39,14 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ quiz, userAnswers, score,
     <div className="w-full max-w-4xl mx-auto p-4 animate-slide-in-right">
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 text-center mb-8">
             <TrophyIcon3D className="h-24 w-24 mx-auto text-yellow-400 dark:text-yellow-300 mb-4" />
-            <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">Hoàn thành!</h1>
-            <p className="text-xl text-slate-600 dark:text-slate-300 mb-6">Đây là kết quả ôn tập của anh/chị:</p>
-            <div className="bg-indigo-50 dark:bg-indigo-900/50 inline-block p-6 rounded-xl border border-indigo-200 dark:border-indigo-800">
+            <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">Kết quả Ôn tập</h1>
+
+            <div className="my-4 text-slate-600 dark:text-slate-300">
+                <p className="text-lg">Học viên: <span className="font-bold text-indigo-500 dark:text-indigo-400">{userName}</span></p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Hoàn thành lúc: {formattedDate}</p>
+            </div>
+
+            <div className="bg-indigo-50 dark:bg-indigo-900/50 inline-block p-6 rounded-xl border border-indigo-200 dark:border-indigo-800 mt-4">
                 <p className="text-5xl font-extrabold text-indigo-600 dark:text-indigo-300">
                     {score} / {totalQuestions}
                 </p>

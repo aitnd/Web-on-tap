@@ -27,7 +27,9 @@ export interface License {
 
 export interface UserProgress {
   lastScore: number | null;
+  lastScoreTimestamp: number | null;
   highScore: number;
+  highScoreTimestamp: number | null;
 }
 
 export type UserProgressData = Record<string, UserProgress>; // Key is subjectId

@@ -9,6 +9,16 @@ interface SubjectSelectionScreenProps {
   onBack: () => void;
 }
 
+const formatDate = (timestamp: number | null): string => {
+  if (!timestamp) return '';
+  const date = new Date(timestamp);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `(${day}/${month} ${hours}:${minutes})`;
+};
+
 const SubjectSelectionScreen: React.FC<SubjectSelectionScreenProps> = ({ subjects, progress, onSelect, onBack }) => {
   return (
     <div className="w-full max-w-2xl mx-auto p-4 animate-slide-in-right">
@@ -27,7 +37,6 @@ const SubjectSelectionScreen: React.FC<SubjectSelectionScreenProps> = ({ subject
       <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg">
         <div className="space-y-3">
           {subjects.map(subject => {
-            // FIX: The 'progress' prop was not being passed into the component. Added it to the function's destructured parameters.
             const subjectProgress = progress[subject.id];
             const hasProgress = subjectProgress && subjectProgress.lastScore !== null;
             
@@ -44,11 +53,15 @@ const SubjectSelectionScreen: React.FC<SubjectSelectionScreenProps> = ({ subject
                 <div className="flex items-center gap-4">
                   {hasProgress && (
                     <div className="text-right text-sm">
-                        <p className="text-slate-600 dark:text-slate-300">
-                            Lần cuối: <span className="font-semibold text-blue-600 dark:text-blue-400">{subjectProgress.lastScore}/{subject.questions.length}</span>
+                        <p className="text-slate-600 dark:text-slate-300 flex items-center justify-end">
+                            <span>Lần cuối:</span>
+                            <span className="font-semibold text-blue-600 dark:text-blue-400 ml-1">{subjectProgress.lastScore}/{subject.questions.length}</span>
+                            {subjectProgress.lastScoreTimestamp && <span className="ml-1.5 text-xs text-slate-400 dark:text-slate-500">{formatDate(subjectProgress.lastScoreTimestamp)}</span>}
                         </p>
-                        <p className="text-slate-500 dark:text-slate-400">
-                            Cao nhất: <span className="font-semibold text-green-600 dark:text-green-400">{subjectProgress.highScore}/{subject.questions.length}</span>
+                        <p className="text-slate-500 dark:text-slate-400 flex items-center justify-end mt-0.5">
+                            <span>Cao nhất:</span>
+                            <span className="font-semibold text-green-600 dark:text-green-400 ml-1">{subjectProgress.highScore}/{subject.questions.length}</span>
+                            {subjectProgress.highScoreTimestamp && <span className="ml-1.5 text-xs text-slate-400 dark:text-slate-500">{formatDate(subjectProgress.highScoreTimestamp)}</span>}
                         </p>
                     </div>
                   )}
