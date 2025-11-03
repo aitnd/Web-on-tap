@@ -48,17 +48,6 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ onStart, onLoginClick }) =>
             Đăng nhập
           </button>
         </div>
-        <div className="mt-8 text-sm text-left text-muted-foreground">
-            <div className="bg-background/50 p-3 rounded-lg">
-                <p className="font-semibold flex items-center gap-2">
-                    <InformationCircleIcon className="h-5 w-5"/>
-                    Phiên bản mới nhất: v3.1.1
-                </p>
-                <div className="mt-2 pl-2 border-l-2 border-border">
-                    <p>Tinh chỉnh theme "Tri Ân": đặt làm mặc định, thêm các icon và lời chúc đặc biệt cho ngày 20-11.</p>
-                </div>
-            </div>
-        </div>
       </div>
     </div>
   );

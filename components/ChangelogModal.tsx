@@ -31,6 +31,12 @@ const ChangelogModal: React.FC<ChangelogModalProps> = ({ onClose }) => {
         
         <div className="text-sm text-left text-muted-foreground max-h-[70vh] overflow-y-auto pr-2 space-y-4">
             <div>
+                <p className="font-semibold text-foreground"><strong>Phiên bản v3.1.3:</strong></p>
+                <ul className="list-disc list-inside mt-1 space-y-1">
+                    <li>Dọn dẹp giao diện: Loại bỏ phần thông tin cập nhật ở màn hình chào mừng để giao diện gọn gàng hơn.</li>
+                </ul>
+            </div>
+            <div>
                 <p className="font-semibold text-foreground"><strong>Phiên bản v3.1.2:</strong></p>
                 <ul className="list-disc list-inside mt-1 space-y-1">
                     <li>Cập nhật hình nền cho theme "Tri Ân" với hình ảnh lớp học, tạo không khí sư phạm gần gũi và thân thuộc hơn.</li>
