@@ -90,10 +90,10 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
           <div className="flex gap-4 items-center">
             <img src="https://i.postimg.cc/8PDn1wfM/favicon.png" alt="Avatar" className="w-20 h-[100px] border border-gray-300 object-contain p-1"/>
             <div className="text-sm">
-              <p>Số báo danh: <span className="font-bold">Hỗ trợ HV: 0977240848</span></p>
+              <p>Số báo danh:</p>
               <p>Ngày sinh:</p>
               <p className="mt-2">Họ tên: <span className="font-bold text-blue-700">{userName || 'Học viên'}</span></p>
-              <p>Địa chỉ: <span className="font-bold text-blue-700">{selectedLicense?.name || 'Máy trưởng hạng nhất - M1'}</span></p>
+              <p>Hạng bằng: <span className="font-bold text-blue-700">{selectedLicense?.name || 'Thuyền trưởng hạng ba - T3'}</span></p>
             </div>
           </div>
           <div className="flex items-start gap-4">
@@ -215,8 +215,8 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
         <div className="mt-4 bg-[#005a9c] text-white p-4 rounded-b-md flex items-center gap-4 text-xs">
             <img src="https://i.postimg.cc/8PDn1wfM/favicon.png" alt="Logo" className="h-16 w-16 object-contain"/>
             <div>
-            <p className="font-bold">1.CÔNG TY CỔ PHẦN TƯ VẤN VÀ GIÁO DỤC NINH BÌNH</p>
-            <p>2. Tư vấn, đào tạo, nâng hạng-bằng, chứng chỉ thuyền viên-phương tiện thủy nội địa- Địa chỉ: Đường Triệu Việt Vương</p>
+            <p className="font-bold">CÔNG TY CỔ PHẦN TƯ VẤN VÀ GIÁO DỤC NINH BÌNH</p>
+            <p>Địa chỉ: Đường Triệu Việt Vương, phường Hoa Lư, tỉnh Ninh Bình </p>
             </div>
         </div>
       </div>
