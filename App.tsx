@@ -228,7 +228,7 @@ const App: React.FC = () => {
       id: 'online-exam-quiz',
       title: `Thi Online hạng ${selectedLicense.name}`,
       questions: randomQuestions.map((q: Question) => ({ ...q, answers: shuffleArray(q.answers) })),
-      timeLimit: 60 * 60, // 60 minutes
+      timeLimit: 45 * 60, // 45 minutes
     };
     setCurrentQuiz(examQuiz);
     setUserAnswers({});

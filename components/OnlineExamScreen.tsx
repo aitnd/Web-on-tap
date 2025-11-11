@@ -99,7 +99,7 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
           <div className="flex items-start gap-4">
              <div className="bg-[#f0ad4e] text-black p-2 rounded-md text-sm w-48">
                 <p className="font-bold">Đang thi</p>
-                <p>Thời gian: 60 phút</p>
+                <p>Thời gian: 45 phút</p>
                 <p>Bù giờ: 0 phút</p>
                 <p>Còn lại: <span className="font-bold">{formatTime(timeLeft)}</span></p>
             </div>

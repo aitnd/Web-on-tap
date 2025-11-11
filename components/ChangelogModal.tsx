@@ -31,6 +31,12 @@ const ChangelogModal: React.FC<ChangelogModalProps> = ({ onClose }) => {
         
         <div className="text-sm text-left text-muted-foreground max-h-[70vh] overflow-y-auto pr-2 space-y-4">
             <div>
+                <p className="font-semibold text-foreground"><strong>Phiên bản v3.2.4:</strong></p>
+                <ul className="list-disc list-inside mt-1 space-y-1">
+                    <li>Điều chỉnh thời gian làm bài của chế độ "Thi Online" từ 60 phút xuống còn 45 phút để phù hợp hơn.</li>
+                </ul>
+            </div>
+            <div>
                 <p className="font-semibold text-foreground"><strong>Phiên bản v3.2.3:</strong></p>
                 <ul className="list-disc list-inside mt-1 space-y-1">
                     <li>Chỉnh sửa nội dung hiển thị trên màn hình "Thi Online" theo yêu cầu để khớp với thực tế.</li>
