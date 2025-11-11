@@ -6,7 +6,7 @@ import { useTheme } from '../contexts/ThemeContext';
 export const ClipboardListIcon3D: React.FC<React.SVGProps<SVGSVGElement>> = (props) => {
     const { theme } = useTheme();
     if (theme === 'tri-an') {
-        return <img src="https://i.postimg.cc/Qd9GZJmK/Gakuseisean-Ivista-2-Misc-Download-Database-256.png" alt="Online Exam Icon" {...props as any} />;
+        return <img src="https://i.postimg.cc/8PDn1wfM/favicon.png" alt="Online Exam Icon" {...props as any} />;
     }
     return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>

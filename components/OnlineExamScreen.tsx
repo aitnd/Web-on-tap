@@ -88,7 +88,7 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
       <div className="bg-white p-4">
         <div className="flex justify-between items-start pb-4 border-b border-gray-300">
           <div className="flex gap-4 items-center">
-            <img src="https://i.postimg.cc/Qd9GZJmK/Gakuseisean-Ivista-2-Misc-Download-Database-256.png" alt="Avatar" className="w-20 h-[100px] border border-gray-300 object-contain p-1"/>
+            <img src="https://i.postimg.cc/8PDn1wfM/favicon.png" alt="Avatar" className="w-20 h-[100px] border border-gray-300 object-contain p-1"/>
             <div className="text-sm">
               <p>Số báo danh: <span className="font-bold">Hỗ trợ HV: 0977240848</span></p>
               <p>Ngày sinh:</p>
@@ -213,7 +213,7 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
         </div>
 
         <div className="mt-4 bg-[#005a9c] text-white p-4 rounded-b-md flex items-center gap-4 text-xs">
-            <img src="https://i.postimg.cc/Qd9GZJmK/Gakuseisean-Ivista-2-Misc-Download-Database-256.png" alt="Logo" className="h-16 w-16 object-contain"/>
+            <img src="https://i.postimg.cc/8PDn1wfM/favicon.png" alt="Logo" className="h-16 w-16 object-contain"/>
             <div>
             <p className="font-bold">1.CÔNG TY CỔ PHẦN TƯ VẤN VÀ GIÁO DỤC NINH BÌNH</p>
             <p>2. Tư vấn, đào tạo, nâng hạng-bằng, chứng chỉ thuyền viên-phương tiện thủy nội địa- Địa chỉ: Đường Triệu Việt Vương</p>

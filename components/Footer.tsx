@@ -9,8 +9,8 @@ interface FooterProps {
 const Footer: React.FC<FooterProps> = ({ onVersionClick }) => {
   const { theme } = useTheme();
   const versionText = theme === 'tri-an' 
-    ? "Phiên bản v3.2.1 - Kính tặng Quý Thầy Cô!"
-    : "Phiên bản v3.2.1 - Chúc anh/chị ôn thi hiệu quả!";
+    ? "Phiên bản v3.2.2 - Kính tặng Quý Thầy Cô!"
+    : "Phiên bản v3.2.2 - Chúc anh/chị ôn thi hiệu quả!";
 
   return (
     <footer className="fixed bottom-0 left-0 right-0 z-40 flex h-14 w-full items-center justify-between border-t border-border bg-card/80 px-4 backdrop-blur-sm sm:px-6">
