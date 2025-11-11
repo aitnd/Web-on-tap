@@ -31,6 +31,19 @@ const ChangelogModal: React.FC<ChangelogModalProps> = ({ onClose }) => {
         
         <div className="text-sm text-left text-muted-foreground max-h-[70vh] overflow-y-auto pr-2 space-y-4">
             <div>
+                <p className="font-semibold text-foreground"><strong>Phiên bản v3.2.1:</strong></p>
+                <ul className="list-disc list-inside mt-1 space-y-1">
+                    <li>Cập nhật giao diện màn hình "Thi Online" để giống hơn với ảnh mô phỏng: chia lại lưới câu hỏi, đổi màu các lựa chọn và nút bấm, thay đổi thông tin chân trang.</li>
+                    <li>Thay đổi favicon của ứng dụng.</li>
+                </ul>
+            </div>
+            <div>
+                <p className="font-semibold text-foreground"><strong>Phiên bản v3.2.0:</strong></p>
+                <ul className="list-disc list-inside mt-1 space-y-1">
+                    <li>Thêm chức năng "Thi Online" với giao diện mô phỏng kỳ thi thực tế, giúp người dùng làm quen và giảm bỡ ngỡ.</li>
+                </ul>
+            </div>
+            <div>
                 <p className="font-semibold text-foreground"><strong>Phiên bản v3.1.3:</strong></p>
                 <ul className="list-disc list-inside mt-1 space-y-1">
                     <li>Dọn dẹp giao diện: Loại bỏ phần thông tin cập nhật ở màn hình chào mừng để giao diện gọn gàng hơn.</li>

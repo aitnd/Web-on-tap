@@ -52,6 +52,7 @@ export type AppState =
   | 'mode_selection'
   | 'subject_selection' // For Practice mode
   | 'in_quiz'
+  | 'in_online_exam'
   | 'results';
 
 export type UserAnswers = Record<string, string>;

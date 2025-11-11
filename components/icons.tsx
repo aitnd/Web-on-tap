@@ -3,6 +3,18 @@ import { useTheme } from '../contexts/ThemeContext';
 
 // --- NEW 3D ICONS ---
 
+export const ClipboardListIcon3D: React.FC<React.SVGProps<SVGSVGElement>> = (props) => {
+    const { theme } = useTheme();
+    if (theme === 'tri-an') {
+        return <img src="https://i.postimg.cc/Qd9GZJmK/Gakuseisean-Ivista-2-Misc-Download-Database-256.png" alt="Online Exam Icon" {...props as any} />;
+    }
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
+            <path fillRule="evenodd" d="M3.75 4.5a3 3 0 00-3 3v10.5a3 3 0 003 3h16.5a3 3 0 003-3V7.5a3 3 0 00-3-3H3.75zm.75 4.5a.75.75 0 01.75-.75h13.5a.75.75 0 010 1.5H5.25a.75.75 0 01-.75-.75zm0 3.75a.75.75 0 01.75-.75h6a.75.75 0 010 1.5h-6a.75.75 0 01-.75-.75zm0 2.25a.75.75 0 01.75-.75h3a.75.75 0 010 1.5h-3a.75.75 0 01-.75-.75z" clipRule="evenodd" />
+        </svg>
+    );
+};
+
 export const XMarkIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

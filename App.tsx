@@ -12,6 +12,7 @@ import QuizScreen from './components/QuizScreen';
 import ResultsScreen from './components/ResultsScreen';
 import ExamQuizScreen from './components/ExamQuizScreen';
 import ExamResultsScreen from './components/ExamResultsScreen';
+import OnlineExamScreen from './components/OnlineExamScreen';
 import Footer from './components/Footer';
 import LoginScreen from './components/LoginScreen';
 import Dashboard from './components/Dashboard';
@@ -218,10 +219,28 @@ const App: React.FC = () => {
       setAppState('in_quiz');
   }, [selectedLicense]);
 
-  const handleModeSelect = useCallback((mode: 'practice' | 'exam') => {
+  const startOnlineExam = useCallback(() => {
+    if (!selectedLicense) return;
+    const allQuestions = selectedLicense.subjects.flatMap(s => s.questions);
+    const randomQuestions = shuffleArray(allQuestions).slice(0, 30);
+    
+    const examQuiz: Quiz = {
+      id: 'online-exam-quiz',
+      title: `Thi Online hạng ${selectedLicense.name}`,
+      questions: randomQuestions.map((q: Question) => ({ ...q, answers: shuffleArray(q.answers) })),
+      timeLimit: 60 * 60, // 60 minutes
+    };
+    setCurrentQuiz(examQuiz);
+    setUserAnswers({});
+    setScore(0);
+    setAppState('in_online_exam');
+  }, [selectedLicense]);
+
+  const handleModeSelect = useCallback((mode: 'practice' | 'exam' | 'online_exam') => {
     if (mode === 'practice') setAppState('subject_selection');
-    else startNewExam();
-  }, [startNewExam]);
+    else if (mode === 'exam') startNewExam();
+    else if (mode === 'online_exam') startOnlineExam();
+  }, [startNewExam, startOnlineExam]);
   
   const handleSubjectSelect = useCallback((subject: Subject) => {
       const practiceQuiz: Quiz = {
@@ -243,7 +262,7 @@ const App: React.FC = () => {
     });
     setUserAnswers(finalAnswers);
     setScore(correctCount);
-    if (currentQuiz.id !== 'exam-quiz') saveProgress(currentQuiz.id, correctCount);
+    if (currentQuiz.id !== 'exam-quiz' && currentQuiz.id !== 'online-exam-quiz') saveProgress(currentQuiz.id, correctCount);
     setAppState('results');
   }, [currentQuiz, saveProgress]);
   
@@ -262,7 +281,7 @@ const App: React.FC = () => {
   }, []);
   
   const handleBackFromQuiz = useCallback(() => {
-    const isPracticeQuiz = currentQuiz && currentQuiz.id !== 'exam-quiz';
+    const isPracticeQuiz = currentQuiz && currentQuiz.id !== 'exam-quiz' && currentQuiz.id !== 'online-exam-quiz';
     if (isPracticeQuiz) handleBackToSubjectSelection();
     else handleBackToModeSelection();
   }, [currentQuiz, handleBackToSubjectSelection, handleBackToModeSelection]);
@@ -272,8 +291,9 @@ const App: React.FC = () => {
     setUserAnswers({});
     setScore(0);
     if (currentQuiz.id === 'exam-quiz') startNewExam();
+    else if (currentQuiz.id === 'online-exam-quiz') startOnlineExam();
     else setAppState('in_quiz');
-  }, [currentQuiz, startNewExam]);
+  }, [currentQuiz, startNewExam, startOnlineExam]);
 
   const handleBackToWelcome = useCallback(() => {
     setSelectedLicense(null);
@@ -363,11 +383,23 @@ const App: React.FC = () => {
             : <QuizScreen quiz={currentQuiz} onFinish={handleQuizFinish} onBack={handleBackFromQuiz} />;
         }
         return null;
+       case 'in_online_exam':
+        if (currentQuiz) {
+          return <OnlineExamScreen 
+            quiz={currentQuiz} 
+            onFinish={handleQuizFinish} 
+            onBack={handleBackToModeSelection}
+            userName={userName}
+            selectedLicense={selectedLicense}
+          />
+        }
+        return null;
       case 'results':
         if (currentQuiz) {
-          return currentQuiz.id !== 'exam-quiz'
-            ? <ResultsScreen quiz={currentQuiz} userAnswers={userAnswers} score={score} onRetry={handleRetryQuiz} onBack={handleBackToSubjectSelection} userName={userName} />
-            : <ExamResultsScreen quiz={currentQuiz} userAnswers={userAnswers} score={score} onRetry={handleRetryQuiz} onBack={handleBackToModeSelection} userName={userName} />;
+          const isExam = currentQuiz.id === 'exam-quiz' || currentQuiz.id === 'online-exam-quiz';
+          return isExam
+            ? <ExamResultsScreen quiz={currentQuiz} userAnswers={userAnswers} score={score} onRetry={handleRetryQuiz} onBack={handleBackToModeSelection} userName={userName} />
+            : <ResultsScreen quiz={currentQuiz} userAnswers={userAnswers} score={score} onRetry={handleRetryQuiz} onBack={handleBackToSubjectSelection} userName={userName} />;
         }
         return null;
       default:
@@ -378,7 +410,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col items-center text-foreground p-4 pb-20 transition-colors duration-500">
       {session && userProfile && <Header userProfile={userProfile} onLogout={handleLogout} />}
-      <main className="w-full max-w-4xl mx-auto flex-grow flex flex-col justify-center">
+      <main className="w-full max-w-7xl mx-auto flex-grow flex flex-col justify-center">
         {renderContent()}
       </main>
       {isChangelogModalOpen && <ChangelogModal onClose={() => setIsChangelogModalOpen(false)} />}
