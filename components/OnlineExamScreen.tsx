@@ -15,19 +15,20 @@ const formatTime = (seconds: number): string => {
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
 };
 
-const RadioButton = ({ id, name, checked, onChange }: { id: string, name: string, checked: boolean, onChange: () => void }) => (
-    <div className="relative flex items-center justify-center w-5 h-5 flex-shrink-0">
-        <input 
-            type="radio" 
-            id={id}
-            name={name}
-            checked={checked}
-            onChange={onChange}
-            className="appearance-none h-4 w-4 border-2 border-gray-400 rounded-full cursor-pointer"
-        />
-        {checked && <div className="absolute h-2 w-2 bg-blue-600 rounded-full"></div>}
-    </div>
-);
+// Loại bỏ component RadioButton cho khu vực bảng
+// const RadioButton = ({ id, name, checked, onChange }: { id: string, name: string, checked: boolean, onChange: () => void }) => (
+//     <div className="relative flex items-center justify-center w-5 h-5 flex-shrink-0">
+//         <input 
+//             type="radio" 
+//             id={id}
+//             name={name}
+//             checked={checked}
+//             onChange={onChange}
+//             className="appearance-none h-4 w-4 border-2 border-gray-400 rounded-full cursor-pointer"
+//         />
+//         {checked && <div className="absolute h-2 w-2 bg-blue-600 rounded-full"></div>}
+//     </div>
+// );
 
 const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onBack, userName, selectedLicense }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -128,19 +129,17 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
                         {currentQuestion.text}
                     </p>
 
-                    {/* START: LOGIC HIỂN THỊ ẢNH ĐÃ ĐƯỢC CHÈN */}
+                    {/* LOGIC HIỂN THỊ ẢNH ĐÃ ĐƯỢC GIỮ LẠI */}
                     {currentQuestion.image && (
                         <div className="mt-4 mb-4 flex justify-center">
                             <img
-                                // currentQuestion.image là thuộc tính chứa URL ảnh
-                                src={currentQuestion.image} 
+                                src={currentQuestion.image}
                                 alt="Hình ảnh minh họa"
-                                // Các class CSS bạn có thể tùy chỉnh nếu cần thiết
                                 className="max-w-full h-auto rounded-lg shadow-md max-h-80 border border-gray-300"
                             />
                         </div>
                     )}
-                    {/* END: LOGIC HIỂN THỊ ẢNH ĐÃ ĐƯỢC CHÈN */}
+                    {/* END LOGIC HIỂN THỊ ẢNH */}
 
                     <div className="space-y-4">
                         {currentQuestion.answers.map((answer, index) => {
@@ -167,7 +166,8 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
                     </div>
                 </div>
 
-                <div className="mt-4 flex justify-between">
+                {/* KHU VỰC NÚT ĐIỀU KHIỂN ĐÃ BỊ BỎ (Câu trước/Câu tiếp) */}
+                {/* <div className="mt-4 flex justify-between">
                     <button
                         onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
                         disabled={currentQuestionIndex === 0}
@@ -182,7 +182,7 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
                     >
                         Câu tiếp
                     </button>
-                </div>
+                </div> */}
             </div>
           )}
 
@@ -250,12 +250,12 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
                                 </td>
                             {limitedAnswers.map(a => (
                                 <td key={a.id} className="border border-gray-400 p-1 text-center">
-                                   <RadioButton 
-                                    id={`grid_q_${q.id}_${a.id}`}
-                                    name={`grid_q_${q.id}`} 
-                                    checked={userAnswers[q.id] === a.id} 
-                                    onChange={() => handleAnswerSelect(q.id, a.id)} 
-                                  />
+                                   {/* ĐÃ BỎ RADIO BUTTON: Chỉ hiển thị ký hiệu đã chọn */}
+                                   {userAnswers[q.id] === a.id ? (
+                                       <span className="text-green-600 font-bold">✔</span>
+                                   ) : (
+                                       <span className="text-gray-400">-</span>
+                                   )}
                                 </td>
                             ))}
                             </tr>
