@@ -15,20 +15,7 @@ const formatTime = (seconds: number): string => {
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
 };
 
-// Đã loại bỏ component RadioButton cho khu vực bảng
-// const RadioButton = ({ id, name, checked, onChange }: { id: string, name: string, checked: boolean, onChange: () => void }) => (
-//     <div className="relative flex items-center justify-center w-5 h-5 flex-shrink-0">
-//         <input 
-//             type="radio" 
-//             id={id}
-//             name={name}
-//             checked={checked}
-//             onChange={onChange}
-//             className="appearance-none h-4 w-4 border-2 border-gray-400 rounded-full cursor-pointer"
-//         />
-//         {checked && <div className="absolute h-2 w-2 bg-blue-600 rounded-full"></div>}
-//     </div>
-// );
+// Đã loại bỏ component RadioButton
 
 const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onBack, userName, selectedLicense }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -129,7 +116,7 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
                         {currentQuestion.text}
                     </p>
 
-                    {/* LOGIC HIỂN THỊ ẢNH ĐÃ ĐƯỢC GIỮ LẠI */}
+                    {/* LOGIC HIỂN THỊ ẢNH ĐÃ ĐƯỢC CHÈN VÀ GIỮ LẠI */}
                     {currentQuestion.image && (
                         <div className="mt-4 mb-4 flex justify-center">
                             <img
@@ -166,7 +153,7 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
                     </div>
                 </div>
 
-                {/* Đã loại bỏ khu vực nút điều khiển Câu trước/Câu tiếp */}
+                {/* Khu vực nút điều khiển Câu trước/Câu tiếp đã bị loại bỏ theo yêu cầu */}
             </div>
           )}
 
@@ -232,7 +219,7 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
                                 >
                                     {index + 1}
                                 </td>
-                            {limitedAnswers.map((a, idx) => (
+                            {limitedAnswers.map(a => (
                                 <td key={a.id} className="border border-gray-400 p-1 text-center">
                                    {/* Chỉ hiển thị ký hiệu đã chọn */}
                                    {userAnswers[q.id] === a.id ? (
