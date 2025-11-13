@@ -15,7 +15,7 @@ const formatTime = (seconds: number): string => {
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
 };
 
-// Loại bỏ component RadioButton cho khu vực bảng
+// Đã loại bỏ component RadioButton cho khu vực bảng
 // const RadioButton = ({ id, name, checked, onChange }: { id: string, name: string, checked: boolean, onChange: () => void }) => (
 //     <div className="relative flex items-center justify-center w-5 h-5 flex-shrink-0">
 //         <input 
@@ -166,23 +166,7 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
                     </div>
                 </div>
 
-                {/* KHU VỰC NÚT ĐIỀU KHIỂN ĐÃ BỊ BỎ (Câu trước/Câu tiếp) */}
-                {/* <div className="mt-4 flex justify-between">
-                    <button
-                        onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
-                        disabled={currentQuestionIndex === 0}
-                        className="bg-secondary text-secondary-foreground font-bold py-3 px-8 rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
-                    >
-                        Câu trước
-                    </button>
-                    <button
-                        onClick={() => setCurrentQuestionIndex(prev => Math.min(quiz.questions.length - 1, prev + 1))}
-                        disabled={currentQuestionIndex === quiz.questions.length - 1}
-                        className="bg-primary text-primary-foreground font-bold py-3 px-8 rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
-                    >
-                        Câu tiếp
-                    </button>
-                </div> */}
+                {/* Đã loại bỏ khu vực nút điều khiển Câu trước/Câu tiếp */}
             </div>
           )}
 
@@ -248,14 +232,20 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
                                 >
                                     {index + 1}
                                 </td>
-                            {limitedAnswers.map(a => (
+                            {limitedAnswers.map((a, idx) => (
                                 <td key={a.id} className="border border-gray-400 p-1 text-center">
-                                   {/* ĐÃ BỎ RADIO BUTTON: Chỉ hiển thị ký hiệu đã chọn */}
+                                   {/* Chỉ hiển thị ký hiệu đã chọn */}
                                    {userAnswers[q.id] === a.id ? (
                                        <span className="text-green-600 font-bold">✔</span>
                                    ) : (
                                        <span className="text-gray-400">-</span>
                                    )}
+                                </td>
+                            ))}
+                            {/* Đảm bảo bảng có đủ 4 cột nếu câu hỏi chỉ có 2 hoặc 3 đáp án */}
+                            {Array(4 - limitedAnswers.length).fill(0).map((_, i) => (
+                                <td key={`empty-${q.id}-${i}`} className="border border-gray-400 p-1 text-center text-gray-400">
+                                    -
                                 </td>
                             ))}
                             </tr>
