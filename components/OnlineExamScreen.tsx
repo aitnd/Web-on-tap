@@ -32,164 +32,221 @@ const RadioButton = ({ id, name, checked, onChange }: { id: string, name: string
 const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onBack, userName, selectedLicense }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<UserAnswers>({});
-  const [timeLeft, setTimeLeft] = useState(quiz.timeLimit ?? 3600);
-
+  const [timeLeft, setTimeLeft] = useState(quiz.timeLimit);
+  const [isFinishing, setIsFinishing] = useState(false); // State for finishing process
+  
   const currentQuestion = useMemo(() => quiz.questions[currentQuestionIndex], [quiz.questions, currentQuestionIndex]);
 
+  // Use a ref to hold the latest userAnswers for callbacks,
+  // preventing stale state issues in closures.
   const latestAnswers = useRef(userAnswers);
   useEffect(() => {
     latestAnswers.current = userAnswers;
   }, [userAnswers]);
 
-  const handleBackWithConfirm = () => {
-    if (window.confirm('Anh/chị có chắc chắn muốn thoát khỏi bài thi không? Mọi tiến trình sẽ bị mất.')) {
-        onBack();
-    }
-  };
-
   const handleFinishQuiz = useCallback(() => {
-    const finalAnswers = latestAnswers.current;
-    const unansweredCount = quiz.questions.length - Object.keys(finalAnswers).length;
-    const confirmationMessage = unansweredCount > 0 
-        ? `Anh/chị vẫn còn ${unansweredCount} câu chưa trả lời. Anh/chị có chắc chắn muốn nộp bài không?`
-        : 'Anh/chị đã hoàn thành tất cả các câu hỏi. Anh/chị có muốn nộp bài không?';
-  
-    if (window.confirm(confirmationMessage)) {
-        onFinish(finalAnswers);
-    }
-  }, [quiz.questions.length, onFinish]);
-
-  const stableOnFinish = useRef(onFinish);
-  useEffect(() => {
-      stableOnFinish.current = onFinish;
+    setIsFinishing(true);
+    // Introduce a small delay to ensure the UI updates/state is stable
+    setTimeout(() => {
+        onFinish(latestAnswers.current);
+    }, 100);
   }, [onFinish]);
   
+  // Timer effect
   useEffect(() => {
-    const intervalId = setInterval(() => {
-        setTimeLeft(t => (t > 0 ? t - 1 : 0));
+    if (timeLeft <= 0) {
+      handleFinishQuiz();
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft(prevTime => prevTime - 1);
     }, 1000);
-    return () => clearInterval(intervalId);
+
+    return () => clearInterval(timer);
+  }, [timeLeft, handleFinishQuiz]);
+
+  const handleAnswerSelect = useCallback((questionId: number, answerId: number) => {
+    setUserAnswers(prevAnswers => ({
+      ...prevAnswers,
+      [questionId]: answerId,
+    }));
   }, []);
 
-  useEffect(() => {
-    if (timeLeft === 0) {
-      alert('Đã hết giờ làm bài! Hệ thống sẽ tự động nộp bài của anh/chị.');
-      stableOnFinish.current(latestAnswers.current);
-    }
-  }, [timeLeft]);
+  const handleQuestionJump = useCallback((index: number) => {
+    setCurrentQuestionIndex(index);
+  }, []);
 
-  const handleAnswerSelect = (questionId: string, answerId: string) => {
-    setUserAnswers(prev => ({ ...prev, [questionId]: answerId }));
-  };
+  const answeredCount = useMemo(() => Object.keys(userAnswers).length, [userAnswers]);
+
+  if (isFinishing) {
+    return (
+        <div className="flex justify-center items-center h-screen bg-gray-100 dark:bg-gray-900">
+            <div className="text-center p-8 bg-white dark:bg-gray-800 rounded-lg shadow-xl">
+                <p className="text-2xl font-semibold text-[#337ab7] dark:text-blue-400">Đang nộp bài...</p>
+                <div className="mt-4 border-4 border-t-4 border-blue-200 rounded-full w-12 h-12 animate-spin mx-auto"></div>
+            </div>
+        </div>
+    );
+  }
 
   return (
-    <div className="w-full max-w-7xl mx-auto font-sans text-black shadow-lg animate-slide-in-right rounded-md">
-      <div className="h-3 bg-yellow-700 rounded-t-md border-b-2 border-yellow-900"></div>
-      <div className="bg-white p-4">
-        <div className="flex justify-between items-start pb-4 border-b border-gray-300">
-          <div className="flex gap-4 items-center">
-            <img src="https://i.postimg.cc/8PDn1wfM/favicon.png" alt="Avatar" className="w-20 h-[100px] border border-gray-300 object-contain p-1"/>
-            <div className="text-sm">
-              <p>Số báo danh:</p>
-              <p>Ngày sinh:</p>
-              <p className="mt-2">Họ tên: <span className="font-bold text-blue-700">{userName || 'Học viên'}</span></p>
-              <p>Hạng bằng: <span className="font-bold text-blue-700">{selectedLicense?.name || 'Thuyền trưởng hạng ba - T3'}</span></p>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col items-center p-4">
+      <div className="w-full max-w-6xl mx-auto shadow-lg rounded-lg overflow-hidden bg-white dark:bg-gray-800">
+        <div className="bg-[#337ab7] text-white p-4 flex justify-between items-center rounded-t-md">
+            <button 
+                onClick={onBack} 
+                className="bg-white text-[#337ab7] font-semibold py-1 px-4 rounded-md hover:bg-gray-200 transition-colors"
+            >
+                Quay lại
+            </button>
+            <div className="text-center">
+                <h1 className="text-2xl font-bold">Thi Trực Tuyến</h1>
+                <p className="text-sm">{selectedLicense?.name} - {quiz.title}</p>
             </div>
-          </div>
-          <div className="flex items-start gap-4">
-             <div className="bg-[#f0ad4e] text-black p-2 rounded-md text-sm w-48">
-                <p className="font-bold">Đang thi</p>
-                <p>Thời gian: 45 phút</p>
-                <p>Bù giờ: 0 phút</p>
-                <p>Còn lại: <span className="font-bold">{formatTime(timeLeft)}</span></p>
+            <div className="flex items-center space-x-4">
+                <div className="text-sm font-semibold">
+                    <p>Thí sinh: {userName}</p>
+                </div>
+                <div className="flex items-center space-x-2 bg-white text-[#337ab7] px-3 py-1 rounded-md font-bold text-lg">
+                    <span>⏳</span>
+                    <span>{formatTime(timeLeft)}</span>
+                </div>
             </div>
-             <button onClick={handleBackWithConfirm} className="text-sm text-gray-600 hover:text-red-500 font-semibold">Thoát</button>
-          </div>
         </div>
 
-        <div className="flex mt-4 gap-4">
-          <div className="w-[60%] border border-gray-400 rounded-md p-4 flex flex-col justify-between min-h-[500px]">
-            <div>
-              <p className="font-bold mb-4 border-b border-dashed border-gray-400 pb-2">Nội dung câu hỏi</p>
-              <p className="font-bold text-red-600 mb-2">Câu :{currentQuestionIndex + 1}</p>
-              <p className="mb-4 font-semibold">{currentQuestion.text}</p>
-              <div className="space-y-4">
-                {currentQuestion.answers.map((answer, index) => (
-                  <label key={answer.id} htmlFor={`q_main_${answer.id}`} className="flex items-center cursor-pointer">
-                    <RadioButton 
-                      id={`q_main_${answer.id}`}
-                      name={`q_main_${currentQuestion.id}`}
-                      checked={userAnswers[currentQuestion.id] === answer.id}
-                      onChange={() => handleAnswerSelect(currentQuestion.id, answer.id)}
-                    />
-                    <span className="ml-3 flex">
-                      <span className="font-bold mr-1 text-gray-700">{String.fromCharCode(97 + index)}.</span> 
-                      <p>{answer.text}</p>
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-            <div className="flex justify-center gap-4 mt-8">
-               <button onClick={() => setCurrentQuestionIndex(p => Math.max(0, p - 1))} disabled={currentQuestionIndex === 0} className="bg-[#f0ad4e] text-black px-4 py-2 rounded-md border border-gray-400 flex items-center font-semibold hover:bg-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
-                Trở lại
-              </button>
-              <button onClick={() => setCurrentQuestionIndex(p => Math.min(quiz.questions.length - 1, p + 1))} disabled={currentQuestionIndex === quiz.questions.length - 1} className="bg-[#f0ad4e] text-black px-4 py-2 rounded-md border border-gray-400 flex items-center font-semibold hover:bg-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                Tiếp tục
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
-              </button>
-            </div>
-          </div>
+        <div className="p-4 grid grid-cols-12 gap-4">
+          
+          {/* Main Question Area */}
+          {currentQuestion && (
+            <div className="col-span-12 lg:col-span-8">
+                <div className="p-4 bg-white rounded-md shadow-md">
+                    <h2 className="text-xl font-bold text-[#337ab7] mb-2 border-b-2 border-[#337ab7] pb-2">
+                        Câu hỏi {currentQuestionIndex + 1}/{quiz.questions.length}
+                    </h2>
+                    <p className="text-lg mb-4 text-gray-800 font-semibold leading-relaxed">
+                        {currentQuestion.text}
+                    </p>
 
-          <div className="w-[40%]">
-            <div className="flex gap-2">
-              <table className="w-1/2 border-collapse text-xs">
-                <thead>
-                  <tr className="bg-[#f0ad4e]">
-                    <th className="border border-gray-400 p-1">Câu</th>
-                    <th className="border border-gray-400 p-1">a</th>
-                    <th className="border border-gray-400 p-1">b</th>
-                    <th className="border border-gray-400 p-1">c</th>
-                    <th className="border border-gray-400 p-1">d</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {quiz.questions.slice(0, 15).map((q, index) => (
-                    <tr key={q.id} className={currentQuestionIndex === index ? 'bg-cyan-200' : ''}>
-                      <td className={`border border-gray-400 p-1 font-bold text-center cursor-pointer ${currentQuestionIndex === index ? 'text-black' : 'text-gray-500'}`} onClick={() => setCurrentQuestionIndex(index)}>{index + 1}</td>
-                      {q.answers.slice(0, 4).map((a) => (
-                        <td key={a.id} className="border border-gray-400 p-1 text-center">
-                           <RadioButton 
-                            id={`grid_q_${q.id}_${a.id}`}
-                            name={`grid_q_${q.id}`} 
-                            checked={userAnswers[q.id] === a.id} 
-                            onChange={() => handleAnswerSelect(q.id, a.id)} 
-                          />
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div className="w-1/2">
-                <table className="w-full border-collapse text-xs">
+                    {/* START: LOGIC HIỂN THỊ ẢNH ĐÃ ĐƯỢC THÊM */}
+                    {currentQuestion.image && (
+                        <div className="mt-4 mb-4 flex justify-center">
+                            <img
+                                src={currentQuestion.image}
+                                alt="Hình ảnh minh họa"
+                                className="max-w-full h-auto rounded-lg shadow-md max-h-80 border border-gray-300"
+                            />
+                        </div>
+                    )}
+                    {/* END: LOGIC HIỂN THỊ ẢNH ĐÃ ĐƯỢC THÊM */}
+
+                    <div className="space-y-4">
+                        {currentQuestion.answers.map((answer, index) => {
+                            const isSelected = userAnswers[currentQuestion.id] === answer.id;
+                            
+                            let buttonClass = "flex items-start p-3 rounded-lg border-2 transition-all duration-200 text-left text-gray-800 hover:bg-gray-100";
+                            if (isSelected) {
+                                buttonClass = "flex items-start p-3 rounded-lg border-2 border-blue-500 bg-blue-50 text-blue-700 font-semibold shadow-inner transition-all duration-200 text-left";
+                            } else {
+                                buttonClass += " border-gray-200";
+                            }
+
+                            return (
+                                <button
+                                    key={answer.id}
+                                    onClick={() => handleAnswerSelect(currentQuestion.id, answer.id)}
+                                    className={buttonClass}
+                                >
+                                    <span className="font-bold mr-3 min-w-[20px] text-center">{String.fromCharCode(65 + index)}.</span>
+                                    <span className="flex-1">{answer.text}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                <div className="mt-4 flex justify-between">
+                    <button
+                        onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
+                        disabled={currentQuestionIndex === 0}
+                        className="bg-secondary text-secondary-foreground font-bold py-3 px-8 rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    >
+                        Câu trước
+                    </button>
+                    <button
+                        onClick={() => setCurrentQuestionIndex(prev => Math.min(quiz.questions.length - 1, prev + 1))}
+                        disabled={currentQuestionIndex === quiz.questions.length - 1}
+                        className="bg-primary text-primary-foreground font-bold py-3 px-8 rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    >
+                        Câu tiếp
+                    </button>
+                </div>
+            </div>
+          )}
+
+          {/* Question Navigator and Grid */}
+          <div className="col-span-12 lg:col-span-4">
+            <div className="sticky top-4">
+              <div className="p-4 bg-white rounded-md shadow-md mb-4">
+                  <h3 className="text-xl font-bold text-[#337ab7] mb-3 border-b-2 border-[#337ab7] pb-2">
+                      Tổng quan bài thi
+                  </h3>
+                  <p className="mb-3 text-gray-700">Đã trả lời: <span className="font-bold text-blue-600">{answeredCount}</span>/{quiz.questions.length}</p>
+                  <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2">
+                      {quiz.questions.map((q, index) => {
+                          const isAnswered = !!userAnswers[q.id];
+                          const isActive = currentQuestionIndex === index;
+                          
+                          let className = "py-2 text-sm rounded-md font-semibold transition-colors duration-200";
+                          if (isActive) {
+                              className += " bg-[#337ab7] text-white shadow-lg border-2 border-blue-700";
+                          } else if (isAnswered) {
+                              className += " bg-green-500 text-white hover:bg-green-600";
+                          } else {
+                              className += " bg-gray-200 text-gray-700 hover:bg-gray-300";
+                          }
+
+                          return (
+                              <button
+                                  key={q.id}
+                                  onClick={() => handleQuestionJump(index)}
+                                  className={className}
+                              >
+                                  {index + 1}
+                              </button>
+                          );
+                      })}
+                  </div>
+              </div>
+              
+              <div className="p-4 bg-white rounded-md shadow-md">
+                <h3 className="text-xl font-bold text-[#337ab7] mb-3 border-b-2 border-[#337ab7] pb-2">
+                    Bảng trả lời
+                </h3>
+                <table className="min-w-full border-collapse border border-gray-400">
                   <thead>
-                    <tr className="bg-[#f0ad4e]">
-                      <th className="border border-gray-400 p-1">Câu</th>
-                      <th className="border border-gray-400 p-1">a</th>
-                      <th className="border border-gray-400 p-1">b</th>
-                      <th className="border border-gray-400 p-1">c</th>
-                      <th className="border border-gray-400 p-1">d</th>
+                    <tr>
+                      <th className="border border-gray-400 p-2 bg-gray-200 text-sm font-semibold text-gray-700">Câu</th>
+                      <th className="border border-gray-400 p-2 bg-gray-200 text-sm font-semibold text-gray-700">A</th>
+                      <th className="border border-gray-400 p-2 bg-gray-200 text-sm font-semibold text-gray-700">B</th>
+                      <th className="border border-gray-400 p-2 bg-gray-200 text-sm font-semibold text-gray-700">C</th>
+                      <th className="border border-gray-400 p-2 bg-gray-200 text-sm font-semibold text-gray-700">D</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {quiz.questions.slice(15, 30).map((q, index) => {
-                        const realIndex = index + 15;
+                    {quiz.questions.map((q, index) => {
+                        // Chỉ hiển thị tối đa 4 đáp án trong bảng (A, B, C, D)
+                        const limitedAnswers = q.answers.slice(0, 4);
+                        
                         return (
-                            <tr key={q.id} className={currentQuestionIndex === realIndex ? 'bg-cyan-200' : ''}>
-                            <td className={`border border-gray-400 p-1 font-bold text-center cursor-pointer ${currentQuestionIndex === realIndex ? 'text-black' : 'text-gray-500'}`} onClick={() => setCurrentQuestionIndex(realIndex)}>{realIndex + 1}</td>
-                            {q.answers.slice(0,4).map(a => (
+                            <tr key={q.id} className={currentQuestionIndex === index ? "bg-blue-100" : "hover:bg-gray-50"}>
+                                <td 
+                                    className="border border-gray-400 p-1 text-center font-bold cursor-pointer"
+                                    onClick={() => handleQuestionJump(index)}
+                                >
+                                    {index + 1}
+                                </td>
+                            {limitedAnswers.map(a => (
                                 <td key={a.id} className="border border-gray-400 p-1 text-center">
                                    <RadioButton 
                                     id={`grid_q_${q.id}_${a.id}`}
@@ -217,6 +274,7 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
             <div>
             <p className="font-bold">CÔNG TY CỔ PHẦN TƯ VẤN VÀ GIÁO DỤC NINH BÌNH</p>
             <p>Địa chỉ: Đường Triệu Việt Vương, phường Hoa Lư, tỉnh Ninh Bình </p>
+            <p>Hotline: 0989.123.456 - Email: info@ninhbinhedu.vn</p>
             </div>
         </div>
       </div>
