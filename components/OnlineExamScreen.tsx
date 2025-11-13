@@ -128,17 +128,19 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
                         {currentQuestion.text}
                     </p>
 
-                    {/* START: LOGIC HIỂN THỊ ẢNH ĐÃ ĐƯỢC THÊM */}
+                    {/* START: LOGIC HIỂN THỊ ẢNH ĐÃ ĐƯỢC CHÈN */}
                     {currentQuestion.image && (
                         <div className="mt-4 mb-4 flex justify-center">
                             <img
-                                src={currentQuestion.image}
+                                // currentQuestion.image là thuộc tính chứa URL ảnh
+                                src={currentQuestion.image} 
                                 alt="Hình ảnh minh họa"
+                                // Các class CSS bạn có thể tùy chỉnh nếu cần thiết
                                 className="max-w-full h-auto rounded-lg shadow-md max-h-80 border border-gray-300"
                             />
                         </div>
                     )}
-                    {/* END: LOGIC HIỂN THỊ ẢNH ĐÃ ĐƯỢC THÊM */}
+                    {/* END: LOGIC HIỂN THỊ ẢNH ĐÃ ĐƯỢC CHÈN */}
 
                     <div className="space-y-4">
                         {currentQuestion.answers.map((answer, index) => {
