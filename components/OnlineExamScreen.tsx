@@ -241,7 +241,7 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
             <div>
             <p className="font-bold">CÔNG TY CỔ PHẦN TƯ VẤN VÀ GIÁO DỤC NINH BÌNH</p>
             <p>Địa chỉ: Đường Triệu Việt Vương, phường Hoa Lư, tỉnh Ninh Bình </p>
-            <p>Hotline: 0989.123.456 - Email: info@ninhbinhedu.vn</p>
+            <p>Hotline: 022.96.282.969 </p>
             </div>
         </div>
       </div>
