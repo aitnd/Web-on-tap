@@ -15,7 +15,20 @@ const formatTime = (seconds: number): string => {
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
 };
 
-// Đã loại bỏ component RadioButton
+// Khôi phục component RadioButton để sử dụng trong bảng trả lời
+const RadioButton = ({ id, name, checked, onChange }: { id: string, name: string, checked: boolean, onChange: () => void }) => (
+    <div className="relative flex items-center justify-center w-5 h-5 flex-shrink-0 mx-auto">
+        <input 
+            type="radio" 
+            id={id}
+            name={name}
+            checked={checked}
+            onChange={onChange}
+            className="appearance-none h-4 w-4 border-2 border-gray-400 rounded-full cursor-pointer"
+        />
+        {checked && <div className="absolute h-2 w-2 bg-blue-600 rounded-full"></div>}
+    </div>
+);
 
 const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onBack, userName, selectedLicense }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -90,7 +103,7 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
             </button>
             <div className="text-center">
                 <h1 className="text-2xl font-bold">Thi Trực Tuyến</h1>
-                <p className="text-sm">{selectedLicense?.name} - {quiz.title}</p>
+                <p className="text-sm">{selectedLicense?.name}</p>
             </div>
             <div className="flex items-center space-x-4">
                 <div className="text-sm font-semibold">
@@ -105,7 +118,7 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
 
         <div className="p-4 grid grid-cols-12 gap-4">
           
-          {/* Main Question Area */}
+          {/* Question Display Area (Read-only, now showing answers) */}
           {currentQuestion && (
             <div className="col-span-12 lg:col-span-8">
                 <div className="p-4 bg-white rounded-md shadow-md">
@@ -116,7 +129,7 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
                         {currentQuestion.text}
                     </p>
 
-                    {/* LOGIC HIỂN THỊ ẢNH ĐÃ ĐƯỢC CHÈN VÀ GIỮ LẠI */}
+                    {/* LOGIC HIỂN THỊ ẢNH ĐÃ ĐƯỢC GIỮ LẠI */}
                     {currentQuestion.image && (
                         <div className="mt-4 mb-4 flex justify-center">
                             <img
@@ -128,70 +141,42 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
                     )}
                     {/* END LOGIC HIỂN THỊ ẢNH */}
 
-                    <div className="space-y-4">
+                    {/* KHÔI PHỤC VÀ CHUYỂN LOGIC HIỂN THỊ ĐÁP ÁN THÀNH READ-ONLY */}
+                    <div className="space-y-4 mt-6">
                         {currentQuestion.answers.map((answer, index) => {
                             const isSelected = userAnswers[currentQuestion.id] === answer.id;
                             
-                            let buttonClass = "flex items-start p-3 rounded-lg border-2 transition-all duration-200 text-left text-gray-800 hover:bg-gray-100";
+                            // Sử dụng div thay vì button và bỏ các hiệu ứng hover/cursor
+                            let divClass = "flex items-start p-3 rounded-lg border-2 transition-all duration-200 text-left text-gray-800";
                             if (isSelected) {
-                                buttonClass = "flex items-start p-3 rounded-lg border-2 border-blue-500 bg-blue-50 text-blue-700 font-semibold shadow-inner transition-all duration-200 text-left";
+                                // Giữ lại highlight cho đáp án đã chọn
+                                divClass = "flex items-start p-3 rounded-lg border-2 border-blue-500 bg-blue-50 text-blue-700 font-semibold shadow-inner transition-all duration-200 text-left";
                             } else {
-                                buttonClass += " border-gray-200";
+                                divClass += " border-gray-200";
                             }
 
                             return (
-                                <button
+                                <div
                                     key={answer.id}
-                                    onClick={() => handleAnswerSelect(currentQuestion.id, answer.id)}
-                                    className={buttonClass}
+                                    className={divClass} // KHÔNG CÓ onClick handler
                                 >
                                     <span className="font-bold mr-3 min-w-[20px] text-center">{String.fromCharCode(65 + index)}.</span>
                                     <span className="flex-1">{answer.text}</span>
-                                </button>
+                                </div>
                             );
                         })}
                     </div>
                 </div>
-
-                {/* Khu vực nút điều khiển Câu trước/Câu tiếp đã bị loại bỏ theo yêu cầu */}
+                {/* Đã loại bỏ khu vực nút điều khiển Câu trước/Câu tiếp */}
             </div>
           )}
 
-          {/* Question Navigator and Grid */}
+          {/* Question Controller Area (Table) */}
           <div className="col-span-12 lg:col-span-4">
             <div className="sticky top-4">
-              <div className="p-4 bg-white rounded-md shadow-md mb-4">
-                  <h3 className="text-xl font-bold text-[#337ab7] mb-3 border-b-2 border-[#337ab7] pb-2">
-                      Tổng quan bài thi
-                  </h3>
-                  <p className="mb-3 text-gray-700">Đã trả lời: <span className="font-bold text-blue-600">{answeredCount}</span>/{quiz.questions.length}</p>
-                  <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2">
-                      {quiz.questions.map((q, index) => {
-                          const isAnswered = !!userAnswers[q.id];
-                          const isActive = currentQuestionIndex === index;
-                          
-                          let className = "py-2 text-sm rounded-md font-semibold transition-colors duration-200";
-                          if (isActive) {
-                              className += " bg-[#337ab7] text-white shadow-lg border-2 border-blue-700";
-                          } else if (isAnswered) {
-                              className += " bg-green-500 text-white hover:bg-green-600";
-                          } else {
-                              className += " bg-gray-200 text-gray-700 hover:bg-gray-300";
-                          }
-
-                          return (
-                              <button
-                                  key={q.id}
-                                  onClick={() => handleQuestionJump(index)}
-                                  className={className}
-                              >
-                                  {index + 1}
-                              </button>
-                          );
-                      })}
-                  </div>
-              </div>
               
+              {/* ĐÃ BỎ KHỐI "Tổng quan bài thi" (Question Navigator Grid) */}
+
               <div className="p-4 bg-white rounded-md shadow-md">
                 <h3 className="text-xl font-bold text-[#337ab7] mb-3 border-b-2 border-[#337ab7] pb-2">
                     Bảng trả lời
@@ -220,13 +205,16 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
                                     {index + 1}
                                 </td>
                             {limitedAnswers.map(a => (
-                                <td key={a.id} className="border border-gray-400 p-1 text-center">
-                                   {/* Chỉ hiển thị ký hiệu đã chọn */}
-                                   {userAnswers[q.id] === a.id ? (
-                                       <span className="text-green-600 font-bold">✔</span>
-                                   ) : (
-                                       <span className="text-gray-400">-</span>
-                                   )}
+                                <td key={a.id} className="border border-gray-400 p-1 text-center cursor-pointer hover:bg-gray-200 transition-colors"
+                                    onClick={() => handleAnswerSelect(q.id, a.id)}>
+                                   
+                                   {/* LOGIC CHỌN ĐÁP ÁN BẰNG RADIO BUTTON Ở ĐÂY */}
+                                   <RadioButton 
+                                    id={`grid_q_${q.id}_${a.id}`}
+                                    name={`grid_q_${q.id}`} 
+                                    checked={userAnswers[q.id] === a.id} 
+                                    onChange={() => handleAnswerSelect(q.id, a.id)} 
+                                  />
                                 </td>
                             ))}
                             {/* Đảm bảo bảng có đủ 4 cột nếu câu hỏi chỉ có 2 hoặc 3 đáp án */}
