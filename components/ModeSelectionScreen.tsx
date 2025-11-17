@@ -62,7 +62,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({ onModeSelect,
         >
             <ClipboardListIcon3D className="h-16 w-16 mx-auto text-green-500 mb-4 transition-transform group-hover:scale-110" />
             <h2 className="text-2xl font-bold text-card-foreground">Thi Online</h2>
-            <p className="text-muted-foreground mt-2">Làm bài thi 30 câu ngẫu nhiên trong 60 phút với giao diện mô phỏng.</p>
+            <p className="text-muted-foreground mt-2">Làm bài thi 30 câu trong 60 phút với giao diện thi mô phỏng.</p>
         </button>
       </div>
     </div>
