@@ -79,7 +79,7 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
   }, [timeLeft]);
 
   const handleAnswerSelect = (questionId: string, answerId: string) => {
-    setUserAnswers(prev => ({ ...prev, [currentQuestion.id]: answerId }));
+    setUserAnswers(prev => ({ ...prev, [questionId]: answerId }));
   };
 
   return (
@@ -113,6 +113,17 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
               <p className="font-bold mb-4 border-b border-dashed border-gray-400 pb-2">Nội dung câu hỏi</p>
               <p className="font-bold text-red-600 mb-2">Câu :{currentQuestionIndex + 1}</p>
               <p className="mb-4 font-semibold">{currentQuestion.text}</p>
+              
+              {currentQuestion.image && (
+                <div className="mb-4 flex justify-start">
+                  <img 
+                    src={currentQuestion.image} 
+                    alt="Hình ảnh câu hỏi" 
+                    className="max-w-full h-auto max-h-60 object-contain border border-gray-300 rounded-md" 
+                  />
+                </div>
+              )}
+
               <div className="space-y-4">
                 {currentQuestion.answers.map((answer, index) => (
                   <label key={answer.id} htmlFor={`q_main_${answer.id}`} className="flex items-center cursor-pointer">
@@ -157,8 +168,7 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
                 <tbody>
                   {quiz.questions.slice(0, 15).map((q, index) => (
                     <tr key={q.id} className={currentQuestionIndex === index ? 'bg-cyan-200' : ''}>
-                      {/* 💖 SỬA CHỖ NÀY NÈ ANH (Bảng 1) 💖 */}
-                      <td className={`border border-gray-400 p-1 font-bold text-center cursor-pointer text-black`} onClick={() => setCurrentQuestionIndex(index)}>{index + 1}</td>
+                      <td className={`border border-gray-400 p-1 font-bold text-center cursor-pointer ${currentQuestionIndex === index ? 'text-black' : 'text-gray-500'}`} onClick={() => setCurrentQuestionIndex(index)}>{index + 1}</td>
                       {q.answers.slice(0, 4).map((a) => (
                         <td key={a.id} className="border border-gray-400 p-1 text-center">
                            <RadioButton 
@@ -189,8 +199,7 @@ const OnlineExamScreen: React.FC<OnlineExamScreenProps> = ({ quiz, onFinish, onB
                         const realIndex = index + 15;
                         return (
                             <tr key={q.id} className={currentQuestionIndex === realIndex ? 'bg-cyan-200' : ''}>
-                            {/* 💖 SỬA CHỖ NÀY NÈ ANH (Bảng 2) 💖 */}
-                            <td className={`border border-gray-400 p-1 font-bold text-center cursor-pointer text-black`} onClick={() => setCurrentQuestionIndex(realIndex)}>{realIndex + 1}</td>
+                            <td className={`border border-gray-400 p-1 font-bold text-center cursor-pointer ${currentQuestionIndex === realIndex ? 'text-black' : 'text-gray-500'}`} onClick={() => setCurrentQuestionIndex(realIndex)}>{realIndex + 1}</td>
                             {q.answers.slice(0,4).map(a => (
                                 <td key={a.id} className="border border-gray-400 p-1 text-center">
                                    <RadioButton 
