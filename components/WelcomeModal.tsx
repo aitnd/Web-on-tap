@@ -15,25 +15,39 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ onStart, onLoginClick }) =>
       <div className="bg-card text-card-foreground rounded-2xl shadow-xl p-8 md:p-12 max-w-2xl mx-auto relative">
         {theme === 'tri-an' ? (
           <img src="https://i.postimg.cc/MH9hVp8S/happy-techers-day.jpg" alt="Icon Chúc mừng Ngày Nhà giáo" className="h-24 w-24 mx-auto mb-4 rounded-full object-cover" />
+        ) : theme === 'noel' ? (
+           // Icon cho Noel, tạm thời dùng HelmIcon nhưng màu đỏ/vàng của theme sẽ tự áp dụng
+           // Nếu muốn icon riêng có thể thay thế ở đây
+           <HelmIcon3D className="h-24 w-24 mx-auto text-primary mb-4" />
         ) : (
           <HelmIcon3D className="h-24 w-24 mx-auto text-primary mb-4" />
         )}
+        
         <h1 className="text-4xl md:text-5xl font-extrabold text-foreground mb-2">
           Ứng Dụng Ôn tập
         </h1>
+        
         {theme === 'tri-an' && (
           <p className="text-xl font-semibold text-primary mb-4">
             Phiên bản đặc biệt Tri Ân Thầy Cô
           </p>
         )}
+         {theme === 'noel' && (
+          <p className="text-xl font-semibold text-primary mb-4">
+            Chào đón Giáng Sinh An Lành
+          </p>
+        )}
+
         <p className="text-lg text-muted-foreground mb-4">
           Chào mừng anh/chị đã đến với Ứng dụng Ôn tập, ôn thi chứng chỉ chuyên môn phương tiện thủy nội địa.
         </p>
+        
         {theme === 'tri-an' && (
           <p className="text-lg text-muted-foreground mb-8 italic">
             "Nhân ngày Nhà giáo Việt Nam 20-11, kính chúc quý thầy cô luôn mạnh khỏe, hạnh phúc và thành công trong sự nghiệp trồng người."
           </p>
         )}
+
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <button
             onClick={onStart}

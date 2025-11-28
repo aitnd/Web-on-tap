@@ -9,11 +9,12 @@ type ThemeContextType = {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [theme, setThemeState] = useState<Theme>('tri-an');
+  const [theme, setThemeState] = useState<Theme>('noel');
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('app-theme') as Theme | null;
-    const initialTheme = savedTheme || 'tri-an';
+    // Nếu chưa có theme được lưu, sử dụng 'noel' làm mặc định
+    const initialTheme = savedTheme || 'noel';
     setThemeState(initialTheme);
     document.documentElement.setAttribute('data-theme', initialTheme);
   }, []);

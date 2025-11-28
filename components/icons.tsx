@@ -8,6 +8,9 @@ export const ClipboardListIcon3D: React.FC<React.SVGProps<SVGSVGElement>> = (pro
     if (theme === 'tri-an') {
         return <img src="https://i.postimg.cc/8PDn1wfM/favicon.png" alt="Online Exam Icon" {...props as any} />;
     }
+    if (theme === 'noel') {
+        return <img src="/assets/img/gift3.png" alt="Gift Icon" {...props as any} className="h-16 w-16 object-contain" />;
+    }
     return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
             <path fillRule="evenodd" d="M3.75 4.5a3 3 0 00-3 3v10.5a3 3 0 003 3h16.5a3 3 0 003-3V7.5a3 3 0 00-3-3H3.75zm.75 4.5a.75.75 0 01.75-.75h13.5a.75.75 0 010 1.5H5.25a.75.75 0 01-.75-.75zm0 3.75a.75.75 0 01.75-.75h6a.75.75 0 010 1.5h-6a.75.75 0 01-.75-.75zm0 2.25a.75.75 0 01.75-.75h3a.75.75 0 010 1.5h-3a.75.75 0 01-.75-.75z" clipRule="evenodd" />
@@ -25,16 +28,24 @@ export const XMarkIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 export const PaletteIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
         <path d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm.25 4.5a.75.75 0 00-1.5 0v5.337a2.25 2.25 0 00-1.5 2.063v.75a.75.75 0 001.5 0v-.75a.75.75 0 01.75-.75h.75a.75.75 0 01.75.75v.75a.75.75 0 001.5 0v-.75a2.25 2.25 0 00-1.5-2.063V6.75z" />
-        <path d="M6.163 15.25a.75.75 0 011.06-1.06l1.25 1.25a.75.75 0 01-1.06 1.06l-1.25-1.25zm10.617 0a.75.75 0 011.06 1.06l-1.25 1.25a.75.75 0 01-1.06-1.06l1.25-1.25z" />
+        <path d="M6.163 15.25a.75.75 0 011.06-1.06l1.25 1.25a.75.75 0 01-1.06 1.06l-1.25-1.25zm10.617 0a.75.75 0 011.06 1.06l-1.25 1.25a.75.75 0 01-1.06 1.06l1.25-1.25z" />
     </svg>
 );
 
 
-export const CheckIcon3D: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
-        <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
-    </svg>
-);
+export const CheckIcon3D: React.FC<React.SVGProps<SVGSVGElement>> = (props) => {
+    const { theme } = useTheme();
+    if (theme === 'noel') {
+         // Dùng ngôi sao vàng hoặc chuông nhỏ cho dấu check cũng được, nhưng để nguyên SVG hoặc dùng ball.png
+         // Dùng ball.png cho lạ mắt
+         return <img src="/assets/img/ball.png" alt="Check" {...props as any} className={`${props.className} object-contain`} />;
+    }
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
+            <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
+        </svg>
+    );
+};
 
 export const XIcon3D: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
@@ -65,6 +76,9 @@ export const UserIcon3D: React.FC<React.SVGProps<SVGSVGElement>> = (props) => {
     if (theme === 'tri-an') {
         return <img src="https://i.postimg.cc/J0JwWn5p/Mattahan-Buuf-One-of-those-ugly-pens-you-just-find-lying-around-128.png" alt="Pen Icon" {...props as any} />;
     }
+    if (theme === 'noel') {
+        return <img src="/assets/img/celebrate.png" alt="Santa" {...props as any} className={`${props.className} object-contain`} />;
+    }
     return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
             <path d="M12.75 12.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
@@ -84,6 +98,9 @@ export const HelmIcon3D: React.FC<React.SVGProps<SVGSVGElement>> = (props) => {
     if (theme === 'tri-an') {
         return <img src="https://i.postimg.cc/xjbVmxDW/Oxygen-Icons-org-Oxygen-Categories-applications-education-university-256.png" alt="Graduation Cap Icon" {...props as any} />;
     }
+    if (theme === 'noel') {
+        return <img src="/assets/img/home.png" alt="Home Icon" {...props as any} className={`${props.className} object-contain`} />;
+    }
     return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
             <path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm0 2a8 8 0 100 16 8 8 0 000-16zm0 3a5 5 0 110 10 5 5 0 010-10zm0 2a3 3 0 100 6 3 3 0 000-6z"/>
@@ -96,6 +113,9 @@ export const AnchorIcon3D: React.FC<React.SVGProps<SVGSVGElement>> = (props) => 
     const { theme } = useTheme();
     if (theme === 'tri-an') {
         return <img src="https://i.postimg.cc/66GxZjxN/school-114359.png" alt="School Bag Icon" {...props as any} />;
+    }
+    if (theme === 'noel') {
+        return <img src="/assets/img/bell.png" alt="Bell Icon" {...props as any} className={`${props.className} object-contain`} />;
     }
     return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
@@ -110,6 +130,9 @@ export const EngineerIcon3D: React.FC<React.SVGProps<SVGSVGElement>> = (props) =
     if (theme === 'tri-an') {
         return <img src="https://i.postimg.cc/h47RmyWN/Mattahan-Buuf-They-reply-technosorcery-128.png" alt="Wrench Icon" {...props as any} />;
     }
+    if (theme === 'noel') {
+        return <img src="/assets/img/gift4.png" alt="Gift Icon" {...props as any} className={`${props.className} object-contain`} />;
+    }
     return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
             <path fillRule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.981A10.503 10.503 0 0112 21a10.5 10.5 0 01-10.5-10.5c0-4.368 2.667-8.162 6.43-9.742a.75.75 0 01.819.162z" clipRule="evenodd"/>
@@ -122,6 +145,9 @@ export const CaptainIcon3D: React.FC<React.SVGProps<SVGSVGElement>> = (props) =>
     const { theme } = useTheme();
     if (theme === 'tri-an') {
         return <img src="https://i.postimg.cc/zvWm1BFk/book-512x512-35977.png" alt="Book Icon" {...props as any} />;
+    }
+    if (theme === 'noel') {
+        return <img src="/assets/img/hat.png" alt="Hat Icon" {...props as any} className={`${props.className} object-contain`} />;
     }
     return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
@@ -136,6 +162,9 @@ export const LifebuoyIcon3D: React.FC<React.SVGProps<SVGSVGElement>> = (props) =
     if (theme === 'tri-an') {
         return <img src="https://i.postimg.cc/2yvpf67d/Mattahan-Buuf-A-Proper-Journal-Icon-128.png" alt="Journal Icon" {...props as any} />;
     }
+    if (theme === 'noel') {
+        return <img src="/assets/img/gift5.png" alt="Gift Icon" {...props as any} className={`${props.className} object-contain`} />;
+    }
     return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
             <path fillRule="evenodd" d="M12 2a10 10 0 100 20 10 10 0 000-20zM4 12a8 8 0 1116 0 8 8 0 01-16 0z" clipRule="evenodd" />
@@ -148,6 +177,9 @@ export const CertificateIcon3D: React.FC<React.SVGProps<SVGSVGElement>> = (props
     const { theme } = useTheme();
     if (theme === 'tri-an') {
         return <img src="https://i.postimg.cc/2yvpf67d/Mattahan-Buuf-A-Proper-Journal-Icon-128.png" alt="Journal Icon" {...props as any} />;
+    }
+    if (theme === 'noel') {
+        return <img src="/assets/img/star-gold.png" alt="Star Icon" {...props as any} className={`${props.className} object-contain`} />;
     }
     return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
@@ -163,6 +195,9 @@ export const TrophyIcon3D: React.FC<React.SVGProps<SVGSVGElement>> = (props) => 
     if (theme === 'tri-an') {
         return <img src="https://i.postimg.cc/xjbVmxDW/Oxygen-Icons-org-Oxygen-Categories-applications-education-university-256.png" alt="Graduation Cap Icon" {...props as any} />;
     }
+    if (theme === 'noel') {
+        return <img src="/assets/img/star-gold.png" alt="Gold Star Icon" {...props as any} className={`${props.className} object-contain`} />;
+    }
     return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
             <path fillRule="evenodd" d="M11.25 4.5A.75.75 0 0112 5.25v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0111.25 4.5zM12.75 6a.75.75 0 00-1.5 0v1.5a.75.75 0 001.5 0V6zM11.25 7.5A.75.75 0 0112 8.25v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0111.25 7.5zM12.75 9a.75.75 0 00-1.5 0v1.5a.75.75 0 001.5 0V9z" clipRule="evenodd" />
@@ -177,6 +212,9 @@ export const BookOpenIcon3D: React.FC<React.SVGProps<SVGSVGElement>> = (props) =
     if (theme === 'tri-an') {
         return <img src="https://i.postimg.cc/FFJXSWXv/study-learning-knowledge-education-book-notebook-icon-256768.png" alt="Book and Glasses Icon" {...props as any} />;
     }
+    if (theme === 'noel') {
+        return <img src="/assets/img/gift1.png" alt="Gift Icon" {...props as any} className={`${props.className} object-contain`} />;
+    }
     return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
             <path d="M11.25 4.533A9.708 9.708 0 006 3.75c-1.052 0-2.062.18-3 .512V17.25a8.987 8.987 0 013.75-.82V9.75a.75.75 0 011.5 0v7.5a.75.75 0 01-1.5 0V15a6.726 6.726 0 00-3-.585V18.75C3.393 18.932 3.69 19.1 4 19.29c2.023.784 4.18 1.093 6.364 1.294a.75.75 0 00.872-.725V4.534z" />
@@ -189,6 +227,9 @@ export const PracticeIcon3D: React.FC<React.SVGProps<SVGSVGElement>> = (props) =
     const { theme } = useTheme();
     if (theme === 'tri-an') {
         return <img src="https://i.postimg.cc/kG8rd4vv/Limpa-Curriculum-Vitae-Education-256.png" alt="Blackboard Icon" {...props as any} />;
+    }
+    if (theme === 'noel') {
+        return <img src="/assets/img/gift2.png" alt="Gift Icon" {...props as any} className={`${props.className} object-contain`} />;
     }
     return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>

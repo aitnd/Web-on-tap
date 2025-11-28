@@ -20,7 +20,17 @@ interface LicenseSelectionScreenProps {
 const getLicenseIcon = (license: License, theme: Theme): React.ReactNode => {
     const defaultIconClass = "h-14 w-14 mx-auto text-primary mb-3 object-contain";
     const imageIconClass = "h-14 w-14 mx-auto mb-3 object-cover rounded-full border-2 border-border/20 shadow-sm";
+    const noelIconClass = "h-14 w-14 mx-auto mb-3 object-contain drop-shadow-lg";
     const name = license.name.toLowerCase();
+
+    if (theme === 'noel') {
+        if (name.includes('thuyền trưởng')) return <img src="/assets/img/hat.png" alt="Captain Hat" className={noelIconClass} />;
+        if (name.includes('máy trưởng')) return <img src="/assets/img/gift4.png" alt="Chief Engineer" className={noelIconClass} />;
+        if (name.includes('thủy thủ')) return <img src="/assets/img/bell.png" alt="Sailor" className={noelIconClass} />;
+        if (name.includes('lái phương tiện')) return <img src="/assets/img/tree.png" alt="Helm" className={noelIconClass} />;
+        if (name.includes('chứng chỉ')) return <img src="/assets/img/star-gold.png" alt="Certificate" className={noelIconClass} />;
+        return <img src="/assets/img/gift5.png" alt="Default" className={noelIconClass} />;
+    }
 
     if (theme === 'tri-an') {
         switch (license.id) {
@@ -90,7 +100,12 @@ const LicenseSelectionScreen: React.FC<LicenseSelectionScreenProps> = ({ license
         >
             <ArrowLeftIcon3D className="h-10 w-10 text-primary" />
         </button>
-        <AnchorIcon3D className="h-20 w-20 mx-auto text-primary mb-4" />
+        {theme === 'noel' ? (
+            <img src="/assets/img/tree.png" alt="Tree" className="h-20 w-20 mx-auto mb-4 object-contain drop-shadow-lg" />
+        ) : (
+            <AnchorIcon3D className="h-20 w-20 mx-auto text-primary mb-4" />
+        )}
+        
         <h1 className="text-4xl font-bold text-foreground">Chọn Hạng Bằng</h1>
         <p className="text-lg text-muted-foreground mt-2">Anh/chị vui lòng chọn hạng bằng muốn ôn tập và thi thử.</p>
       </div>

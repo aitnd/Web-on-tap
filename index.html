@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" data-theme="tri-an">
+<html lang="vi" data-theme="noel">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="https://i.postimg.cc/8PDn1wfM/favicon.png" />
@@ -173,11 +173,59 @@
         --gradient-body: linear-gradient(to bottom right, var(--gradient-from), var(--gradient-to));
       }
 
+      [data-theme='noel'] {
+        --font-sans: 'Nunito', sans-serif;
+
+        /* Deep Wine/Burgundy Background */
+        --background: 355 90% 10%;
+        --foreground: 0 0% 100%; /* Snow White */
+
+        /* Dark Red Card */
+        --card: 355 85% 15%;
+        --card-foreground: 0 0% 100%;
+
+        --popover: 355 90% 12%;
+        --popover-foreground: 0 0% 100%;
+
+        /* Bright Red/Neon Red for Icons (Tone-sur-tone) */
+        --primary: 350 100% 65%; 
+        --primary-foreground: 355 90% 10%;
+
+        /* Muted Red for secondary elements */
+        --secondary: 355 60% 25%; 
+        --secondary-foreground: 0 0% 100%;
+
+        --muted: 355 50% 20%;
+        --muted-foreground: 355 20% 80%;
+
+        --accent: 350 100% 65%;
+        --accent-foreground: 0 0% 100%;
+
+        --destructive: 0 63% 31%;
+        --destructive-foreground: 0 0% 100%;
+
+        --success: 142 76% 36%;
+        --success-foreground: 142 100% 96%;
+
+        --border: 355 60% 30%;
+        --input: 355 60% 30%;
+        --ring: 350 100% 65%; /* Red Ring */
+        
+        --radius: 0.75rem;
+
+        /* Rich Red Gradient Backup if Image Fails */
+        --gradient-from: #4a0404; 
+        --gradient-to: #2b0202;
+        --gradient-body: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%);
+      }
+
       body {
         font-family: var(--font-sans);
         background-color: hsl(var(--background));
         background-image: var(--gradient-body);
         color: hsl(var(--foreground));
+        background-attachment: fixed;
+        background-size: cover;
       }
 
       [data-theme='tri-an'] body {
@@ -186,6 +234,15 @@
         background-position: center;
         background-repeat: no-repeat;
         background-attachment: fixed;
+      }
+
+      /* Noel Theme Background */
+      [data-theme='noel'] body {
+         background-image: url('/assets/img/noel-bg.jpg');
+         background-size: cover;
+         background-position: center;
+         background-repeat: no-repeat;
+         background-attachment: fixed;
       }
 
       .font-quiz-default {
@@ -204,6 +261,30 @@
       }
       .animate-slide-in-right {
         animation: slide-in-right 0.3s ease-out forwards;
+      }
+      
+      @keyframes spin-slow {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .animate-spin-slow {
+        animation: spin-slow 3s linear infinite;
+      }
+      
+      @keyframes bounce-slow {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-5px);
+        }
+      }
+      .animate-bounce-slow {
+        animation: bounce-slow 2s infinite;
       }
     </style>
   <script type="importmap">

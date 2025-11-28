@@ -17,7 +17,9 @@ import Footer from './components/Footer';
 import LoginScreen from './components/LoginScreen';
 import Dashboard from './components/Dashboard';
 import Header from './components/Header';
-import ChangelogModal from './components/ChangelogModal'; // Import modal mới
+import ChangelogModal from './components/ChangelogModal';
+import SnowEffect from './components/SnowEffect';
+import MusicPlayer from './components/MusicPlayer'; // Import MusicPlayer
 
 import { fetchLicenses } from './services/dataService';
 import { HelmIcon3D } from './components/icons';
@@ -409,6 +411,10 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center text-foreground p-4 pb-20 transition-colors duration-500">
+      {/* Kích hoạt hiệu ứng tuyết chỉ khi theme là 'noel' */}
+      {theme === 'noel' && <SnowEffect />}
+      {theme === 'noel' && <MusicPlayer />} {/* Thêm trình phát nhạc cho theme Noel */}
+      
       {session && userProfile && <Header userProfile={userProfile} onLogout={handleLogout} />}
       <main className="w-full max-w-7xl mx-auto flex-grow flex flex-col justify-center">
         {renderContent()}

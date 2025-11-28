@@ -4,6 +4,7 @@ import { PaletteIcon } from './icons';
 import type { Theme } from '../types';
 
 const themes: { name: Theme; label: string; color: string }[] = [
+  { name: 'noel', label: 'Giáng Sinh', color: 'bg-[#8B0000]' },
   { name: 'modern', label: 'Hiện Đại', color: 'bg-indigo-600' },
   { name: 'classic', label: 'Cổ Điển', color: 'bg-[#6F6049]' },
   { name: 'sunrise', label: 'Bình Minh', color: 'bg-orange-500' },
@@ -33,7 +34,7 @@ const ThemeSwitcher: React.FC = () => {
                   : 'text-card-foreground hover:bg-secondary'
               }`}
             >
-              <span className={`w-4 h-4 rounded-full ${t.color}`}></span>
+              <span className={`w-4 h-4 rounded-full ${t.color} border border-white/20`}></span>
               {t.label}
             </button>
           ))}
